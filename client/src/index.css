@@ -150,7 +150,7 @@
 
 /* Button styles */
 .btn-primary {
-  @apply bg-primary text-primary-foreground hover:bg-primary-dark;
+  @apply bg-primary text-primary-foreground hover:opacity-90;
 }
 
 .btn-secondary {
