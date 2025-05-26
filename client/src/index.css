@@ -1,0 +1,211 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --background: 0 0% 100%;
+  --foreground: 240 5% 6%;
+  --muted: 240 5% 96%;
+  --muted-foreground: 240 4% 46%;
+  --popover: 0 0% 100%;
+  --popover-foreground: 240 10% 4%;
+  --card: 0 0% 100%;
+  --card-foreground: 240 10% 4%;
+  --border: 240 6% 90%;
+  --input: 240 6% 90%;
+  --primary: 207 90% 54%; /* #1976D2 */
+  --primary-foreground: 0 0% 98%;
+  --secondary: 125 40% 40%; /* #388E3C */
+  --secondary-foreground: 0 0% 98%;
+  --accent: 33 100% 47%; /* #F57C00 */
+  --accent-foreground: 0 0% 98%;
+  --destructive: 0 68% 52%; /* #D32F2F */
+  --destructive-foreground: 0 0% 98%;
+  --ring: 240 5% 6%;
+  --radius: 0.5rem;
+  
+  /* Material Design colors */
+  --primary-dark: 212 90% 46%; /* #1565C0 */
+  --surface: 0 0% 98%; /* #FAFAFA */
+  --on-surface: 0 0% 13%; /* #212121 */
+  --text-muted: 0 0% 46%; /* #757575 */
+  
+  /* Chart colors */
+  --chart-1: 207 90% 54%;
+  --chart-2: 125 40% 40%;
+  --chart-3: 33 100% 47%;
+  --chart-4: 0 68% 52%;
+  --chart-5: 280 65% 60%;
+}
+
+.dark {
+  --background: 240 10% 4%;
+  --foreground: 0 0% 98%;
+  --muted: 240 4% 16%;
+  --muted-foreground: 240 5% 65%;
+  --popover: 240 10% 4%;
+  --popover-foreground: 0 0% 98%;
+  --card: 240 10% 4%;
+  --card-foreground: 0 0% 98%;
+  --border: 240 4% 16%;
+  --input: 240 4% 16%;
+  --primary: 207 90% 54%;
+  --primary-foreground: 0 0% 98%;
+  --secondary: 125 40% 40%;
+  --secondary-foreground: 0 0% 98%;
+  --accent: 33 100% 47%;
+  --accent-foreground: 0 0% 98%;
+  --destructive: 0 68% 52%;
+  --destructive-foreground: 0 0% 98%;
+  --ring: 240 5% 90%;
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-surface text-on-surface;
+    font-family: 'Roboto', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
+  }
+}
+
+/* Custom utility classes */
+.text-on-surface {
+  color: hsl(var(--on-surface));
+}
+
+.text-text-muted {
+  color: hsl(var(--text-muted));
+}
+
+.bg-surface {
+  background-color: hsl(var(--surface));
+}
+
+.bg-primary-dark {
+  background-color: hsl(var(--primary-dark));
+}
+
+.border-primary-dark {
+  border-color: hsl(var(--primary-dark));
+}
+
+.shadow-material {
+  box-shadow: 0 2px 4px -1px rgba(0, 0, 0, 0.2), 0 4px 5px 0 rgba(0, 0, 0, 0.14), 0 1px 10px 0 rgba(0, 0, 0, 0.12);
+}
+
+.shadow-material-lg {
+  box-shadow: 0 8px 10px -5px rgba(0, 0, 0, 0.2), 0 16px 24px 2px rgba(0, 0, 0, 0.14), 0 6px 30px 5px rgba(0, 0, 0, 0.12);
+}
+
+/* Navigation styles */
+.nav-item {
+  @apply transition-colors duration-200;
+}
+
+.nav-item.active {
+  @apply bg-primary/10 text-primary;
+}
+
+.nav-item:not(.active) {
+  @apply text-text-muted hover:bg-gray-50;
+  color: hsl(var(--on-surface));
+}
+
+.nav-item:not(.active):hover {
+  color: hsl(var(--on-surface));
+}
+
+/* Form styles */
+.form-field {
+  @apply mb-4;
+}
+
+.form-label {
+  @apply block text-sm font-medium text-on-surface mb-1;
+}
+
+.form-input {
+  @apply w-full px-3 py-2 border border-input rounded-md focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-all;
+}
+
+/* Table styles */
+.data-table {
+  @apply w-full border-collapse;
+}
+
+.data-table th {
+  @apply text-left py-3 px-4 font-medium text-text-muted text-sm border-b border-border;
+}
+
+.data-table td {
+  @apply py-3 px-4 border-b border-border;
+}
+
+.data-table tr:hover {
+  @apply bg-muted/50;
+}
+
+/* Button styles */
+.btn-primary {
+  @apply bg-primary text-primary-foreground hover:bg-primary-dark;
+}
+
+.btn-secondary {
+  @apply bg-secondary text-secondary-foreground hover:bg-secondary/90;
+}
+
+.btn-accent {
+  @apply bg-accent text-accent-foreground hover:bg-accent/90;
+}
+
+.btn-destructive {
+  @apply bg-destructive text-destructive-foreground hover:bg-destructive/90;
+}
+
+/* Stats card styles */
+.stats-card {
+  @apply bg-card rounded-lg shadow-material p-6;
+}
+
+.stats-value {
+  @apply text-3xl font-bold text-on-surface;
+}
+
+.stats-label {
+  @apply text-sm font-medium text-text-muted;
+}
+
+.stats-change {
+  @apply text-sm mt-1;
+}
+
+.stats-change.positive {
+  @apply text-secondary;
+}
+
+.stats-change.negative {
+  @apply text-destructive;
+}
+
+.stats-change.neutral {
+  @apply text-accent;
+}
+
+/* Loading states */
+.loading-skeleton {
+  @apply animate-pulse bg-muted rounded;
+}
+
+/* Responsive utilities */
+@media (max-width: 768px) {
+  .mobile-hide {
+    @apply hidden;
+  }
+  
+  .mobile-full {
+    @apply w-full;
+  }
+}
