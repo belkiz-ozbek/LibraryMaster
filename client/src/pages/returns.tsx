@@ -15,6 +15,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Undo2, Check, Clock, AlertTriangle, Calendar } from "lucide-react";
 import { format, differenceInDays } from "date-fns";
 import type { BorrowingWithDetails } from "@shared/schema";
+import { useTranslation } from "react-i18next";
 
 export default function Returns() {
   const [searchQuery, setSearchQuery] = useState("");
@@ -24,16 +25,17 @@ export default function Returns() {
   const [returnNotes, setReturnNotes] = useState("");
   const { user } = useAuth();
   const { toast } = useToast();
+  const { t } = useTranslation();
 
-  const { data: activeBorrowings = [], isLoading } = useQuery({
+  const { data: activeBorrowings = [], isLoading } = useQuery<BorrowingWithDetails[]>({
     queryKey: ["/api/borrowings/active"],
   });
 
-  const { data: overdueBorrowings = [] } = useQuery({
+  const { data: overdueBorrowings = [] } = useQuery<BorrowingWithDetails[]>({
     queryKey: ["/api/borrowings/overdue"],
   });
 
-  const { data: allBorrowings = [] } = useQuery({
+  const { data: allBorrowings = [] } = useQuery<BorrowingWithDetails[]>({
     queryKey: ["/api/borrowings"],
   });
 
@@ -84,7 +86,7 @@ export default function Returns() {
   });
 
   const filteredBorrowings = searchQuery.length > 2 
-    ? activeBorrowings.filter(borrowing => 
+    ? activeBorrowings.filter((borrowing: BorrowingWithDetails) => 
         borrowing.user.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
         borrowing.user.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
         borrowing.book.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -94,8 +96,8 @@ export default function Returns() {
     : activeBorrowings;
 
   const recentReturns = allBorrowings
-    .filter(b => b.status === "returned")
-    .sort((a, b) => new Date(b.returnDate!).getTime() - new Date(a.returnDate!).getTime())
+    .filter((b: BorrowingWithDetails) => b.status === "returned")
+    .sort((a: BorrowingWithDetails, b: BorrowingWithDetails) => new Date(b.returnDate!).getTime() - new Date(a.returnDate!).getTime())
     .slice(0, 10);
 
   const handleReturn = (borrowing: BorrowingWithDetails) => {
@@ -165,7 +167,7 @@ export default function Returns() {
   const activeColumns = [
     {
       key: "user.name",
-      title: "Member",
+      title: t("borrowing.member"),
       sortable: true,
       render: (value: string, row: BorrowingWithDetails) => (
         <div className="flex items-center">
@@ -183,7 +185,7 @@ export default function Returns() {
     },
     {
       key: "book.title",
-      title: "Book",
+      title: t("borrowing.book"),
       sortable: true,
       render: (value: string, row: BorrowingWithDetails) => (
         <div>
@@ -195,25 +197,25 @@ export default function Returns() {
     },
     {
       key: "dueDate",
-      title: "Due Date",
+      title: t("borrowing.dueDate"),
       sortable: true,
       render: (value: string) => format(new Date(value), "MMM dd, yyyy"),
     },
     {
       key: "status",
-      title: "Status",
+      title: t("borrowing.status"),
       render: (value: string, row: BorrowingWithDetails) => getStatusBadge(row),
     },
     {
       key: "daysInfo",
-      title: "Days Info",
+      title: t("borrowing.daysInfo"),
       render: (value: any, row: BorrowingWithDetails) => (
         <span className="text-sm">{getDaysInfo(row)}</span>
       ),
     },
     {
       key: "actions",
-      title: "Actions",
+      title: t("common.actions"),
       render: (_: any, row: BorrowingWithDetails) => (
         <div className="flex items-center space-x-2">
           <Button
@@ -223,7 +225,7 @@ export default function Returns() {
             disabled={returnBookMutation.isPending}
           >
             <Check size={14} className="mr-1" />
-            Return
+            {t("returns.return")}
           </Button>
           <Button
             variant="outline"
@@ -232,7 +234,7 @@ export default function Returns() {
             disabled={extendDueDateMutation.isPending}
           >
             <Calendar size={14} className="mr-1" />
-            Extend
+            {t("returns.extend")}
           </Button>
         </div>
       ),
@@ -242,12 +244,12 @@ export default function Returns() {
   const recentReturnsColumns = [
     {
       key: "user.name",
-      title: "Member",
+      title: t("borrowing.member"),
       render: (value: string) => value,
     },
     {
       key: "book.title",
-      title: "Book",
+      title: t("borrowing.book"),
       render: (value: string, row: BorrowingWithDetails) => (
         <div>
           <p className="font-medium text-on-surface">{value}</p>
@@ -257,17 +259,17 @@ export default function Returns() {
     },
     {
       key: "returnDate",
-      title: "Returned On",
+      title: t("returns.returnedOn"),
       render: (value: string) => format(new Date(value), "MMM dd, yyyy"),
     },
     {
       key: "status",
-      title: "Status",
+      title: t("borrowing.status"),
       render: (value: string, row: BorrowingWithDetails) => {
         const wasOverdue = new Date(row.returnDate!) > new Date(row.dueDate);
         return (
           <Badge variant={wasOverdue ? "destructive" : "secondary"}>
-            {wasOverdue ? "Returned Late" : "Returned On Time"}
+            {wasOverdue ? t("returns.returnedLate") : t("returns.returnedOnTime")}
           </Badge>
         );
       },
@@ -279,8 +281,8 @@ export default function Returns() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-on-surface">Return Processing</h1>
-          <p className="text-text-muted">Process book returns and manage due dates</p>
+          <h1 className="text-2xl font-bold text-on-surface">{t("returns.management")}</h1>
+          <p className="text-text-muted">{t("returns.managementDesc")}</p>
         </div>
       </div>
 
@@ -294,12 +296,11 @@ export default function Returns() {
                 <p className="text-2xl font-bold text-on-surface">
                   {activeBorrowings.length}
                 </p>
-                <p className="text-sm text-text-muted">Active Borrowings</p>
+                <p className="text-sm text-text-muted">{t("returns.activeBorrowings")}</p>
               </div>
             </div>
           </CardContent>
         </Card>
-
         <Card>
           <CardContent className="p-6">
             <div className="flex items-center">
@@ -308,12 +309,11 @@ export default function Returns() {
                 <p className="text-2xl font-bold text-on-surface">
                   {overdueBorrowings.length}
                 </p>
-                <p className="text-sm text-text-muted">Overdue Items</p>
+                <p className="text-sm text-text-muted">{t("returns.overdueItems")}</p>
               </div>
             </div>
           </CardContent>
         </Card>
-
         <Card>
           <CardContent className="p-6">
             <div className="flex items-center">
@@ -322,7 +322,7 @@ export default function Returns() {
                 <p className="text-2xl font-bold text-on-surface">
                   {recentReturns.length}
                 </p>
-                <p className="text-sm text-text-muted">Recent Returns</p>
+                <p className="text-sm text-text-muted">{t("returns.recentReturns")}</p>
               </div>
             </div>
           </CardContent>
@@ -334,14 +334,14 @@ export default function Returns() {
         <CardHeader>
           <div className="flex items-center justify-between">
             <div>
-              <CardTitle>Active Borrowings</CardTitle>
+              <CardTitle>{t("returns.activeBorrowingsTitle")}</CardTitle>
               <CardDescription>
-                Books currently borrowed and awaiting return
+                {t("returns.activeBorrowingsDesc")}
               </CardDescription>
             </div>
             <div className="w-80">
               <SearchInput
-                placeholder="Search by member, book title, author, or ISBN..."
+                placeholder={t("returns.searchPlaceholder")}
                 onSearch={setSearchQuery}
               />
             </div>
@@ -354,8 +354,8 @@ export default function Returns() {
             loading={isLoading}
             emptyMessage={
               searchQuery.length > 2 
-                ? "No active borrowings found matching your search." 
-                : "No active borrowings at the moment."
+                ? t("returns.noActiveBorrowingsFound")
+                : t("returns.noActiveBorrowingsYet")
             }
             pageSize={10}
           />
@@ -365,14 +365,14 @@ export default function Returns() {
       {/* Recent Returns */}
       <Card>
         <CardHeader>
-          <CardTitle>Recent Returns</CardTitle>
-          <CardDescription>Recently returned books</CardDescription>
+          <CardTitle>{t("returns.recentReturnsTitle")}</CardTitle>
+          <CardDescription>{t("returns.recentReturnsDesc")}</CardDescription>
         </CardHeader>
         <CardContent>
           <DataTable
             data={recentReturns}
             columns={recentReturnsColumns}
-            emptyMessage="No recent returns"
+            emptyMessage={t("returns.noRecentReturns")}
             pageSize={5}
           />
         </CardContent>
@@ -382,19 +382,18 @@ export default function Returns() {
       <Dialog open={isReturnDialogOpen} onOpenChange={setIsReturnDialogOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Process Book Return</DialogTitle>
+            <DialogTitle>{t("returns.processReturnTitle")}</DialogTitle>
             <DialogDescription>
               {selectedBorrowing && (
                 <>
-                  Returning "{selectedBorrowing.book.title}" by {selectedBorrowing.user.name}
+                  {t("returns.returningBook", { book: selectedBorrowing.book.title, user: selectedBorrowing.user.name })}
                 </>
               )}
             </DialogDescription>
           </DialogHeader>
-          
           <div className="space-y-4">
             <div>
-              <Label htmlFor="returnDate">Return Date</Label>
+              <Label htmlFor="returnDate">{t("returns.returnDate")}</Label>
               <Input
                 id="returnDate"
                 type="date"
@@ -402,30 +401,28 @@ export default function Returns() {
                 onChange={(e) => setReturnDate(e.target.value)}
               />
             </div>
-            
             <div>
-              <Label htmlFor="returnNotes">Notes (optional)</Label>
+              <Label htmlFor="returnNotes">{t("returns.notes")}</Label>
               <Textarea
                 id="returnNotes"
                 value={returnNotes}
                 onChange={(e) => setReturnNotes(e.target.value)}
-                placeholder="Any notes about the return condition..."
+                placeholder={t("returns.notesPlaceholder")}
                 rows={3}
               />
             </div>
-            
             <div className="flex justify-end space-x-3">
               <Button 
                 variant="outline" 
                 onClick={() => setIsReturnDialogOpen(false)}
               >
-                Cancel
+                {t("common.cancel")}
               </Button>
               <Button 
                 onClick={confirmReturn}
                 disabled={returnBookMutation.isPending}
               >
-                {returnBookMutation.isPending ? "Processing..." : "Confirm Return"}
+                {returnBookMutation.isPending ? t("returns.processing") : t("returns.confirmReturn")}
               </Button>
             </div>
           </div>

@@ -1,19 +1,16 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from "react";
-import { apiRequest } from "./queryClient";
 
 interface User {
   id: number;
   name: string;
   email: string;
+  role: string;
   isAdmin: boolean;
-  membershipDate: string;
-  adminRating: number | null;
-  adminNotes: string | null;
 }
 
 interface AuthContextType {
   user: User | null;
-  login: (email: string, password: string) => Promise<void>;
+  login: (email: string, password: string) => Promise<User>;
   logout: () => Promise<void>;
   isLoading: boolean;
 }
@@ -32,32 +29,50 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     try {
       const response = await fetch("/api/auth/me", {
         credentials: "include",
+        headers: {
+          "Content-Type": "application/json",
+        },
       });
       
       if (response.ok) {
         const data = await response.json();
         setUser(data.user);
+      } else {
+        setUser(null);
       }
     } catch (error) {
-      // User not authenticated
+      console.error("Auth check failed:", error);
+      setUser(null);
     } finally {
       setIsLoading(false);
     }
   };
 
   const login = async (email: string, password: string) => {
-    const response = await apiRequest("POST", "/api/auth/login", {
-      email,
-      password,
+    const response = await fetch("/api/auth/login", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ email, password }),
     });
-    
+
+    if (!response.ok) {
+      throw new Error("Login failed");
+    }
+
     const data = await response.json();
     setUser(data.user);
+    return data.user;
   };
 
   const logout = async () => {
-    await apiRequest("POST", "/api/auth/logout");
-    setUser(null);
+    try {
+      await fetch("/api/auth/logout", { method: "POST" });
+      setUser(null);
+    } catch (error) {
+      console.error("Logout failed:", error);
+    }
   };
 
   return (

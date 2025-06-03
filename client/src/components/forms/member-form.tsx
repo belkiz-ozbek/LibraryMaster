@@ -117,14 +117,14 @@ export function MemberForm({ member, onSuccess, onCancel }: MemberFormProps) {
         <div>
           <Label htmlFor="adminRating">Admin Rating (1-5)</Label>
           <Select
-            value={form.watch("adminRating")?.toString() || ""}
+            value={form.watch("adminRating")?.toString() || "0"}
             onValueChange={(value) => form.setValue("adminRating", value ? parseInt(value) : undefined)}
           >
             <SelectTrigger>
               <SelectValue placeholder="Select rating" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">No rating</SelectItem>
+              <SelectItem value="0">No rating</SelectItem>
               <SelectItem value="1">1 - Poor</SelectItem>
               <SelectItem value="2">2 - Fair</SelectItem>
               <SelectItem value="3">3 - Good</SelectItem>

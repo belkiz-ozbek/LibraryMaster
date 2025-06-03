@@ -13,12 +13,15 @@ import Returns from "./pages/returns";
 import Evaluations from "./pages/evaluations";
 import Statistics from "./pages/statistics";
 import NotFound from "./pages/not-found";
+import LoginPage from "./pages/login";
+import SignupPage from "./pages/signup";
 import { Button } from "./components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "./components/ui/card";
 import { Input } from "./components/ui/input";
 import { Label } from "./components/ui/label";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useToast } from "./hooks/use-toast";
+import AdminPage from "./pages/admin";
 
 function LoginForm() {
   const [email, setEmail] = useState("");
@@ -96,7 +99,13 @@ function Router() {
   const { user } = useAuth();
   
   if (!user) {
-    return <LoginForm />;
+    return (
+      <Switch>
+        <Route path="/login" component={LoginPage} />
+        <Route path="/signup" component={SignupPage} />
+        <Route component={LoginPage} />
+      </Switch>
+    );
   }
 
   return (
@@ -110,6 +119,7 @@ function Router() {
         <Route path="/returns" component={Returns} />
         <Route path="/evaluations" component={Evaluations} />
         <Route path="/statistics" component={Statistics} />
+        <Route path="/admin" component={AdminPage} />
         <Route component={NotFound} />
       </Switch>
     </MainLayout>

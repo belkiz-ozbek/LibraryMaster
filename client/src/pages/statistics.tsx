@@ -15,46 +15,48 @@ import {
   Award
 } from "lucide-react";
 import { format } from "date-fns";
+import { useTranslation } from "react-i18next";
 
 export default function Statistics() {
   const { user } = useAuth();
+  const { t } = useTranslation();
 
   const { data: stats } = useQuery({
     queryKey: ["/api/stats"],
   });
 
-  const { data: popularBooks = [] } = useQuery({
+  const { data: popularBooks = [] } = useQuery<any[]>({
     queryKey: ["/api/stats/popular-books"],
   });
 
-  const { data: activeUsers = [] } = useQuery({
+  const { data: activeUsers = [] } = useQuery<any[]>({
     queryKey: ["/api/stats/active-users"],
   });
 
-  const { data: allUsers = [] } = useQuery({
+  const { data: allUsers = [] } = useQuery<any[]>({
     queryKey: ["/api/users"],
   });
 
-  const { data: allBooks = [] } = useQuery({
+  const { data: allBooks = [] } = useQuery<any[]>({
     queryKey: ["/api/books"],
   });
 
-  const { data: allBorrowings = [] } = useQuery({
+  const { data: allBorrowings = [] } = useQuery<any[]>({
     queryKey: ["/api/borrowings"],
   });
 
   // Calculate additional statistics
-  const totalCopies = allBooks.reduce((sum, book) => sum + book.totalCopies, 0);
-  const availableCopies = allBooks.reduce((sum, book) => sum + book.availableCopies, 0);
+  const totalCopies = allBooks.reduce((sum: number, book: any) => sum + book.totalCopies, 0);
+  const availableCopies = allBooks.reduce((sum: number, book: any) => sum + book.availableCopies, 0);
   const utilizationRate = totalCopies > 0 ? ((totalCopies - availableCopies) / totalCopies * 100) : 0;
   
-  const ratedMembers = allUsers.filter(user => user.adminRating && !user.isAdmin);
+  const ratedMembers = allUsers.filter((user: any) => user.adminRating && !user.isAdmin);
   const averageRating = ratedMembers.length > 0 
-    ? ratedMembers.reduce((sum, user) => sum + (user.adminRating || 0), 0) / ratedMembers.length 
+    ? ratedMembers.reduce((sum: number, user: any) => sum + (user.adminRating || 0), 0) / ratedMembers.length 
     : 0;
 
-  const returnedBorrowings = allBorrowings.filter(b => b.status === "returned");
-  const onTimeReturns = returnedBorrowings.filter(b => 
+  const returnedBorrowings = allBorrowings.filter((b: any) => b.status === "returned");
+  const onTimeReturns = returnedBorrowings.filter((b: any) => 
     new Date(b.returnDate!) <= new Date(b.dueDate)
   ).length;
   const onTimeRate = returnedBorrowings.length > 0 
@@ -64,7 +66,7 @@ export default function Statistics() {
   const popularBooksColumns = [
     {
       key: "rank",
-      title: "Rank",
+      title: t("statistics.rank"),
       render: (_: any, row: any, index: number) => (
         <div className="w-8 h-8 bg-primary/10 rounded-full flex items-center justify-center">
           <span className="text-sm font-medium text-primary">{index + 1}</span>
@@ -73,7 +75,7 @@ export default function Statistics() {
     },
     {
       key: "title",
-      title: "Book",
+      title: t("borrowing.book"),
       sortable: true,
       render: (value: string, row: any) => (
         <div>
@@ -84,14 +86,14 @@ export default function Statistics() {
     },
     {
       key: "genre",
-      title: "Genre",
+      title: t("books.genre"),
       render: (value: string) => (
         <Badge variant="secondary">{value}</Badge>
       ),
     },
     {
       key: "borrowCount",
-      title: "Times Borrowed",
+      title: t("statistics.timesBorrowed"),
       sortable: true,
       render: (value: number) => (
         <div className="text-center">
@@ -101,7 +103,7 @@ export default function Statistics() {
     },
     {
       key: "popularity",
-      title: "Popularity",
+      title: t("statistics.popularity"),
       render: (value: any, row: any) => {
         const maxBorrows = popularBooks[0]?.borrowCount || 1;
         const percentage = (row.borrowCount / maxBorrows) * 100;
@@ -123,7 +125,7 @@ export default function Statistics() {
   const activeUsersColumns = [
     {
       key: "rank",
-      title: "Rank",
+      title: t("statistics.rank"),
       render: (_: any, row: any, index: number) => (
         <div className="w-8 h-8 bg-secondary/10 rounded-full flex items-center justify-center">
           <span className="text-sm font-medium text-secondary">{index + 1}</span>
@@ -132,7 +134,7 @@ export default function Statistics() {
     },
     {
       key: "name",
-      title: "Member",
+      title: t("members.name"),
       sortable: true,
       render: (value: string, row: any) => (
         <div className="flex items-center">
@@ -150,7 +152,7 @@ export default function Statistics() {
     },
     {
       key: "borrowCount",
-      title: "Books Borrowed",
+      title: t("statistics.booksBorrowed"),
       sortable: true,
       render: (value: number) => (
         <div className="text-center">
@@ -160,9 +162,9 @@ export default function Statistics() {
     },
     {
       key: "adminRating",
-      title: "Rating",
+      title: t("statistics.rating"),
       render: (value: number | null) => {
-        if (!value) return <span className="text-text-muted">Not rated</span>;
+        if (!value) return <span className="text-text-muted">{t("statistics.notRated")}</span>;
         
         return (
           <div className="flex items-center">
@@ -180,7 +182,7 @@ export default function Statistics() {
     },
     {
       key: "membershipDate",
-      title: "Member Since",
+      title: t("statistics.memberSince"),
       render: (value: string) => format(new Date(value), "MMM yyyy"),
     },
   ];
@@ -192,9 +194,9 @@ export default function Statistics() {
         <Card className="w-full max-w-md text-center">
           <CardContent className="p-8">
             <BarChart3 className="h-12 w-12 text-text-muted mx-auto mb-4" />
-            <h2 className="text-xl font-semibold text-on-surface mb-2">Admin Access Required</h2>
+            <h2 className="text-xl font-semibold text-on-surface mb-2">{t("statistics.adminAccessRequired")}</h2>
             <p className="text-text-muted">
-              You need administrator privileges to access statistics and reports.
+              {t("statistics.adminAccessRequiredDesc")}
             </p>
           </CardContent>
         </Card>
@@ -206,40 +208,40 @@ export default function Statistics() {
     <div className="space-y-6">
       {/* Header */}
       <div>
-        <h1 className="text-2xl font-bold text-on-surface">Statistics & Reports</h1>
-        <p className="text-text-muted">View library analytics and performance metrics</p>
+        <h1 className="text-2xl font-bold text-on-surface">{t("statistics.titleAndReports")}</h1>
+        <p className="text-text-muted">{t("statistics.analyticsDesc")}</p>
       </div>
 
       {/* Main Stats */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         <StatsCard
-          title="Total Books"
+          title={t("statistics.totalBooks")}
           value={stats?.totalBooks || 0}
-          change={`${totalCopies} total copies`}
+          change={t("statistics.totalCopies", { count: totalCopies })}
           changeType="neutral"
           icon={<Book size={20} />}
           iconColor="bg-primary/10 text-primary"
         />
         <StatsCard
-          title="Active Members"
+          title={t("statistics.activeMembers")}
           value={stats?.totalUsers || 0}
-          change={`Avg. rating: ${averageRating.toFixed(1)}/5`}
+          change={t("statistics.avgRating", { rating: averageRating.toFixed(1) })}
           changeType="positive"
           icon={<Users size={20} />}
           iconColor="bg-secondary/10 text-secondary"
         />
         <StatsCard
-          title="Active Borrowings"
+          title={t("statistics.activeBorrowings")}
           value={stats?.activeBorrowings || 0}
-          change={`${utilizationRate.toFixed(0)}% utilization rate`}
+          change={t("statistics.utilizationRate", { rate: utilizationRate.toFixed(0) })}
           changeType="neutral"
           icon={<Activity size={20} />}
           iconColor="bg-accent/10 text-accent"
         />
         <StatsCard
-          title="On-Time Returns"
+          title={t("statistics.onTimeReturns")}
           value={`${onTimeRate.toFixed(0)}%`}
-          change={`${onTimeReturns}/${returnedBorrowings.length} returns`}
+          change={t("statistics.returnsCount", { onTime: onTimeReturns, total: returnedBorrowings.length })}
           changeType={onTimeRate >= 80 ? "positive" : onTimeRate >= 60 ? "neutral" : "negative"}
           icon={<Clock size={20} />}
           iconColor="bg-primary/10 text-primary"
@@ -256,12 +258,11 @@ export default function Statistics() {
                 <p className="text-2xl font-bold text-on-surface">
                   {utilizationRate.toFixed(1)}%
                 </p>
-                <p className="text-sm text-text-muted">Collection Utilization</p>
+                <p className="text-sm text-text-muted">{t("statistics.collectionUtilization")}</p>
               </div>
             </div>
           </CardContent>
         </Card>
-
         <Card>
           <CardContent className="p-6">
             <div className="flex items-center">
@@ -270,12 +271,11 @@ export default function Statistics() {
                 <p className="text-2xl font-bold text-on-surface">
                   {averageRating.toFixed(1)}/5
                 </p>
-                <p className="text-sm text-text-muted">Average Member Rating</p>
+                <p className="text-sm text-text-muted">{t("statistics.avgMemberRating")}</p>
               </div>
             </div>
           </CardContent>
         </Card>
-
         <Card>
           <CardContent className="p-6">
             <div className="flex items-center">
@@ -284,7 +284,7 @@ export default function Statistics() {
                 <p className="text-2xl font-bold text-on-surface">
                   {ratedMembers.filter(u => u.adminRating! >= 4).length}
                 </p>
-                <p className="text-sm text-text-muted">Highly Rated Members</p>
+                <p className="text-sm text-text-muted">{t("statistics.highlyRatedMembers")}</p>
               </div>
             </div>
           </CardContent>
@@ -295,9 +295,9 @@ export default function Statistics() {
         {/* Most Borrowed Books */}
         <Card>
           <CardHeader>
-            <CardTitle>Most Borrowed Books</CardTitle>
+            <CardTitle>{t("statistics.mostBorrowedBooks")}</CardTitle>
             <CardDescription>
-              Top {Math.min(10, popularBooks.length)} most popular books
+              {t("statistics.topPopularBooks", { count: Math.min(10, popularBooks.length) })}
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -305,17 +305,16 @@ export default function Statistics() {
               data={popularBooks.slice(0, 10)}
               columns={popularBooksColumns}
               pageSize={5}
-              emptyMessage="No borrowing data available"
+              emptyMessage={t("statistics.noBorrowingData")}
             />
           </CardContent>
         </Card>
-
         {/* Most Active Users */}
         <Card>
           <CardHeader>
-            <CardTitle>Most Active Members</CardTitle>
+            <CardTitle>{t("statistics.mostActiveMembers")}</CardTitle>
             <CardDescription>
-              Top {Math.min(10, activeUsers.length)} most active library members
+              {t("statistics.topActiveMembers", { count: Math.min(10, activeUsers.length) })}
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -323,7 +322,7 @@ export default function Statistics() {
               data={activeUsers.filter(u => !u.isAdmin).slice(0, 10)}
               columns={activeUsersColumns}
               pageSize={5}
-              emptyMessage="No member activity data available"
+              emptyMessage={t("statistics.noMemberActivity")}
             />
           </CardContent>
         </Card>
@@ -332,8 +331,8 @@ export default function Statistics() {
       {/* Collection Overview */}
       <Card>
         <CardHeader>
-          <CardTitle>Collection Overview</CardTitle>
-          <CardDescription>Library collection statistics by genre</CardDescription>
+          <CardTitle>{t("statistics.collectionOverview")}</CardTitle>
+          <CardDescription>{t("statistics.collectionOverviewDesc")}</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -342,24 +341,23 @@ export default function Statistics() {
               const totalInGenre = genreBooks.reduce((sum, book) => sum + book.totalCopies, 0);
               const availableInGenre = genreBooks.reduce((sum, book) => sum + book.availableCopies, 0);
               const genreUtilization = totalInGenre > 0 ? ((totalInGenre - availableInGenre) / totalInGenre * 100) : 0;
-              
               return (
                 <div key={genre} className="p-4 border rounded-lg">
                   <div className="flex items-center justify-between mb-2">
                     <h3 className="font-medium text-on-surface">{genre}</h3>
-                    <Badge variant="outline">{genreBooks.length} titles</Badge>
+                    <Badge variant="outline">{genreBooks.length} {t("statistics.titles")}</Badge>
                   </div>
                   <div className="space-y-1 text-sm text-text-muted">
                     <div className="flex justify-between">
-                      <span>Total copies:</span>
+                      <span>{t("statistics.totalCopiesLabel")}</span>
                       <span>{totalInGenre}</span>
                     </div>
                     <div className="flex justify-between">
-                      <span>Available:</span>
+                      <span>{t("statistics.availableLabel")}</span>
                       <span>{availableInGenre}</span>
                     </div>
                     <div className="flex justify-between">
-                      <span>Utilization:</span>
+                      <span>{t("statistics.utilizationLabel")}</span>
                       <span>{genreUtilization.toFixed(1)}%</span>
                     </div>
                   </div>

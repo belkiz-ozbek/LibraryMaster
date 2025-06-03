@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -13,6 +13,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Plus, Edit, Trash2, Users, Star } from "lucide-react";
 import { format } from "date-fns";
 import type { User } from "@shared/schema";
+import { useTranslation } from "react-i18next";
 
 export default function Members() {
   const [searchQuery, setSearchQuery] = useState("");
@@ -20,6 +21,7 @@ export default function Members() {
   const [isFormOpen, setIsFormOpen] = useState(false);
   const { user } = useAuth();
   const { toast } = useToast();
+  const { t } = useTranslation();
 
   const { data: members = [], isLoading } = useQuery({
     queryKey: ["/api/users"],
@@ -88,10 +90,10 @@ export default function Members() {
     );
   };
 
-  const columns = [
+  const columns = useMemo(() => [
     {
       key: "name",
-      title: "Member",
+      title: t("members.name"),
       sortable: true,
       render: (value: string, row: User) => (
         <div className="flex items-center">
@@ -109,36 +111,36 @@ export default function Members() {
     },
     {
       key: "membershipDate",
-      title: "Member Since",
+      title: t("members.membershipDate"),
       sortable: true,
       render: (value: string) => format(new Date(value), "MMM dd, yyyy"),
     },
     {
       key: "isAdmin",
-      title: "Role",
+      title: t("members.role"),
       render: (value: boolean) => (
         <Badge variant={value ? "default" : "secondary"}>
-          {value ? "Administrator" : "Member"}
+          {value ? t("members.administrator") : t("members.member")}
         </Badge>
       ),
     },
     {
       key: "adminRating",
-      title: "Rating",
+      title: t("members.adminRating"),
       render: (value: number | null) => renderStars(value),
     },
     {
       key: "adminNotes",
-      title: "Notes",
+      title: t("members.adminNotes"),
       render: (value: string | null) => (
         <span className="text-sm text-text-muted">
-          {value || "No notes"}
+          {value || t("members.noNotes")}
         </span>
       ),
     },
     {
       key: "actions",
-      title: "Actions",
+      title: t("members.actions"),
       render: (_: any, row: User) => (
         <div className="flex items-center space-x-2">
           {user?.isAdmin && (
@@ -163,7 +165,7 @@ export default function Members() {
         </div>
       ),
     },
-  ];
+  ], [t, user, deleteMemberMutation.isPending]);
 
   const activeMembers = members.filter(member => !member.isAdmin);
   const adminMembers = members.filter(member => member.isAdmin);
@@ -173,26 +175,26 @@ export default function Members() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-on-surface">Member Management</h1>
-          <p className="text-text-muted">Manage library members and their information</p>
+          <h1 className="text-2xl font-bold text-on-surface">{t("members.management")}</h1>
+          <p className="text-text-muted">{t("members.managementDesc")}</p>
         </div>
         {user?.isAdmin && (
           <Dialog open={isFormOpen} onOpenChange={setIsFormOpen}>
             <DialogTrigger asChild>
               <Button onClick={() => setSelectedMember(null)}>
                 <Plus size={16} className="mr-2" />
-                Add Member
+                {t("members.addMember")}
               </Button>
             </DialogTrigger>
             <DialogContent className="max-w-2xl">
               <DialogHeader>
                 <DialogTitle>
-                  {selectedMember ? "Edit Member" : "Add New Member"}
+                  {selectedMember ? t("members.editMember") : t("members.addNewMember")}
                 </DialogTitle>
                 <DialogDescription>
                   {selectedMember 
-                    ? "Update the member information below." 
-                    : "Enter the details for the new member."
+                    ? t("members.updateMemberInfo")
+                    : t("members.enterNewMember")
                   }
                 </DialogDescription>
               </DialogHeader>
@@ -214,14 +216,14 @@ export default function Members() {
         <CardHeader>
           <div className="flex items-center justify-between">
             <div>
-              <CardTitle>Member Directory</CardTitle>
+              <CardTitle>{t("members.directory")}</CardTitle>
               <CardDescription>
-                {displayMembers.length} members in the system
+                {displayMembers.length} {t("members.inSystem")}
               </CardDescription>
             </div>
             <div className="w-80">
               <SearchInput
-                placeholder="Search members by name or email..."
+                placeholder={t("members.searchPlaceholder")}
                 onSearch={setSearchQuery}
               />
             </div>
@@ -234,8 +236,8 @@ export default function Members() {
             loading={isLoading}
             emptyMessage={
               searchQuery.length > 2 
-                ? "No members found matching your search." 
-                : "No members registered yet."
+                ? t("members.noMembersFound")
+                : t("members.noMembersYet")
             }
             pageSize={10}
           />
@@ -252,7 +254,7 @@ export default function Members() {
                 <p className="text-2xl font-bold text-on-surface">
                   {activeMembers.length}
                 </p>
-                <p className="text-sm text-text-muted">Active Members</p>
+                <p className="text-sm text-text-muted">{t("members.activeMembers")}</p>
               </div>
             </div>
           </CardContent>
@@ -266,7 +268,7 @@ export default function Members() {
                 <p className="text-2xl font-bold text-on-surface">
                   {adminMembers.length}
                 </p>
-                <p className="text-sm text-text-muted">Administrators</p>
+                <p className="text-sm text-text-muted">{t("members.administrators")}</p>
               </div>
             </div>
           </CardContent>
@@ -280,7 +282,7 @@ export default function Members() {
                 <p className="text-2xl font-bold text-on-surface">
                   {members.filter(member => member.adminRating && member.adminRating >= 4).length}
                 </p>
-                <p className="text-sm text-text-muted">Highly Rated</p>
+                <p className="text-sm text-text-muted">{t("members.highlyRated")}</p>
               </div>
             </div>
           </CardContent>

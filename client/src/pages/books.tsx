@@ -12,6 +12,7 @@ import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { Plus, Edit, Trash2, Book as BookIcon } from "lucide-react";
 import type { Book } from "@shared/schema";
+import { useTranslation } from "react-i18next";
 
 export default function Books() {
   const [searchQuery, setSearchQuery] = useState("");
@@ -19,13 +20,14 @@ export default function Books() {
   const [isFormOpen, setIsFormOpen] = useState(false);
   const { user } = useAuth();
   const { toast } = useToast();
+  const { t } = useTranslation();
 
-  const { data: books = [], isLoading } = useQuery({
+  const { data: books = [], isLoading } = useQuery<{ id: number; title: string; author: string; isbn: string; genre: string; publishYear: number; shelfNumber: string; availableCopies: number; totalCopies: number; }[]>({
     queryKey: ["/api/books"],
   });
 
-  const { data: searchResults = [] } = useQuery({
-    queryKey: ["/api/books/search", searchQuery],
+  const { data: searchResults = [] } = useQuery<{ id: number; title: string; author: string; isbn: string; genre: string; publishYear: number; shelfNumber: string; availableCopies: number; totalCopies: number; }[]>({
+    queryKey: [`/api/books/search?q=${encodeURIComponent(searchQuery)}`],
     enabled: searchQuery.length > 2,
   });
 
@@ -47,7 +49,7 @@ export default function Books() {
     },
   });
 
-  const displayBooks = searchQuery.length > 2 ? searchResults : books;
+  const displayBooks: Book[] = searchQuery.length > 2 ? searchResults : books;
 
   const handleEdit = (book: Book) => {
     setSelectedBook(book);
@@ -73,7 +75,7 @@ export default function Books() {
   const columns = [
     {
       key: "title",
-      title: "Title",
+      title: t("books.name"),
       sortable: true,
       render: (value: string, row: Book) => (
         <div>
@@ -84,14 +86,14 @@ export default function Books() {
     },
     {
       key: "isbn",
-      title: "ISBN",
+      title: t("books.isbn"),
       render: (value: string) => (
         <span className="font-mono text-sm">{value}</span>
       ),
     },
     {
       key: "genre",
-      title: "Genre",
+      title: t("books.genre"),
       sortable: true,
       render: (value: string) => (
         <Badge variant="secondary">{value}</Badge>
@@ -99,16 +101,16 @@ export default function Books() {
     },
     {
       key: "publishYear",
-      title: "Year",
+      title: t("books.publishYear"),
       sortable: true,
     },
     {
       key: "shelfNumber",
-      title: "Shelf",
+      title: t("books.shelfNumber"),
     },
     {
       key: "availableCopies",
-      title: "Available",
+      title: t("books.availableCopies"),
       render: (value: number, row: Book) => (
         <div className="text-center">
           <span className={value > 0 ? "text-secondary" : "text-destructive"}>
@@ -120,7 +122,7 @@ export default function Books() {
     },
     {
       key: "actions",
-      title: "Actions",
+      title: t("books.actions"),
       render: (_: any, row: Book) => (
         <div className="flex items-center space-x-2">
           {user?.isAdmin && (
@@ -152,26 +154,26 @@ export default function Books() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-on-surface">Book Management</h1>
-          <p className="text-text-muted">Manage your library's book collection</p>
+          <h1 className="text-2xl font-bold text-on-surface">{t("books.management")}</h1>
+          <p className="text-text-muted">{t("books.managementDesc")}</p>
         </div>
         {user?.isAdmin && (
           <Dialog open={isFormOpen} onOpenChange={setIsFormOpen}>
             <DialogTrigger asChild>
               <Button onClick={() => setSelectedBook(null)}>
                 <Plus size={16} className="mr-2" />
-                Add Book
+                {t("books.addBook")}
               </Button>
             </DialogTrigger>
             <DialogContent className="max-w-2xl">
               <DialogHeader>
                 <DialogTitle>
-                  {selectedBook ? "Edit Book" : "Add New Book"}
+                  {selectedBook ? t("books.editBook") : t("books.addNewBook")}
                 </DialogTitle>
                 <DialogDescription>
                   {selectedBook 
-                    ? "Update the book information below." 
-                    : "Enter the details for the new book."
+                    ? t("books.updateBookInfo")
+                    : t("books.enterNewBook")
                   }
                 </DialogDescription>
               </DialogHeader>
@@ -193,14 +195,14 @@ export default function Books() {
         <CardHeader>
           <div className="flex items-center justify-between">
             <div>
-              <CardTitle>Book Catalog</CardTitle>
+              <CardTitle>{t("books.catalog")}</CardTitle>
               <CardDescription>
-                {displayBooks.length} books in the collection
+                {displayBooks.length} {t("books.inCollection")}
               </CardDescription>
             </div>
             <div className="w-80">
               <SearchInput
-                placeholder="Search books by title, author, ISBN, or genre..."
+                placeholder={t("books.searchPlaceholder")}
                 onSearch={setSearchQuery}
               />
             </div>
@@ -213,8 +215,8 @@ export default function Books() {
             loading={isLoading}
             emptyMessage={
               searchQuery.length > 2 
-                ? "No books found matching your search." 
-                : "No books in the catalog yet."
+                ? t("books.noBooksFound")
+                : t("books.noBooksYet")
             }
             pageSize={10}
           />
@@ -231,7 +233,7 @@ export default function Books() {
                 <p className="text-2xl font-bold text-on-surface">
                   {books.reduce((sum, book) => sum + book.totalCopies, 0)}
                 </p>
-                <p className="text-sm text-text-muted">Total Copies</p>
+                <p className="text-sm text-text-muted">{t("books.totalCopies")}</p>
               </div>
             </div>
           </CardContent>
@@ -245,7 +247,7 @@ export default function Books() {
                 <p className="text-2xl font-bold text-on-surface">
                   {books.reduce((sum, book) => sum + book.availableCopies, 0)}
                 </p>
-                <p className="text-sm text-text-muted">Available Copies</p>
+                <p className="text-sm text-text-muted">{t("books.availableCopiesTotal")}</p>
               </div>
             </div>
           </CardContent>
@@ -257,9 +259,9 @@ export default function Books() {
               <BookIcon className="h-8 w-8 text-accent mr-3" />
               <div>
                 <p className="text-2xl font-bold text-on-surface">
-                  {new Set(books.map(book => book.genre)).size}
+                  {new Set(books.flatMap(book => book.genre.split(',').map(g => g.trim()))).size}
                 </p>
-                <p className="text-sm text-text-muted">Unique Genres</p>
+                <p className="text-sm text-text-muted">{t("books.uniqueGenres")}</p>
               </div>
             </div>
           </CardContent>

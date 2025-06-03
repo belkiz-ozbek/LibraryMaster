@@ -15,6 +15,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Star, Edit, Users, TrendingUp, Award } from "lucide-react";
 import { format } from "date-fns";
 import type { User } from "@shared/schema";
+import { useTranslation } from "react-i18next";
 
 export default function Evaluations() {
   const [searchQuery, setSearchQuery] = useState("");
@@ -24,8 +25,9 @@ export default function Evaluations() {
   const [newNotes, setNewNotes] = useState("");
   const { user } = useAuth();
   const { toast } = useToast();
+  const { t } = useTranslation();
 
-  const { data: members = [], isLoading } = useQuery({
+  const { data: members = [], isLoading } = useQuery<User[]>({
     queryKey: ["/api/users"],
   });
 
@@ -39,28 +41,28 @@ export default function Evaluations() {
       setNewNotes("");
       setNewRating(5);
       toast({
-        title: "Evaluation updated",
-        description: "Member evaluation has been successfully updated.",
+        title: t("evaluations.evaluationUpdated"),
+        description: t("evaluations.evaluationUpdatedDesc"),
       });
     },
     onError: () => {
       toast({
-        title: "Error",
-        description: "Failed to update evaluation.",
+        title: t("common.error"),
+        description: t("evaluations.evaluationUpdateFailed"),
         variant: "destructive",
       });
     },
   });
 
   const filteredMembers = searchQuery.length > 2 
-    ? members.filter(member => 
+    ? members.filter((member: User) => 
         member.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
         member.email.toLowerCase().includes(searchQuery.toLowerCase())
       )
     : members;
 
   // Filter out admin users for evaluation
-  const evaluableMembers = filteredMembers.filter(member => !member.isAdmin);
+  const evaluableMembers = filteredMembers.filter((member: User) => !member.isAdmin);
 
   const handleEvaluate = (member: User) => {
     setSelectedMember(member);
@@ -82,7 +84,7 @@ export default function Evaluations() {
   };
 
   const renderStars = (rating: number | null, interactive = false, onRatingChange?: (rating: number) => void) => {
-    if (!rating && !interactive) return <span className="text-text-muted">Not rated</span>;
+    if (!rating && !interactive) return <span className="text-text-muted">{t("evaluations.notRated")}</span>;
     
     return (
       <div className="flex items-center">
@@ -106,18 +108,18 @@ export default function Evaluations() {
   };
 
   const getRatingBadge = (rating: number | null) => {
-    if (!rating) return <Badge variant="outline">Not Rated</Badge>;
+    if (!rating) return <Badge variant="outline">{t("evaluations.notRated")}</Badge>;
     
-    if (rating >= 4) return <Badge variant="default" className="bg-secondary">Excellent</Badge>;
-    if (rating >= 3) return <Badge variant="secondary">Good</Badge>;
-    if (rating >= 2) return <Badge variant="outline" className="border-accent text-accent">Fair</Badge>;
-    return <Badge variant="destructive">Poor</Badge>;
+    if (rating >= 4) return <Badge variant="default" className="bg-secondary">{t("evaluations.excellent")}</Badge>;
+    if (rating >= 3) return <Badge variant="secondary">{t("evaluations.good")}</Badge>;
+    if (rating >= 2) return <Badge variant="outline" className="border-accent text-accent">{t("evaluations.fair")}</Badge>;
+    return <Badge variant="destructive">{t("evaluations.poor")}</Badge>;
   };
 
   const columns = [
     {
       key: "name",
-      title: "Member",
+      title: t("evaluations.member"),
       sortable: true,
       render: (value: string, row: User) => (
         <div className="flex items-center">
@@ -135,33 +137,33 @@ export default function Evaluations() {
     },
     {
       key: "membershipDate",
-      title: "Member Since",
+      title: t("evaluations.memberSince"),
       sortable: true,
       render: (value: string) => format(new Date(value), "MMM dd, yyyy"),
     },
     {
       key: "adminRating",
-      title: "Rating",
+      title: t("evaluations.rating"),
       sortable: true,
       render: (value: number | null) => renderStars(value),
     },
     {
       key: "adminRating",
-      title: "Performance",
+      title: t("evaluations.performance"),
       render: (value: number | null) => getRatingBadge(value),
     },
     {
       key: "adminNotes",
-      title: "Notes",
+      title: t("evaluations.notes"),
       render: (value: string | null) => (
         <span className="text-sm text-text-muted max-w-xs truncate block">
-          {value || "No notes"}
+          {value || t("evaluations.noNotes")}
         </span>
       ),
     },
     {
       key: "actions",
-      title: "Actions",
+      title: t("evaluations.actions"),
       render: (_: any, row: User) => (
         <Button
           variant="outline"
@@ -170,7 +172,7 @@ export default function Evaluations() {
           disabled={updateMemberMutation.isPending}
         >
           <Edit size={14} className="mr-1" />
-          Evaluate
+          {t("evaluations.evaluate")}
         </Button>
       ),
     },
@@ -178,10 +180,10 @@ export default function Evaluations() {
 
   const stats = {
     totalMembers: evaluableMembers.length,
-    ratedMembers: evaluableMembers.filter(m => m.adminRating).length,
-    excellentMembers: evaluableMembers.filter(m => m.adminRating && m.adminRating >= 4).length,
-    averageRating: evaluableMembers.filter(m => m.adminRating).length > 0 
-      ? evaluableMembers.reduce((sum, m) => sum + (m.adminRating || 0), 0) / evaluableMembers.filter(m => m.adminRating).length
+    ratedMembers: evaluableMembers.filter((m: User) => m.adminRating).length,
+    excellentMembers: evaluableMembers.filter((m: User) => m.adminRating && m.adminRating >= 4).length,
+    averageRating: evaluableMembers.filter((m: User) => m.adminRating).length > 0 
+      ? evaluableMembers.reduce((sum: number, m: User) => sum + (m.adminRating || 0), 0) / evaluableMembers.filter((m: User) => m.adminRating).length
       : 0
   };
 
@@ -192,9 +194,9 @@ export default function Evaluations() {
         <Card className="w-full max-w-md text-center">
           <CardContent className="p-8">
             <Star className="h-12 w-12 text-text-muted mx-auto mb-4" />
-            <h2 className="text-xl font-semibold text-on-surface mb-2">Admin Access Required</h2>
+            <h2 className="text-xl font-semibold text-on-surface mb-2">{t("evaluations.adminAccessRequired")}</h2>
             <p className="text-text-muted">
-              You need administrator privileges to access member evaluations.
+              {t("evaluations.adminAccessRequiredDesc")}
             </p>
           </CardContent>
         </Card>
@@ -207,8 +209,8 @@ export default function Evaluations() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-on-surface">Member Evaluations</h1>
-          <p className="text-text-muted">Rate and evaluate library members</p>
+          <h1 className="text-2xl font-bold text-on-surface">{t("evaluations.title")}</h1>
+          <p className="text-text-muted">{t("evaluations.subtitle")}</p>
         </div>
       </div>
 
@@ -222,7 +224,7 @@ export default function Evaluations() {
                 <p className="text-2xl font-bold text-on-surface">
                   {stats.totalMembers}
                 </p>
-                <p className="text-sm text-text-muted">Total Members</p>
+                <p className="text-sm text-text-muted">{t("evaluations.totalMembers")}</p>
               </div>
             </div>
           </CardContent>
@@ -236,7 +238,7 @@ export default function Evaluations() {
                 <p className="text-2xl font-bold text-on-surface">
                   {stats.ratedMembers}
                 </p>
-                <p className="text-sm text-text-muted">Rated Members</p>
+                <p className="text-sm text-text-muted">{t("evaluations.ratedMembers")}</p>
               </div>
             </div>
           </CardContent>
@@ -250,7 +252,7 @@ export default function Evaluations() {
                 <p className="text-2xl font-bold text-on-surface">
                   {stats.excellentMembers}
                 </p>
-                <p className="text-sm text-text-muted">Excellent (4+ stars)</p>
+                <p className="text-sm text-text-muted">{t("evaluations.excellentMembers")}</p>
               </div>
             </div>
           </CardContent>
@@ -264,7 +266,7 @@ export default function Evaluations() {
                 <p className="text-2xl font-bold text-on-surface">
                   {stats.averageRating.toFixed(1)}
                 </p>
-                <p className="text-sm text-text-muted">Average Rating</p>
+                <p className="text-sm text-text-muted">{t("evaluations.averageRating")}</p>
               </div>
             </div>
           </CardContent>
@@ -276,14 +278,14 @@ export default function Evaluations() {
         <CardHeader>
           <div className="flex items-center justify-between">
             <div>
-              <CardTitle>Member Evaluations</CardTitle>
+              <CardTitle>{t("evaluations.title")}</CardTitle>
               <CardDescription>
-                Manage member ratings and notes
+                {t("evaluations.manageRatings")}
               </CardDescription>
             </div>
             <div className="w-80">
               <SearchInput
-                placeholder="Search members by name or email..."
+                placeholder={t("evaluations.searchPlaceholder")}
                 onSearch={setSearchQuery}
               />
             </div>
@@ -296,8 +298,8 @@ export default function Evaluations() {
             loading={isLoading}
             emptyMessage={
               searchQuery.length > 2 
-                ? "No members found matching your search." 
-                : "No members to evaluate."
+                ? t("evaluations.noMembersFound")
+                : t("evaluations.noMembersToEvaluate")
             }
             pageSize={10}
           />
@@ -308,11 +310,11 @@ export default function Evaluations() {
       <Dialog open={isEvaluationDialogOpen} onOpenChange={setIsEvaluationDialogOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Evaluate Member</DialogTitle>
+            <DialogTitle>{t("evaluations.evaluateMember")}</DialogTitle>
             <DialogDescription>
               {selectedMember && (
                 <>
-                  Rate the performance of {selectedMember.name}
+                  {t("evaluations.ratePerformance", { name: selectedMember.name })}
                 </>
               )}
             </DialogDescription>
@@ -320,22 +322,22 @@ export default function Evaluations() {
           
           <div className="space-y-4">
             <div>
-              <Label>Rating (1-5 stars)</Label>
+              <Label>{t("evaluations.ratingLabel")}</Label>
               <div className="mt-2">
                 {renderStars(newRating, true, setNewRating)}
               </div>
               <p className="text-sm text-text-muted mt-1">
-                Click on stars to set rating
+                {t("evaluations.clickToSetRating")}
               </p>
             </div>
             
             <div>
-              <Label htmlFor="evaluationNotes">Notes</Label>
+              <Label htmlFor="evaluationNotes">{t("evaluations.notes")}</Label>
               <Textarea
                 id="evaluationNotes"
                 value={newNotes}
                 onChange={(e) => setNewNotes(e.target.value)}
-                placeholder="Add notes about member behavior, punctuality, book care, etc."
+                placeholder={t("evaluations.notesPlaceholder")}
                 rows={4}
               />
             </div>
@@ -345,13 +347,13 @@ export default function Evaluations() {
                 variant="outline" 
                 onClick={() => setIsEvaluationDialogOpen(false)}
               >
-                Cancel
+                {t("common.cancel")}
               </Button>
               <Button 
                 onClick={confirmEvaluation}
                 disabled={updateMemberMutation.isPending}
               >
-                {updateMemberMutation.isPending ? "Saving..." : "Save Evaluation"}
+                {updateMemberMutation.isPending ? t("common.saving") : t("evaluations.saveEvaluation")}
               </Button>
             </div>
           </div>

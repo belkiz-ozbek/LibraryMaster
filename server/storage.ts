@@ -6,7 +6,7 @@ import {
   type BorrowingWithDetails, type UserWithBorrowings, type BookWithBorrowings
 } from "@shared/schema";
 import { db } from "./db";
-import { eq, desc, asc, like, or, and, count, sql, lt, gte } from "drizzle-orm";
+import { eq, desc, asc, like, or, and, count, sql, lt, gte, ilike } from "drizzle-orm";
 
 export interface IStorage {
   // User operations
@@ -126,14 +126,17 @@ export class DatabaseStorage implements IStorage {
   }
 
   async searchBooks(query: string): Promise<Book[]> {
-    return await db.select().from(books).where(
+    const q = `%${query.toLowerCase()}%`;
+    const results = await db.select().from(books).where(
       or(
-        like(books.title, `%${query}%`),
-        like(books.author, `%${query}%`),
-        like(books.isbn, `%${query}%`),
-        like(books.genre, `%${query}%`)
+        sql`LOWER(${books.title}) LIKE ${q}`,
+        sql`LOWER(${books.author}) LIKE ${q}`,
+        sql`LOWER(${books.isbn}) LIKE ${q}`,
+        sql`LOWER(${books.genre}) LIKE ${q}`
       )
     );
+    console.log("Arama sorgusu:", query, "SQL param:", q, "Sonuç:", results);
+    return results;
   }
 
   async getAllBooks(): Promise<Book[]> {

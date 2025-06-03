@@ -11,23 +11,25 @@ import {
   LayoutDashboard,
   LogOut 
 } from "lucide-react";
-
-const navigation = [
-  { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
-  { name: "Books", href: "/books", icon: Book },
-  { name: "Members", href: "/members", icon: Users },
-  { name: "Borrowing", href: "/borrowing", icon: HandHeart },
-  { name: "Returns", href: "/returns", icon: Undo2 },
-];
-
-const adminNavigation = [
-  { name: "Evaluations", href: "/evaluations", icon: Star },
-  { name: "Statistics", href: "/statistics", icon: BarChart3 },
-];
+import { useTranslation } from "react-i18next";
 
 export default function Sidebar() {
   const [location] = useLocation();
   const { user, logout } = useAuth();
+  const { t } = useTranslation();
+
+  const navigation = [
+    { name: t("navigation.dashboard"), href: "/dashboard", icon: LayoutDashboard },
+    { name: t("navigation.books"), href: "/books", icon: Book },
+    { name: t("navigation.members"), href: "/members", icon: Users },
+    { name: t("navigation.borrowing"), href: "/borrowing", icon: HandHeart },
+    { name: t("navigation.returns"), href: "/returns", icon: Undo2 },
+  ];
+
+  const adminNavigation = [
+    { name: t("navigation.evaluations"), href: "/evaluations", icon: Star },
+    { name: t("navigation.statistics"), href: "/statistics", icon: BarChart3 },
+  ];
 
   const handleLogout = async () => {
     try {
@@ -56,7 +58,7 @@ export default function Sidebar() {
           </div>
           <div>
             <h1 className="text-xl font-medium text-on-surface">LibraryMS</h1>
-            <p className="text-sm text-text-muted">Management System</p>
+            <p className="text-sm text-text-muted">{t('sidebar.managementSystem')}</p>
           </div>
         </div>
       </div>
@@ -88,7 +90,7 @@ export default function Sidebar() {
         {user?.isAdmin && (
           <div className="pt-6 mt-6 border-t border-gray-200">
             <p className="px-4 mb-3 text-xs font-medium text-text-muted uppercase tracking-wider">
-              Admin
+              {t('sidebar.admin')}
             </p>
             {adminNavigation.map((item) => {
               const isActive = location === item.href;
@@ -124,10 +126,10 @@ export default function Sidebar() {
           </div>
           <div className="flex-1 min-w-0">
             <p className="text-sm font-medium text-on-surface truncate">
-              {user?.name || "User"}
+              {user?.name || t('sidebar.user')}
             </p>
             <p className="text-xs text-text-muted">
-              {user?.isAdmin ? "Administrator" : "Staff"}
+              {user?.isAdmin ? t('sidebar.administrator') : t('sidebar.staff')}
             </p>
           </div>
           <Button

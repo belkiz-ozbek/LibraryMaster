@@ -13,6 +13,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Plus, Edit, Trash2, HandHeart, Clock, AlertTriangle } from "lucide-react";
 import { format, differenceInDays } from "date-fns";
 import type { BorrowingWithDetails } from "@shared/schema";
+import { useTranslation } from "react-i18next";
 
 export default function Borrowing() {
   const [searchQuery, setSearchQuery] = useState("");
@@ -20,6 +21,7 @@ export default function Borrowing() {
   const [isFormOpen, setIsFormOpen] = useState(false);
   const { user } = useAuth();
   const { toast } = useToast();
+  const { t } = useTranslation();
 
   const { data: borrowings = [], isLoading } = useQuery({
     queryKey: ["/api/borrowings"],
@@ -131,7 +133,7 @@ export default function Borrowing() {
   const columns = [
     {
       key: "user.name",
-      title: "Member",
+      title: t("borrowing.member"),
       sortable: true,
       render: (value: string, row: BorrowingWithDetails) => (
         <div className="flex items-center">
@@ -149,7 +151,7 @@ export default function Borrowing() {
     },
     {
       key: "book.title",
-      title: "Book",
+      title: t("borrowing.book"),
       sortable: true,
       render: (value: string, row: BorrowingWithDetails) => (
         <div>
@@ -161,31 +163,31 @@ export default function Borrowing() {
     },
     {
       key: "borrowDate",
-      title: "Borrowed",
+      title: t("borrowing.borrowDate"),
       sortable: true,
       render: (value: string) => format(new Date(value), "MMM dd, yyyy"),
     },
     {
       key: "dueDate",
-      title: "Due Date",
+      title: t("borrowing.dueDate"),
       sortable: true,
       render: (value: string) => format(new Date(value), "MMM dd, yyyy"),
     },
     {
       key: "status",
-      title: "Status",
+      title: t("borrowing.status"),
       render: (value: string, row: BorrowingWithDetails) => getStatusBadge(row),
     },
     {
       key: "daysInfo",
-      title: "Days Info",
+      title: t("borrowing.daysInfo"),
       render: (value: any, row: BorrowingWithDetails) => (
         <span className="text-sm">{getDaysInfo(row)}</span>
       ),
     },
     {
       key: "actions",
-      title: "Actions",
+      title: t("borrowing.actions"),
       render: (_: any, row: BorrowingWithDetails) => (
         <div className="flex items-center space-x-2">
           <Button
@@ -215,25 +217,25 @@ export default function Borrowing() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-on-surface">Borrowing System</h1>
-          <p className="text-text-muted">Manage book borrowings and track due dates</p>
+          <h1 className="text-2xl font-bold text-on-surface">{t("borrowing.management")}</h1>
+          <p className="text-text-muted">{t("borrowing.managementDesc")}</p>
         </div>
         <Dialog open={isFormOpen} onOpenChange={setIsFormOpen}>
           <DialogTrigger asChild>
             <Button onClick={() => setSelectedBorrowing(null)}>
               <Plus size={16} className="mr-2" />
-              New Borrowing
+              {t("borrowing.newBorrowing")}
             </Button>
           </DialogTrigger>
           <DialogContent className="max-w-2xl">
             <DialogHeader>
               <DialogTitle>
-                {selectedBorrowing ? "Edit Borrowing" : "Create New Borrowing"}
+                {selectedBorrowing ? t("borrowing.editBorrowing") : t("borrowing.createBorrowing")}
               </DialogTitle>
               <DialogDescription>
                 {selectedBorrowing 
-                  ? "Update the borrowing information below." 
-                  : "Create a new book borrowing record."
+                  ? t("borrowing.updateBorrowingInfo")
+                  : t("borrowing.createBorrowingDesc")
                 }
               </DialogDescription>
             </DialogHeader>
@@ -259,12 +261,11 @@ export default function Borrowing() {
                 <p className="text-2xl font-bold text-on-surface">
                   {activeBorrowings.length}
                 </p>
-                <p className="text-sm text-text-muted">Active Borrowings</p>
+                <p className="text-sm text-text-muted">{t("borrowing.activeBorrowings")}</p>
               </div>
             </div>
           </CardContent>
         </Card>
-
         <Card>
           <CardContent className="p-6">
             <div className="flex items-center">
@@ -276,12 +277,11 @@ export default function Borrowing() {
                     return daysUntilDue <= 3 && daysUntilDue >= 0;
                   }).length}
                 </p>
-                <p className="text-sm text-text-muted">Due Soon (3 days)</p>
+                <p className="text-sm text-text-muted">{t("borrowing.dueSoon")}</p>
               </div>
             </div>
           </CardContent>
         </Card>
-
         <Card>
           <CardContent className="p-6">
             <div className="flex items-center">
@@ -290,7 +290,7 @@ export default function Borrowing() {
                 <p className="text-2xl font-bold text-on-surface">
                   {overdueBorrowings.length}
                 </p>
-                <p className="text-sm text-text-muted">Overdue Items</p>
+                <p className="text-sm text-text-muted">{t("borrowing.overdueItems")}</p>
               </div>
             </div>
           </CardContent>
@@ -302,14 +302,14 @@ export default function Borrowing() {
         <CardHeader>
           <div className="flex items-center justify-between">
             <div>
-              <CardTitle>All Borrowings</CardTitle>
+              <CardTitle>{t("borrowing.allBorrowings")}</CardTitle>
               <CardDescription>
-                {filteredBorrowings.length} borrowing records
+                {filteredBorrowings.length} {t("borrowing.borrowingRecords")}
               </CardDescription>
             </div>
             <div className="w-80">
               <SearchInput
-                placeholder="Search by member, book title, author, or ISBN..."
+                placeholder={t("borrowing.searchPlaceholder")}
                 onSearch={setSearchQuery}
               />
             </div>
@@ -322,8 +322,8 @@ export default function Borrowing() {
             loading={isLoading}
             emptyMessage={
               searchQuery.length > 2 
-                ? "No borrowings found matching your search." 
-                : "No borrowing records yet."
+                ? t("borrowing.noBorrowingsFound")
+                : t("borrowing.noBorrowingsYet")
             }
             pageSize={10}
           />
