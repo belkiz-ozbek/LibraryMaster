@@ -6,7 +6,7 @@ import {
   type BorrowingWithDetails, type UserWithBorrowings, type BookWithBorrowings
 } from "@shared/schema";
 import { db } from "./db";
-import { eq, desc, asc, like, or, and, count, sql, lt, gte, ilike } from "drizzle-orm";
+import { eq, desc, asc, like, or, and, count, sql, lt, gte, ilike, isNotNull } from "drizzle-orm";
 
 export interface IStorage {
   // User operations
@@ -14,7 +14,7 @@ export interface IStorage {
   getUserByEmail(email: string): Promise<User | undefined>;
   createUser(user: InsertUser): Promise<User>;
   updateUser(id: number, user: UpdateUser): Promise<User | undefined>;
-  deleteUser(id: number): Promise<boolean>;
+  deleteUser(id: number): Promise<void>;
   searchUsers(query: string): Promise<User[]>;
   getAllUsers(): Promise<User[]>;
   getUserWithBorrowings(id: number): Promise<UserWithBorrowings | undefined>;
@@ -24,7 +24,7 @@ export interface IStorage {
   getBookByIsbn(isbn: string): Promise<Book | undefined>;
   createBook(book: InsertBook): Promise<Book>;
   updateBook(id: number, book: UpdateBook): Promise<Book | undefined>;
-  deleteBook(id: number): Promise<boolean>;
+  deleteBook(id: number): Promise<void>;
   searchBooks(query: string): Promise<Book[]>;
   getAllBooks(): Promise<Book[]>;
   getBookWithBorrowings(id: number): Promise<BookWithBorrowings | undefined>;
@@ -33,7 +33,7 @@ export interface IStorage {
   getBorrowing(id: number): Promise<Borrowing | undefined>;
   createBorrowing(borrowing: InsertBorrowing): Promise<Borrowing>;
   updateBorrowing(id: number, borrowing: UpdateBorrowing): Promise<Borrowing | undefined>;
-  deleteBorrowing(id: number): Promise<boolean>;
+  deleteBorrowing(id: number): Promise<void>;
   getAllBorrowings(): Promise<BorrowingWithDetails[]>;
   getActiveBorrowings(): Promise<BorrowingWithDetails[]>;
   getOverdueBorrowings(): Promise<BorrowingWithDetails[]>;
@@ -49,6 +49,7 @@ export interface IStorage {
   }>;
   getMostBorrowedBooks(): Promise<Array<Book & { borrowCount: number }>>;
   getMostActiveUsers(): Promise<Array<User & { borrowCount: number }>>;
+  getTopReadersMonth(): Promise<Array<{ userId: number; name: string; email: string; totalPagesRead: number }>>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -73,9 +74,11 @@ export class DatabaseStorage implements IStorage {
     return user || undefined;
   }
 
-  async deleteUser(id: number): Promise<boolean> {
+  async deleteUser(id: number): Promise<void> {
     const result = await db.delete(users).where(eq(users.id, id));
-    return result.rowCount > 0;
+    if (result.rowCount === 0) {
+      throw new Error(`User with id ${id} not found`);
+    }
   }
 
   async searchUsers(query: string): Promise<User[]> {
@@ -120,9 +123,11 @@ export class DatabaseStorage implements IStorage {
     return book || undefined;
   }
 
-  async deleteBook(id: number): Promise<boolean> {
+  async deleteBook(id: number): Promise<void> {
     const result = await db.delete(books).where(eq(books.id, id));
-    return result.rowCount > 0;
+    if (result.rowCount === 0) {
+      throw new Error(`Book with id ${id} not found`);
+    }
   }
 
   async searchBooks(query: string): Promise<Book[]> {
@@ -187,9 +192,11 @@ export class DatabaseStorage implements IStorage {
     return borrowing || undefined;
   }
 
-  async deleteBorrowing(id: number): Promise<boolean> {
+  async deleteBorrowing(id: number): Promise<void> {
     const result = await db.delete(borrowings).where(eq(borrowings.id, id));
-    return result.rowCount > 0;
+    if (result.rowCount === 0) {
+      throw new Error(`Borrowing with id ${id} not found`);
+    }
   }
 
   async getAllBorrowings(): Promise<BorrowingWithDetails[]> {
@@ -364,12 +371,13 @@ export class DatabaseStorage implements IStorage {
       shelfNumber: books.shelfNumber,
       availableCopies: books.availableCopies,
       totalCopies: books.totalCopies,
-      borrowCount: count(borrowings.id),
+      pageCount: books.pageCount,
+      borrowCount: sql<number>`count(${borrowings.bookId})`.as("borrow_count"),
     })
     .from(books)
     .leftJoin(borrowings, eq(books.id, borrowings.bookId))
     .groupBy(books.id)
-    .orderBy(desc(count(borrowings.id)))
+    .orderBy(desc(sql`borrow_count`))
     .limit(10);
   }
 
@@ -390,6 +398,36 @@ export class DatabaseStorage implements IStorage {
     .groupBy(users.id)
     .orderBy(desc(count(borrowings.id)))
     .limit(10);
+  }
+
+  async getTopReadersMonth(): Promise<Array<{ userId: number; name: string; email: string; totalPagesRead: number }>> {
+    const now = new Date();
+    const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+    const endOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+
+    const topReaders = await db
+      .select({
+        userId: users.id,
+        name: users.name,
+        email: users.email,
+        totalPagesRead: sql<number>`sum(${books.pageCount})`.as("total_pages_read"),
+      })
+      .from(borrowings)
+      .innerJoin(users, eq(borrowings.userId, users.id))
+      .innerJoin(books, eq(borrowings.bookId, books.id))
+      .where(
+        and(
+          eq(borrowings.status, "returned"),
+          isNotNull(borrowings.returnDate),
+          sql`${borrowings.returnDate} >= ${startOfMonth.toISOString().split('T')[0]}`,
+          sql`${borrowings.returnDate} <= ${endOfMonth.toISOString().split('T')[0]}`
+        )
+      )
+      .groupBy(users.id, users.name, users.email)
+      .orderBy(desc(sql`total_pages_read`))
+      .limit(3);
+
+    return topReaders;
   }
 }
 
