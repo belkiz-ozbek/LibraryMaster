@@ -13,7 +13,7 @@ import { useState } from "react";
 interface Column<T> {
   key: keyof T | string;
   title: string;
-  render?: (value: any, row: T) => React.ReactNode;
+  render?: (value: any, row: T, index: number) => React.ReactNode;
   sortable?: boolean;
 }
 
@@ -88,10 +88,10 @@ export function DataTable<T extends Record<string, any>>({
               {columns.map((column) => (
                 <TableHead
                   key={String(column.key)}
-                  className={column.sortable ? "cursor-pointer hover:bg-muted/50" : ""}
+                  className={`h-12 ${column.sortable ? "cursor-pointer hover:bg-muted/50" : ""}`}
                   onClick={column.sortable ? () => handleSort(String(column.key)) : undefined}
                 >
-                  <div className="flex items-center space-x-1">
+                  <div className="flex items-center space-x-1 font-medium">
                     <span>{column.title}</span>
                     {column.sortable && sortColumn === column.key && (
                       <span className="text-xs">
@@ -112,11 +112,11 @@ export function DataTable<T extends Record<string, any>>({
               </TableRow>
             ) : (
               paginatedData.map((row, index) => (
-                <TableRow key={index}>
+                <TableRow key={index} className="hover:bg-muted/50 data-[state=selected]:bg-muted">
                   {columns.map((column) => (
-                    <TableCell key={String(column.key)}>
+                    <TableCell key={String(column.key)} className="py-3">
                       {column.render 
-                        ? column.render(getValue(row, String(column.key)), row)
+                        ? column.render(getValue(row, String(column.key)), row, index)
                         : getValue(row, String(column.key))
                       }
                     </TableCell>
