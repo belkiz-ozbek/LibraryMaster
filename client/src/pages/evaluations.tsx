@@ -16,6 +16,28 @@ import { Star, Edit, Users, TrendingUp, Award } from "lucide-react";
 import { format } from "date-fns";
 import type { User } from "@shared/schema";
 import { useTranslation } from "react-i18next";
+import { motion } from "framer-motion";
+
+const containerVariants = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.1,
+    },
+  },
+};
+
+const itemVariants = {
+  hidden: { y: 20, opacity: 0 },
+  visible: {
+    y: 0,
+    opacity: 1,
+    transition: {
+      duration: 0.5,
+    },
+  },
+};
 
 export default function Evaluations() {
   const [searchQuery, setSearchQuery] = useState("");
@@ -205,17 +227,22 @@ export default function Evaluations() {
   }
 
   return (
-    <div className="space-y-6">
+    <motion.div
+      className="space-y-6"
+      initial="hidden"
+      animate="visible"
+      variants={containerVariants}
+    >
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <motion.div variants={itemVariants} className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-on-surface">{t("evaluations.title")}</h1>
           <p className="text-text-muted">{t("evaluations.subtitle")}</p>
         </div>
-      </div>
+      </motion.div>
 
       {/* Quick Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+      <motion.div variants={itemVariants} className="grid grid-cols-1 md:grid-cols-4 gap-6">
         <Card>
           <CardContent className="p-6">
             <div className="flex items-center">
@@ -271,40 +298,42 @@ export default function Evaluations() {
             </div>
           </CardContent>
         </Card>
-      </div>
+      </motion.div>
 
       {/* Members Table */}
-      <Card>
-        <CardHeader>
-          <div className="flex items-center justify-between">
-            <div>
-              <CardTitle>{t("evaluations.title")}</CardTitle>
-              <CardDescription>
-                {t("evaluations.manageRatings")}
-              </CardDescription>
+      <motion.div variants={itemVariants}>
+        <Card>
+          <CardHeader>
+            <div className="flex items-center justify-between">
+              <div>
+                <CardTitle>{t("evaluations.title")}</CardTitle>
+                <CardDescription>
+                  {t("evaluations.manageRatings")}
+                </CardDescription>
+              </div>
+              <div className="w-80">
+                <SearchInput
+                  placeholder={t("evaluations.searchPlaceholder")}
+                  onSearch={setSearchQuery}
+                />
+              </div>
             </div>
-            <div className="w-80">
-              <SearchInput
-                placeholder={t("evaluations.searchPlaceholder")}
-                onSearch={setSearchQuery}
-              />
-            </div>
-          </div>
-        </CardHeader>
-        <CardContent>
-          <DataTable
-            data={evaluableMembers}
-            columns={columns}
-            loading={isLoading}
-            emptyMessage={
-              searchQuery.length > 2 
-                ? t("evaluations.noMembersFound")
-                : t("evaluations.noMembersToEvaluate")
-            }
-            pageSize={10}
-          />
-        </CardContent>
-      </Card>
+          </CardHeader>
+          <CardContent>
+            <DataTable
+              data={evaluableMembers}
+              columns={columns}
+              loading={isLoading}
+              emptyMessage={
+                searchQuery.length > 2 
+                  ? t("evaluations.noMembersFound")
+                  : t("evaluations.noMembersToEvaluate")
+              }
+              pageSize={10}
+            />
+          </CardContent>
+        </Card>
+      </motion.div>
 
       {/* Evaluation Dialog */}
       <Dialog open={isEvaluationDialogOpen} onOpenChange={setIsEvaluationDialogOpen}>
@@ -359,6 +388,6 @@ export default function Evaluations() {
           </div>
         </DialogContent>
       </Dialog>
-    </div>
+    </motion.div>
   );
 }

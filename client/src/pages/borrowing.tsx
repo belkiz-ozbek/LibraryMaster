@@ -14,6 +14,28 @@ import { Plus, Edit, Trash2, HandHeart, Clock, AlertTriangle } from "lucide-reac
 import { format, differenceInDays } from "date-fns";
 import type { BorrowingWithDetails } from "@shared/schema";
 import { useTranslation } from "react-i18next";
+import { motion } from "framer-motion";
+
+const containerVariants = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.1,
+    },
+  },
+};
+
+const itemVariants = {
+  hidden: { y: 20, opacity: 0 },
+  visible: {
+    y: 0,
+    opacity: 1,
+    transition: {
+      duration: 0.5,
+    },
+  },
+};
 
 export default function Borrowing() {
   const [searchQuery, setSearchQuery] = useState("");
@@ -23,15 +45,15 @@ export default function Borrowing() {
   const { toast } = useToast();
   const { t } = useTranslation();
 
-  const { data: borrowings = [], isLoading } = useQuery({
+  const { data: borrowings = [], isLoading } = useQuery<BorrowingWithDetails[]>({
     queryKey: ["/api/borrowings"],
   });
 
-  const { data: activeBorrowings = [] } = useQuery({
+  const { data: activeBorrowings = [] } = useQuery<BorrowingWithDetails[]>({
     queryKey: ["/api/borrowings/active"],
   });
 
-  const { data: overdueBorrowings = [] } = useQuery({
+  const { data: overdueBorrowings = [] } = useQuery<BorrowingWithDetails[]>({
     queryKey: ["/api/borrowings/overdue"],
   });
 
@@ -57,7 +79,7 @@ export default function Borrowing() {
   });
 
   const filteredBorrowings = searchQuery.length > 2 
-    ? borrowings.filter(borrowing => 
+    ? borrowings.filter((borrowing: BorrowingWithDetails) => 
         borrowing.user.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
         borrowing.user.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
         borrowing.book.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -92,22 +114,22 @@ export default function Borrowing() {
 
   const getStatusBadge = (borrowing: BorrowingWithDetails) => {
     if (borrowing.status === "returned") {
-      return <Badge variant="secondary">Returned</Badge>;
+      return <Badge variant="secondary">{t("borrowing.statusReturned")}</Badge>;
     }
     
     const today = new Date();
     const dueDate = new Date(borrowing.dueDate);
     
     if (today > dueDate) {
-      return <Badge variant="destructive">Overdue</Badge>;
+      return <Badge variant="destructive">{t("borrowing.statusOverdue")}</Badge>;
     }
     
     const daysUntilDue = differenceInDays(dueDate, today);
     if (daysUntilDue <= 3) {
-      return <Badge variant="outline" className="border-accent text-accent">Due Soon</Badge>;
+      return <Badge variant="outline" className="border-accent text-accent">{t("borrowing.statusDueSoon")}</Badge>;
     }
     
-    return <Badge variant="default">Active</Badge>;
+    return <Badge variant="default">{t("borrowing.statusActive")}</Badge>;
   };
 
   const getDaysInfo = (borrowing: BorrowingWithDetails) => {
@@ -116,18 +138,20 @@ export default function Borrowing() {
     const daysDiff = differenceInDays(dueDate, today);
     
     if (borrowing.status === "returned") {
-      return format(new Date(borrowing.returnDate!), "MMM dd, yyyy");
+      return format(new Date(borrowing.returnDate!), "dd MMM yyyy");
     }
     
     if (daysDiff < 0) {
-      return `${Math.abs(daysDiff)} days overdue`;
+      const count = Math.abs(daysDiff);
+      return t(count === 1 ? "borrowing.dayOverdue" : "borrowing.daysOverdue", { count });
     }
     
     if (daysDiff === 0) {
-      return "Due today";
+      return t("borrowing.dueToday");
     }
     
-    return `${daysDiff} days remaining`;
+    const count = daysDiff;
+    return t(count === 1 ? "borrowing.dayRemaining" : "borrowing.daysRemaining", { count });
   };
 
   const columns = [
@@ -165,13 +189,13 @@ export default function Borrowing() {
       key: "borrowDate",
       title: t("borrowing.borrowDate"),
       sortable: true,
-      render: (value: string) => format(new Date(value), "MMM dd, yyyy"),
+      render: (value: string) => format(new Date(value), "dd MMM yyyy"),
     },
     {
       key: "dueDate",
       title: t("borrowing.dueDate"),
       sortable: true,
-      render: (value: string) => format(new Date(value), "MMM dd, yyyy"),
+      render: (value: string) => format(new Date(value), "dd MMM yyyy"),
     },
     {
       key: "status",
@@ -213,9 +237,14 @@ export default function Borrowing() {
   ];
 
   return (
-    <div className="space-y-6">
+    <motion.div
+      className="space-y-6"
+      initial="hidden"
+      animate="visible"
+      variants={containerVariants}
+    >
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <motion.div variants={itemVariants} className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-on-surface">{t("borrowing.management")}</h1>
           <p className="text-text-muted">{t("borrowing.managementDesc")}</p>
@@ -249,10 +278,10 @@ export default function Borrowing() {
             />
           </DialogContent>
         </Dialog>
-      </div>
+      </motion.div>
 
       {/* Quick Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <motion.div variants={itemVariants} className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <Card>
           <CardContent className="p-6">
             <div className="flex items-center">
@@ -295,40 +324,42 @@ export default function Borrowing() {
             </div>
           </CardContent>
         </Card>
-      </div>
+      </motion.div>
 
       {/* Borrowings Table */}
-      <Card>
-        <CardHeader>
-          <div className="flex items-center justify-between">
-            <div>
-              <CardTitle>{t("borrowing.allBorrowings")}</CardTitle>
-              <CardDescription>
-                {filteredBorrowings.length} {t("borrowing.borrowingRecords")}
-              </CardDescription>
+      <motion.div variants={itemVariants}>
+        <Card>
+          <CardHeader>
+            <div className="flex items-center justify-between">
+              <div>
+                <CardTitle>{t("borrowing.allBorrowings")}</CardTitle>
+                <CardDescription>
+                  {filteredBorrowings.length} {t("borrowing.borrowingRecords")}
+                </CardDescription>
+              </div>
+              <div className="w-80">
+                <SearchInput
+                  placeholder={t("borrowing.searchPlaceholder")}
+                  onSearch={setSearchQuery}
+                />
+              </div>
             </div>
-            <div className="w-80">
-              <SearchInput
-                placeholder={t("borrowing.searchPlaceholder")}
-                onSearch={setSearchQuery}
-              />
-            </div>
-          </div>
-        </CardHeader>
-        <CardContent>
-          <DataTable
-            data={filteredBorrowings}
-            columns={columns}
-            loading={isLoading}
-            emptyMessage={
-              searchQuery.length > 2 
-                ? t("borrowing.noBorrowingsFound")
-                : t("borrowing.noBorrowingsYet")
-            }
-            pageSize={10}
-          />
-        </CardContent>
-      </Card>
-    </div>
+          </CardHeader>
+          <CardContent>
+            <DataTable
+              data={filteredBorrowings}
+              columns={columns}
+              loading={isLoading}
+              emptyMessage={
+                searchQuery.length > 2 
+                  ? t("borrowing.noBorrowingsFound")
+                  : t("borrowing.noBorrowingsYet")
+              }
+              pageSize={10}
+            />
+          </CardContent>
+        </Card>
+      </motion.div>
+    </motion.div>
   );
 }

@@ -16,6 +16,28 @@ import { Undo2, Check, Clock, AlertTriangle, Calendar } from "lucide-react";
 import { format, differenceInDays } from "date-fns";
 import type { BorrowingWithDetails } from "@shared/schema";
 import { useTranslation } from "react-i18next";
+import { motion } from "framer-motion";
+
+const containerVariants = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.1,
+    },
+  },
+};
+
+const itemVariants = {
+  hidden: { y: 20, opacity: 0 },
+  visible: {
+    y: 0,
+    opacity: 1,
+    transition: {
+      duration: 0.5,
+    },
+  },
+};
 
 export default function Returns() {
   const [searchQuery, setSearchQuery] = useState("");
@@ -277,14 +299,19 @@ export default function Returns() {
   ];
 
   return (
-    <div className="space-y-6">
+    <motion.div
+      className="space-y-6"
+      initial="hidden"
+      animate="visible"
+      variants={containerVariants}
+    >
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <motion.div variants={itemVariants} className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-on-surface">{t("returns.management")}</h1>
           <p className="text-text-muted">{t("returns.managementDesc")}</p>
         </div>
-      </div>
+      </motion.div>
 
       {/* Quick Stats */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -330,104 +357,110 @@ export default function Returns() {
       </div>
 
       {/* Active Borrowings */}
-      <Card>
-        <CardHeader>
-          <div className="flex items-center justify-between">
-            <div>
-              <CardTitle>{t("returns.activeBorrowingsTitle")}</CardTitle>
-              <CardDescription>
-                {t("returns.activeBorrowingsDesc")}
-              </CardDescription>
+      <motion.div variants={itemVariants}>
+        <Card>
+          <CardHeader>
+            <div className="flex items-center justify-between">
+              <div>
+                <CardTitle>{t("returns.activeBorrowingsTitle")}</CardTitle>
+                <CardDescription>
+                  {t("returns.activeBorrowingsDesc")}
+                </CardDescription>
+              </div>
+              <div className="w-80">
+                <SearchInput
+                  placeholder={t("returns.searchPlaceholder")}
+                  onSearch={setSearchQuery}
+                />
+              </div>
             </div>
-            <div className="w-80">
-              <SearchInput
-                placeholder={t("returns.searchPlaceholder")}
-                onSearch={setSearchQuery}
-              />
-            </div>
-          </div>
-        </CardHeader>
-        <CardContent>
-          <DataTable
-            data={filteredBorrowings}
-            columns={activeColumns}
-            loading={isLoading}
-            emptyMessage={
-              searchQuery.length > 2 
-                ? t("returns.noActiveBorrowingsFound")
-                : t("returns.noActiveBorrowingsYet")
-            }
-            pageSize={10}
-          />
-        </CardContent>
-      </Card>
+          </CardHeader>
+          <CardContent>
+            <DataTable
+              data={filteredBorrowings}
+              columns={activeColumns}
+              loading={isLoading}
+              emptyMessage={
+                searchQuery.length > 2 
+                  ? t("returns.noActiveBorrowingsFound")
+                  : t("returns.noActiveBorrowingsYet")
+              }
+              pageSize={10}
+            />
+          </CardContent>
+        </Card>
+      </motion.div>
 
       {/* Recent Returns */}
-      <Card>
-        <CardHeader>
-          <CardTitle>{t("returns.recentReturnsTitle")}</CardTitle>
-          <CardDescription>{t("returns.recentReturnsDesc")}</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <DataTable
-            data={recentReturns}
-            columns={recentReturnsColumns}
-            emptyMessage={t("returns.noRecentReturns")}
-            pageSize={5}
-          />
-        </CardContent>
-      </Card>
+      <motion.div variants={itemVariants}>
+        <Card>
+          <CardHeader>
+            <CardTitle>{t("returns.recentReturnsTitle")}</CardTitle>
+            <CardDescription>{t("returns.recentReturnsDesc")}</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <DataTable
+              data={recentReturns}
+              columns={recentReturnsColumns}
+              emptyMessage={t("returns.noRecentReturns")}
+              pageSize={5}
+            />
+          </CardContent>
+        </Card>
+      </motion.div>
 
       {/* Return Dialog */}
-      <Dialog open={isReturnDialogOpen} onOpenChange={setIsReturnDialogOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>{t("returns.processReturnTitle")}</DialogTitle>
-            <DialogDescription>
-              {selectedBorrowing && (
-                <>
-                  {t("returns.returningBook", { book: selectedBorrowing.book.title, user: selectedBorrowing.user.name })}
-                </>
-              )}
-            </DialogDescription>
-          </DialogHeader>
-          <div className="space-y-4">
-            <div>
-              <Label htmlFor="returnDate">{t("returns.returnDate")}</Label>
-              <Input
-                id="returnDate"
-                type="date"
-                value={returnDate}
-                onChange={(e) => setReturnDate(e.target.value)}
-              />
+      {isReturnDialogOpen && (
+        <Dialog open={isReturnDialogOpen} onOpenChange={setIsReturnDialogOpen}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>{t("returns.processReturnTitle")}</DialogTitle>
+              <DialogDescription>
+                {selectedBorrowing && (
+                  <>
+                    {t("returns.returningBook", { book: selectedBorrowing.book.title, user: selectedBorrowing.user.name })}
+                  </>
+                )}
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div>
+                <Label htmlFor="returnDate">{t("returns.returnDate")}</Label>
+                <Input
+                  id="returnDate"
+                  type="date"
+                  value={returnDate}
+                  onChange={(e) => setReturnDate(e.target.value)}
+                />
+              </div>
+              <div>
+                <Label htmlFor="returnNotes">{t("returns.notes")}</Label>
+                <Textarea
+                  id="returnNotes"
+                  value={returnNotes}
+                  onChange={(e) => setReturnNotes(e.target.value)}
+                  placeholder={t("returns.notesPlaceholder")}
+                  rows={3}
+                />
+              </div>
+              <div className="flex justify-end space-x-3">
+                <Button 
+                  variant="outline" 
+                  onClick={() => setIsReturnDialogOpen(false)}
+                >
+                  {t("common.cancel")}
+                </Button>
+                <Button 
+                  onClick={confirmReturn}
+                  disabled={returnBookMutation.isPending}
+                >
+                  {returnBookMutation.isPending ? t("returns.processing") : t("returns.confirmReturn")}
+                </Button>
+              </div>
             </div>
-            <div>
-              <Label htmlFor="returnNotes">{t("returns.notes")}</Label>
-              <Textarea
-                id="returnNotes"
-                value={returnNotes}
-                onChange={(e) => setReturnNotes(e.target.value)}
-                placeholder={t("returns.notesPlaceholder")}
-                rows={3}
-              />
-            </div>
-            <div className="flex justify-end space-x-3">
-              <Button 
-                variant="outline" 
-                onClick={() => setIsReturnDialogOpen(false)}
-              >
-                {t("common.cancel")}
-              </Button>
-              <Button 
-                onClick={confirmReturn}
-                disabled={returnBookMutation.isPending}
-              >
-                {returnBookMutation.isPending ? t("returns.processing") : t("returns.confirmReturn")}
-              </Button>
-            </div>
-          </div>
-        </DialogContent>
-      </Dialog>
-    </div>
+          </DialogContent>
+        </Dialog>
+      )}
+    </motion.div>
   );
 }

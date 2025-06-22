@@ -14,6 +14,28 @@ import { Plus, Edit, Trash2, Users, Star } from "lucide-react";
 import { format } from "date-fns";
 import type { User } from "@shared/schema";
 import { useTranslation } from "react-i18next";
+import { motion } from "framer-motion";
+
+const containerVariants = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.1,
+    },
+  },
+};
+
+const itemVariants = {
+  hidden: { y: 20, opacity: 0 },
+  visible: {
+    y: 0,
+    opacity: 1,
+    transition: {
+      duration: 0.5,
+    },
+  },
+};
 
 export default function Members() {
   const [searchQuery, setSearchQuery] = useState("");
@@ -23,11 +45,11 @@ export default function Members() {
   const { toast } = useToast();
   const { t } = useTranslation();
 
-  const { data: members = [], isLoading } = useQuery({
+  const { data: members = [], isLoading } = useQuery<User[]>({
     queryKey: ["/api/users"],
   });
 
-  const { data: searchResults = [] } = useQuery({
+  const { data: searchResults = [] } = useQuery<User[]>({
     queryKey: ["/api/users/search", searchQuery],
     enabled: searchQuery.length > 2,
   });
@@ -171,9 +193,14 @@ export default function Members() {
   const adminMembers = members.filter(member => member.isAdmin);
 
   return (
-    <div className="space-y-6">
+    <motion.div
+      className="space-y-6"
+      initial="hidden"
+      animate="visible"
+      variants={containerVariants}
+    >
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <motion.div variants={itemVariants} className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-on-surface">{t("members.management")}</h1>
           <p className="text-text-muted">{t("members.managementDesc")}</p>
@@ -209,43 +236,45 @@ export default function Members() {
             </DialogContent>
           </Dialog>
         )}
-      </div>
+      </motion.div>
 
       {/* Search and Stats */}
-      <Card>
-        <CardHeader>
-          <div className="flex items-center justify-between">
-            <div>
-              <CardTitle>{t("members.directory")}</CardTitle>
-              <CardDescription>
-                {displayMembers.length} {t("members.inSystem")}
-              </CardDescription>
+      <motion.div variants={itemVariants}>
+        <Card>
+          <CardHeader>
+            <div className="flex items-center justify-between">
+              <div>
+                <CardTitle>{t("members.directory")}</CardTitle>
+                <CardDescription>
+                  {displayMembers.length} {t("members.inSystem")}
+                </CardDescription>
+              </div>
+              <div className="w-80">
+                <SearchInput
+                  placeholder={t("members.searchPlaceholder")}
+                  onSearch={setSearchQuery}
+                />
+              </div>
             </div>
-            <div className="w-80">
-              <SearchInput
-                placeholder={t("members.searchPlaceholder")}
-                onSearch={setSearchQuery}
-              />
-            </div>
-          </div>
-        </CardHeader>
-        <CardContent>
-          <DataTable
-            data={displayMembers}
-            columns={columns}
-            loading={isLoading}
-            emptyMessage={
-              searchQuery.length > 2 
-                ? t("members.noMembersFound")
-                : t("members.noMembersYet")
-            }
-            pageSize={10}
-          />
-        </CardContent>
-      </Card>
+          </CardHeader>
+          <CardContent>
+            <DataTable
+              data={displayMembers}
+              columns={columns}
+              loading={isLoading}
+              emptyMessage={
+                searchQuery.length > 2 
+                  ? t("members.noMembersFound")
+                  : t("members.noMembersYet")
+              }
+              pageSize={10}
+            />
+          </CardContent>
+        </Card>
+      </motion.div>
 
       {/* Quick Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <motion.div variants={itemVariants} className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <Card>
           <CardContent className="p-6">
             <div className="flex items-center">
@@ -287,7 +316,7 @@ export default function Members() {
             </div>
           </CardContent>
         </Card>
-      </div>
-    </div>
+      </motion.div>
+    </motion.div>
   );
 }

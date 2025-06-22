@@ -13,6 +13,28 @@ import { useToast } from "@/hooks/use-toast";
 import { Plus, Edit, Trash2, Book as BookIcon } from "lucide-react";
 import type { Book } from "@shared/schema";
 import { useTranslation } from "react-i18next";
+import { motion } from "framer-motion";
+
+const containerVariants = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.1,
+    },
+  },
+};
+
+const itemVariants = {
+  hidden: { y: 20, opacity: 0 },
+  visible: {
+    y: 0,
+    opacity: 1,
+    transition: {
+      duration: 0.5,
+    },
+  },
+};
 
 export default function Books() {
   const [searchQuery, setSearchQuery] = useState("");
@@ -22,11 +44,11 @@ export default function Books() {
   const { toast } = useToast();
   const { t } = useTranslation();
 
-  const { data: books = [], isLoading } = useQuery<{ id: number; title: string; author: string; isbn: string; genre: string; publishYear: number; shelfNumber: string; availableCopies: number; totalCopies: number; }[]>({
+  const { data: books = [], isLoading } = useQuery<Book[]>({
     queryKey: ["/api/books"],
   });
 
-  const { data: searchResults = [] } = useQuery<{ id: number; title: string; author: string; isbn: string; genre: string; publishYear: number; shelfNumber: string; availableCopies: number; totalCopies: number; }[]>({
+  const { data: searchResults = [] } = useQuery<Book[]>({
     queryKey: [`/api/books/search?q=${encodeURIComponent(searchQuery)}`],
     enabled: searchQuery.length > 2,
   });
@@ -109,6 +131,14 @@ export default function Books() {
       title: t("books.shelfNumber"),
     },
     {
+      key: "pageCount",
+      title: t("books.pageCount"),
+      sortable: true,
+      render: (value: number) => (
+        <span>{value || "-"}</span>
+      ),
+    },
+    {
       key: "availableCopies",
       title: t("books.availableCopies"),
       render: (value: number, row: Book) => (
@@ -150,9 +180,14 @@ export default function Books() {
   ];
 
   return (
-    <div className="space-y-6">
+    <motion.div
+      className="space-y-6"
+      initial="hidden"
+      animate="visible"
+      variants={containerVariants}
+    >
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <motion.div variants={itemVariants} className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-on-surface">{t("books.management")}</h1>
           <p className="text-text-muted">{t("books.managementDesc")}</p>
@@ -188,43 +223,45 @@ export default function Books() {
             </DialogContent>
           </Dialog>
         )}
-      </div>
+      </motion.div>
 
       {/* Search and Stats */}
-      <Card>
-        <CardHeader>
-          <div className="flex items-center justify-between">
-            <div>
-              <CardTitle>{t("books.catalog")}</CardTitle>
-              <CardDescription>
-                {displayBooks.length} {t("books.inCollection")}
-              </CardDescription>
+      <motion.div variants={itemVariants}>
+        <Card>
+          <CardHeader>
+            <div className="flex items-center justify-between">
+              <div>
+                <CardTitle>{t("books.catalog")}</CardTitle>
+                <CardDescription>
+                  {displayBooks.length} {t("books.inCollection")}
+                </CardDescription>
+              </div>
+              <div className="w-80">
+                <SearchInput
+                  placeholder={t("books.searchPlaceholder")}
+                  onSearch={setSearchQuery}
+                />
+              </div>
             </div>
-            <div className="w-80">
-              <SearchInput
-                placeholder={t("books.searchPlaceholder")}
-                onSearch={setSearchQuery}
-              />
-            </div>
-          </div>
-        </CardHeader>
-        <CardContent>
-          <DataTable
-            data={displayBooks}
-            columns={columns}
-            loading={isLoading}
-            emptyMessage={
-              searchQuery.length > 2 
-                ? t("books.noBooksFound")
-                : t("books.noBooksYet")
-            }
-            pageSize={10}
-          />
-        </CardContent>
-      </Card>
+          </CardHeader>
+          <CardContent>
+            <DataTable
+              data={displayBooks}
+              columns={columns}
+              loading={isLoading}
+              emptyMessage={
+                searchQuery.length > 2 
+                  ? t("books.noBooksFound")
+                  : t("books.noBooksYet")
+              }
+              pageSize={10}
+            />
+          </CardContent>
+        </Card>
+      </motion.div>
 
       {/* Quick Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <motion.div variants={itemVariants} className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <Card>
           <CardContent className="p-6">
             <div className="flex items-center">
@@ -266,7 +303,7 @@ export default function Books() {
             </div>
           </CardContent>
         </Card>
-      </div>
-    </div>
+      </motion.div>
+    </motion.div>
   );
 }

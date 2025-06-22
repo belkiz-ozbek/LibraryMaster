@@ -7,56 +7,105 @@ import { useAuth } from "@/lib/auth";
 import { 
   BarChart3, 
   Users, 
-  Book, 
+  Book as BookIcon, 
   TrendingUp, 
   Star, 
   Clock,
   Activity,
-  Award
+  Award,
+  Crown
 } from "lucide-react";
 import { format } from "date-fns";
 import { useTranslation } from "react-i18next";
+import { motion } from "framer-motion";
+import type { User, Book, Borrowing } from "@shared/schema";
+
+interface Stats {
+  totalBooks: number;
+  totalUsers: number;
+  activeBorrowings: number;
+}
+
+interface PopularBook extends Book {
+  borrowCount: number;
+}
+
+interface ActiveUser extends User {
+  borrowCount: number;
+}
+
+interface TopReader {
+  userId: number;
+  name: string;
+  email: string;
+  totalPagesRead: number;
+}
+
+const containerVariants = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.1,
+    },
+  },
+};
+
+const itemVariants = {
+  hidden: { y: 20, opacity: 0 },
+  visible: {
+    y: 0,
+    opacity: 1,
+    transition: {
+      duration: 0.5,
+    },
+  },
+};
 
 export default function Statistics() {
   const { user } = useAuth();
   const { t } = useTranslation();
 
-  const { data: stats } = useQuery({
+  const { data: stats } = useQuery<Stats>({
     queryKey: ["/api/stats"],
   });
 
-  const { data: popularBooks = [] } = useQuery<any[]>({
+  const { data: popularBooks = [] } = useQuery<PopularBook[]>({
     queryKey: ["/api/stats/popular-books"],
   });
 
-  const { data: activeUsers = [] } = useQuery<any[]>({
+  const { data: activeUsers = [] } = useQuery<ActiveUser[]>({
     queryKey: ["/api/stats/active-users"],
   });
 
-  const { data: allUsers = [] } = useQuery<any[]>({
+  const { data: topReaders = [] } = useQuery<TopReader[]>({
+    queryKey: ["/api/stats/top-readers-month"],
+  });
+
+  const { data: allUsers = [] } = useQuery<User[]>({
     queryKey: ["/api/users"],
   });
 
-  const { data: allBooks = [] } = useQuery<any[]>({
+  const { data: allBooks = [] } = useQuery<Book[]>({
     queryKey: ["/api/books"],
   });
 
-  const { data: allBorrowings = [] } = useQuery<any[]>({
+  const { data: allBorrowings = [] } = useQuery<Borrowing[]>({
     queryKey: ["/api/borrowings"],
   });
 
   // Calculate additional statistics
-  const totalCopies = allBooks.reduce((sum: number, book: any) => sum + book.totalCopies, 0);
-  const availableCopies = allBooks.reduce((sum: number, book: any) => sum + book.availableCopies, 0);
+  const totalCopies = allBooks.reduce((sum, book) => sum + book.totalCopies, 0);
+  const availableCopies = allBooks.reduce((sum, book) => sum + book.availableCopies, 0);
   const utilizationRate = totalCopies > 0 ? ((totalCopies - availableCopies) / totalCopies * 100) : 0;
   
-  const ratedMembers = allUsers.filter((user: any) => user.adminRating && !user.isAdmin);
+  const ratedMembers = allUsers.filter((user) => user.adminRating && !user.isAdmin);
   const averageRating = ratedMembers.length > 0 
-    ? ratedMembers.reduce((sum: number, user: any) => sum + (user.adminRating || 0), 0) / ratedMembers.length 
+    ? ratedMembers.reduce((sum, user) => sum + (user.adminRating || 0), 0) / ratedMembers.length 
     : 0;
 
-  const returnedBorrowings = allBorrowings.filter((b: any) => b.status === "returned");
-  const onTimeReturns = returnedBorrowings.filter((b: any) => 
+  const returnedBorrowings = allBorrowings.filter((b) => b.status === "returned");
+  const onTimeReturns = returnedBorrowings.filter((b) => 
     new Date(b.returnDate!) <= new Date(b.dueDate)
   ).length;
   const onTimeRate = returnedBorrowings.length > 0 
@@ -67,7 +116,7 @@ export default function Statistics() {
     {
       key: "rank",
       title: t("statistics.rank"),
-      render: (_: any, row: any, index: number) => (
+      render: (_: any, __: any, index: number) => (
         <div className="w-8 h-8 bg-primary/10 rounded-full flex items-center justify-center">
           <span className="text-sm font-medium text-primary">{index + 1}</span>
         </div>
@@ -77,7 +126,7 @@ export default function Statistics() {
       key: "title",
       title: t("borrowing.book"),
       sortable: true,
-      render: (value: string, row: any) => (
+      render: (value: string, row: PopularBook) => (
         <div>
           <p className="font-medium text-on-surface">{value}</p>
           <p className="text-sm text-text-muted">{row.author}</p>
@@ -104,7 +153,7 @@ export default function Statistics() {
     {
       key: "popularity",
       title: t("statistics.popularity"),
-      render: (value: any, row: any) => {
+      render: (_: any, row: PopularBook) => {
         const maxBorrows = popularBooks[0]?.borrowCount || 1;
         const percentage = (row.borrowCount / maxBorrows) * 100;
         return (
@@ -126,7 +175,7 @@ export default function Statistics() {
     {
       key: "rank",
       title: t("statistics.rank"),
-      render: (_: any, row: any, index: number) => (
+      render: (_: any, __: any, index: number) => (
         <div className="w-8 h-8 bg-secondary/10 rounded-full flex items-center justify-center">
           <span className="text-sm font-medium text-secondary">{index + 1}</span>
         </div>
@@ -136,7 +185,7 @@ export default function Statistics() {
       key: "name",
       title: t("members.name"),
       sortable: true,
-      render: (value: string, row: any) => (
+      render: (value: string, row: ActiveUser) => (
         <div className="flex items-center">
           <div className="w-8 h-8 bg-primary/10 rounded-full flex items-center justify-center mr-3">
             <span className="text-xs font-medium text-primary">
@@ -205,47 +254,96 @@ export default function Statistics() {
   }
 
   return (
-    <div className="space-y-6">
+    <motion.div
+      className="space-y-6"
+      initial="hidden"
+      animate="visible"
+      variants={containerVariants}
+    >
       {/* Header */}
-      <div>
+      <motion.div variants={itemVariants}>
         <h1 className="text-2xl font-bold text-on-surface">{t("statistics.titleAndReports")}</h1>
         <p className="text-text-muted">{t("statistics.analyticsDesc")}</p>
-      </div>
+      </motion.div>
+
+      {/* Top Readers of the Month */}
+      <motion.div variants={itemVariants}>
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center">
+              <Crown className="mr-2 text-yellow-500" />
+              {t("statistics.topReadersOfMonth")}
+            </CardTitle>
+            <CardDescription>{t("statistics.topReadersOfMonthDesc")}</CardDescription>
+          </CardHeader>
+          <CardContent>
+            {topReaders.length > 0 ? (
+              <div className="space-y-4">
+                {topReaders.map((reader, index) => (
+                  <div key={reader.userId} className="flex items-center">
+                    <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center mr-4 text-lg font-bold text-yellow-600">
+                      {index + 1}
+                    </div>
+                    <div className="flex-1">
+                      <p className="font-medium text-on-surface">{reader.name}</p>
+                      <p className="text-sm text-text-muted">{reader.email}</p>
+                    </div>
+                    <div className="text-right">
+                      <p className="font-bold text-on-surface">{reader.totalPagesRead.toLocaleString()}</p>
+                      <p className="text-sm text-text-muted">{t("statistics.pagesRead")}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <p className="text-text-muted text-center py-4">{t("statistics.noMonthlyReaders")}</p>
+            )}
+          </CardContent>
+        </Card>
+      </motion.div>
 
       {/* Main Stats */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <StatsCard
-          title={t("statistics.totalBooks")}
-          value={stats?.totalBooks || 0}
-          change={t("statistics.totalCopies", { count: totalCopies })}
-          changeType="neutral"
-          icon={<Book size={20} />}
-          iconColor="bg-primary/10 text-primary"
-        />
-        <StatsCard
-          title={t("statistics.activeMembers")}
-          value={stats?.totalUsers || 0}
-          change={t("statistics.avgRating", { rating: averageRating.toFixed(1) })}
-          changeType="positive"
-          icon={<Users size={20} />}
-          iconColor="bg-secondary/10 text-secondary"
-        />
-        <StatsCard
-          title={t("statistics.activeBorrowings")}
-          value={stats?.activeBorrowings || 0}
-          change={t("statistics.utilizationRate", { rate: utilizationRate.toFixed(0) })}
-          changeType="neutral"
-          icon={<Activity size={20} />}
-          iconColor="bg-accent/10 text-accent"
-        />
-        <StatsCard
-          title={t("statistics.onTimeReturns")}
-          value={`${onTimeRate.toFixed(0)}%`}
-          change={t("statistics.returnsCount", { onTime: onTimeReturns, total: returnedBorrowings.length })}
-          changeType={onTimeRate >= 80 ? "positive" : onTimeRate >= 60 ? "neutral" : "negative"}
-          icon={<Clock size={20} />}
-          iconColor="bg-primary/10 text-primary"
-        />
+        <motion.div variants={itemVariants}>
+          <StatsCard
+            title={t("statistics.totalBooks")}
+            value={stats?.totalBooks || 0}
+            change={t("statistics.totalCopies", { count: totalCopies })}
+            changeType="neutral"
+            icon={<BookIcon size={20} />}
+            iconColor="bg-primary/10 text-primary"
+          />
+        </motion.div>
+        <motion.div variants={itemVariants}>
+          <StatsCard
+            title={t("statistics.activeMembers")}
+            value={stats?.totalUsers || 0}
+            change={t("statistics.avgRating", { rating: averageRating.toFixed(1) })}
+            changeType="positive"
+            icon={<Users size={20} />}
+            iconColor="bg-secondary/10 text-secondary"
+          />
+        </motion.div>
+        <motion.div variants={itemVariants}>
+          <StatsCard
+            title={t("statistics.activeBorrowings")}
+            value={stats?.activeBorrowings || 0}
+            change={t("statistics.utilizationRate", { rate: utilizationRate.toFixed(0) })}
+            changeType="neutral"
+            icon={<Activity size={20} />}
+            iconColor="bg-accent/10 text-accent"
+          />
+        </motion.div>
+        <motion.div variants={itemVariants}>
+          <StatsCard
+            title={t("statistics.onTimeReturns")}
+            value={`${onTimeRate.toFixed(0)}%`}
+            change={t("statistics.returnsCount", { onTime: onTimeReturns, total: returnedBorrowings.length })}
+            changeType={onTimeRate >= 80 ? "positive" : onTimeRate >= 60 ? "neutral" : "negative"}
+            icon={<Clock size={20} />}
+            iconColor="bg-primary/10 text-primary"
+          />
+        </motion.div>
       </div>
 
       {/* Additional Metrics */}
@@ -291,41 +389,44 @@ export default function Statistics() {
         </Card>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 gap-6">
         {/* Most Borrowed Books */}
-        <Card>
-          <CardHeader>
-            <CardTitle>{t("statistics.mostBorrowedBooks")}</CardTitle>
-            <CardDescription>
-              {t("statistics.topPopularBooks", { count: Math.min(10, popularBooks.length) })}
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <DataTable
-              data={popularBooks.slice(0, 10)}
-              columns={popularBooksColumns}
-              pageSize={5}
-              emptyMessage={t("statistics.noBorrowingData")}
-            />
-          </CardContent>
-        </Card>
-        {/* Most Active Users */}
-        <Card>
-          <CardHeader>
-            <CardTitle>{t("statistics.mostActiveMembers")}</CardTitle>
-            <CardDescription>
-              {t("statistics.topActiveMembers", { count: Math.min(10, activeUsers.length) })}
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <DataTable
-              data={activeUsers.filter(u => !u.isAdmin).slice(0, 10)}
-              columns={activeUsersColumns}
-              pageSize={5}
-              emptyMessage={t("statistics.noMemberActivity")}
-            />
-          </CardContent>
-        </Card>
+        <motion.div variants={itemVariants}>
+          <Card>
+            <CardHeader>
+              <CardTitle>{t("statistics.mostBorrowedBooks")}</CardTitle>
+              <CardDescription>
+                {t("statistics.topPopularBooks", { count: 5 })}
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <DataTable
+                data={popularBooks.slice(0, 5)}
+                columns={popularBooksColumns}
+                emptyMessage={t("statistics.noBorrowingData")}
+              />
+            </CardContent>
+          </Card>
+        </motion.div>
+
+        {/* Most Active Members */}
+        <motion.div variants={itemVariants}>
+          <Card>
+            <CardHeader>
+              <CardTitle>{t("statistics.mostActiveMembers")}</CardTitle>
+              <CardDescription>
+                {t("statistics.topActiveMembers", { count: 5 })}
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <DataTable
+                data={activeUsers.slice(0, 5)}
+                columns={activeUsersColumns}
+                emptyMessage={t("statistics.noMemberActivity")}
+              />
+            </CardContent>
+          </Card>
+        </motion.div>
       </div>
 
       {/* Collection Overview */}
@@ -375,6 +476,6 @@ export default function Statistics() {
           </div>
         </CardContent>
       </Card>
-    </div>
+    </motion.div>
   );
 }
