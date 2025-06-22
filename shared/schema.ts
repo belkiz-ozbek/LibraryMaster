@@ -24,6 +24,7 @@ export const books = pgTable("books", {
   shelfNumber: text("shelf_number").notNull(),
   availableCopies: integer("available_copies").default(1).notNull(),
   totalCopies: integer("total_copies").default(1).notNull(),
+  pageCount: integer("page_count").notNull().default(0),
 });
 
 export const borrowings = pgTable("borrowings", {
