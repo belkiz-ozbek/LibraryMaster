@@ -12,6 +12,7 @@ import { z } from "zod";
 const bookFormSchema = insertBookSchema.extend({
   availableCopies: z.number().min(0, "Available copies must be non-negative"),
   totalCopies: z.number().min(1, "Total copies must be at least 1"),
+  pageCount: z.number().min(1, "Page count must be at least 1"),
 });
 
 type BookFormData = z.infer<typeof bookFormSchema>;
@@ -36,6 +37,7 @@ export function BookForm({ book, onSuccess, onCancel }: BookFormProps) {
       shelfNumber: book?.shelfNumber || "",
       availableCopies: book?.availableCopies || 1,
       totalCopies: book?.totalCopies || 1,
+      pageCount: book?.pageCount || 0,
     },
   });
 
@@ -61,16 +63,16 @@ export function BookForm({ book, onSuccess, onCancel }: BookFormProps) {
           <Input
             id="title"
             {...form.register("title")}
-            error={form.formState.errors.title?.message}
           />
+          {form.formState.errors.title && <p className="text-sm text-destructive mt-1">{form.formState.errors.title.message}</p>}
         </div>
         <div>
           <Label htmlFor="author">Author *</Label>
           <Input
             id="author"
             {...form.register("author")}
-            error={form.formState.errors.author?.message}
           />
+          {form.formState.errors.author && <p className="text-sm text-destructive mt-1">{form.formState.errors.author.message}</p>}
         </div>
       </div>
 
@@ -80,18 +82,18 @@ export function BookForm({ book, onSuccess, onCancel }: BookFormProps) {
           <Input
             id="isbn"
             {...form.register("isbn")}
-            error={form.formState.errors.isbn?.message}
             placeholder="978-0-123456-78-9"
           />
+          {form.formState.errors.isbn && <p className="text-sm text-destructive mt-1">{form.formState.errors.isbn.message}</p>}
         </div>
         <div>
           <Label htmlFor="genre">Genre *</Label>
           <Input
             id="genre"
             {...form.register("genre")}
-            error={form.formState.errors.genre?.message}
             placeholder="Fiction, Science, History, etc."
           />
+          {form.formState.errors.genre && <p className="text-sm text-destructive mt-1">{form.formState.errors.genre.message}</p>}
         </div>
       </div>
 
@@ -102,8 +104,18 @@ export function BookForm({ book, onSuccess, onCancel }: BookFormProps) {
             id="publishYear"
             type="number"
             {...form.register("publishYear", { valueAsNumber: true })}
-            error={form.formState.errors.publishYear?.message}
           />
+          {form.formState.errors.publishYear && <p className="text-sm text-destructive mt-1">{form.formState.errors.publishYear.message}</p>}
+        </div>
+        <div>
+          <Label htmlFor="pageCount">Page Count *</Label>
+          <Input
+            id="pageCount"
+            type="number"
+            min="1"
+            {...form.register("pageCount", { valueAsNumber: true })}
+          />
+          {form.formState.errors.pageCount && <p className="text-sm text-destructive mt-1">{form.formState.errors.pageCount.message}</p>}
         </div>
         <div>
           <Label htmlFor="totalCopies">Total Copies *</Label>
@@ -112,19 +124,20 @@ export function BookForm({ book, onSuccess, onCancel }: BookFormProps) {
             type="number"
             min="1"
             {...form.register("totalCopies", { valueAsNumber: true })}
-            error={form.formState.errors.totalCopies?.message}
           />
+          {form.formState.errors.totalCopies && <p className="text-sm text-destructive mt-1">{form.formState.errors.totalCopies.message}</p>}
         </div>
-        <div>
-          <Label htmlFor="availableCopies">Available Copies *</Label>
-          <Input
-            id="availableCopies"
-            type="number"
-            min="0"
-            {...form.register("availableCopies", { valueAsNumber: true })}
-            error={form.formState.errors.availableCopies?.message}
-          />
-        </div>
+      </div>
+
+      <div>
+        <Label htmlFor="availableCopies">Available Copies *</Label>
+        <Input
+          id="availableCopies"
+          type="number"
+          min="0"
+          {...form.register("availableCopies", { valueAsNumber: true })}
+        />
+        {form.formState.errors.availableCopies && <p className="text-sm text-destructive mt-1">{form.formState.errors.availableCopies.message}</p>}
       </div>
 
       <div>
@@ -132,9 +145,9 @@ export function BookForm({ book, onSuccess, onCancel }: BookFormProps) {
         <Input
           id="shelfNumber"
           {...form.register("shelfNumber")}
-          error={form.formState.errors.shelfNumber?.message}
           placeholder="A1, B2, C3, etc."
         />
+        {form.formState.errors.shelfNumber && <p className="text-sm text-destructive mt-1">{form.formState.errors.shelfNumber.message}</p>}
       </div>
 
       <div className="flex justify-end space-x-3 pt-4">
