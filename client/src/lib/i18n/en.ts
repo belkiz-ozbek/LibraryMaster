@@ -21,6 +21,7 @@ export const en = {
     language: "Language",
     turkish: "Turkish",
     english: "English",
+    saving: "Saving..."
   },
   auth: {
     login: "Login",
@@ -72,7 +73,8 @@ export const en = {
     noBooksFound: "No books found matching your search.",
     noBooksYet: "No books in the catalog yet.",
     availableCopiesTotal: "Available Copies",
-    uniqueGenres: "Unique Genres"
+    uniqueGenres: "Unique Genres",
+    pageCount: "Page Count"
   },
   members: {
     title: "Members",
@@ -103,6 +105,29 @@ export const en = {
     addNewMember: "Add New Member",
     updateMemberInfo: "Update member information below.",
     enterNewMember: "Enter the details for the new member.",
+    noNotes: "No notes",
+    form: {
+      fullName: "Full Name",
+      email: "Email Address",
+      password: "Password",
+      passwordHint: "leave blank to keep current",
+      membershipDate: "Membership Date",
+      adminPrivileges: "Administrator privileges",
+      adminRating: "Admin Rating (1-5)",
+      selectRating: "Select rating",
+      noRating: "No rating",
+      ratings: {
+        poor: "Poor",
+        fair: "Fair",
+        good: "Good",
+        veryGood: "Very Good",
+        excellent: "Excellent"
+      },
+      adminNotes: "Admin Notes",
+      adminNotesPlaceholder: "Any notes about this member...",
+      updateMember: "Update Member",
+      addMember: "Add Member"
+    }
   },
   borrowing: {
     title: "Borrowing",
@@ -145,10 +170,23 @@ export const en = {
     pleaseSelectBook: "Please select a book",
     notes: "Notes",
     notesPlaceholder: "Any additional notes about this borrowing...",
-    createBorrowing: "Create Borrowing",
-    updateBorrowing: "Update Borrowing",
     processing: "Processing...",
     failed: "Failed to {{action}} borrowing. Please try again.",
+    dayRemaining: "{{count}} day remaining",
+    daysRemaining: "{{count}} days remaining",
+    dayOverdue: "{{count}} day overdue",
+    daysOverdue: "{{count}} days overdue",
+    dueToday: "Due today",
+    statusReturned: "Returned",
+    statusOverdue: "Overdue",
+    statusDueSoon: "Due Soon",
+    statusActive: "Active",
+    serverError: "Server error",
+    notFound: "Page not found",
+    unauthorized: "Unauthorized access",
+    forbidden: "Access forbidden",
+    memberUpdateFailed: "Failed to update member. Please try again.",
+    memberCreateFailed: "Failed to create member. Please try again."
   },
   statistics: {
     title: "Statistics",
@@ -187,7 +225,11 @@ export const en = {
     collectionUtilization: "Collection Utilization",
     avgRating: "Avg. rating: {rating}/5",
     utilizationRate: "Collection Utilization Rate: %{rate}",
-    totalCopies: "Total Copies: {count}"
+    totalCopies: "Total Copies: {count}",
+    topReadersOfMonth: "Top Readers of the Month",
+    topReadersOfMonthDesc: "Members who have read the most pages this month",
+    pagesRead: "pages read",
+    noMonthlyReaders: "No book reading data found for this month."
   },
   errors: {
     required: "This field is required",

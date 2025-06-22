@@ -21,6 +21,7 @@ export const tr = {
     language: "Dil",
     turkish: "Türkçe",
     english: "İngilizce",
+    saving: "Kaydediliyor..."
   },
   auth: {
     login: "Giriş Yap",
@@ -32,6 +33,29 @@ export const tr = {
     welcome: "Kütüphane Yönetim Sistemine Hoş Geldiniz",
     loginFailed: "Giriş başarısız",
     invalidCredentials: "Geçersiz e-posta veya şifre",
+    role: "Rol",
+    form: {
+      fullName: "Tam Adı",
+      email: "E-posta Adresi",
+      password: "Şifre",
+      passwordHint: "değiştirmeyecekseniz boş bırakın",
+      membershipDate: "Üyelik Tarihi",
+      adminPrivileges: "Yönetici ayrıcalıkları",
+      adminRating: "Admin Puanı (1-5)",
+      selectRating: "Puan seçin",
+      noRating: "Puan yok",
+      ratings: {
+        poor: "Kötü",
+        fair: "Orta",
+        good: "İyi",
+        veryGood: "Çok İyi",
+        excellent: "Mükemmel"
+      },
+      adminNotes: "Admin Notları",
+      adminNotesPlaceholder: "Bu üye hakkındaki notlar...",
+      updateMember: "Üyeyi Güncelle",
+      addMember: "Üye Ekle"
+    }
   },
   navigation: {
     dashboard: "Ana Sayfa",
@@ -72,7 +96,8 @@ export const tr = {
     noBooksFound: "Aramanıza uygun kitap bulunamadı.",
     noBooksYet: "Henüz katalogda kitap yok.",
     availableCopiesTotal: "Mevcut Kopya",
-    uniqueGenres: "Benzersiz Tür"
+    uniqueGenres: "Benzersiz Tür",
+    pageCount: "Sayfa Sayısı"
   },
   members: {
     title: "Üyeler",
@@ -105,7 +130,29 @@ export const tr = {
     updateMemberInfo: "Aşağıdan üye bilgisini güncelleyin.",
     enterNewMember: "Yeni üye için bilgileri girin.",
     noNotes: "Not yok",
-    role: "Rol"
+    role: "Rol",
+    form: {
+      fullName: "Tam Adı",
+      email: "E-posta Adresi",
+      password: "Şifre",
+      passwordHint: "değiştirmeyecekseniz boş bırakın",
+      membershipDate: "Üyelik Tarihi",
+      adminPrivileges: "Yönetici ayrıcalıkları",
+      adminRating: "Admin Puanı (1-5)",
+      selectRating: "Puan seçin",
+      noRating: "Puan yok",
+      ratings: {
+        poor: "Kötü",
+        fair: "Orta",
+        good: "İyi",
+        veryGood: "Çok İyi",
+        excellent: "Mükemmel"
+      },
+      adminNotes: "Admin Notları",
+      adminNotesPlaceholder: "Bu üye hakkındaki notlar...",
+      updateMember: "Üyeyi Güncelle",
+      addMember: "Üye Ekle"
+    }
   },
   borrowing: {
     title: "Ödünç Alma",
@@ -142,8 +189,8 @@ export const tr = {
     noBorrowingsYet: "Henüz ödünç alma kaydı yok.",
     selectMember: "Üye seçin...",
     selectBook: "Kitap seçin...",
-    noMembersFound: "Üye bulunamadı.",
-    noBooksFound: "Kitap bulunamadı.",
+    noMembersFound_other: "Üye bulunamadı.",
+    noBooksFound_other: "Kitap bulunamadı.",
     pleaseSelectMember: "Lütfen bir üye seçin",
     pleaseSelectBook: "Lütfen bir kitap seçin",
     notes: "Notlar",
@@ -152,7 +199,21 @@ export const tr = {
     failed: "{{action}} işlemi başarısız. Lütfen tekrar deneyin.",
     updateBorrowing: "Ödünç Almayı Güncelle",
     active: "Aktif",
-    daysRemaining: "{{days}} gün kaldı"
+    dayRemaining: "{{count}} gün kaldı",
+    daysRemaining: "{{count}} gün kaldı",
+    dayOverdue: "{{count}} gün gecikti",
+    daysOverdue: "{{count}} gün gecikti",
+    dueToday: "Bugün teslim edilecek",
+    statusReturned: "İade Edildi",
+    statusOverdue: "Gecikmiş",
+    statusDueSoon: "Yakında Teslim",
+    statusActive: "Aktif",
+    forbidden: "Erişim engellendi",
+    memberUpdateFailed: "Üye güncellenemedi. Lütfen tekrar deneyin.",
+    memberCreateFailed: "Üye oluşturulamadı. Lütfen tekrar deneyin.",
+    notFound: "Sayfa bulunamadı",
+    unauthorized: "Yetkisiz erişim",
+    serverError: "Sunucu hatası"
   },
   statistics: {
     title: "İstatistikler",
@@ -188,13 +249,16 @@ export const tr = {
     totalCopiesLabel: "Toplam kopya:",
     availableLabel: "Mevcut:",
     utilizationLabel: "Kullanım:",
-    rank: "Sıra",
     timesBorrowed: "Ödünç Alınma Sayısı",
     popularity: "Popülerlik",
     booksBorrowed: "Ödünç Alınan Kitaplar",
     rating: "Puan",
     notRated: "Puanlanmadı",
-    memberSince: "Üyelikten Beri"
+    memberSince: "Üyelikten Beri",
+    topReadersOfMonth: "Ayın En Çok Okuyanları",
+    topReadersOfMonthDesc: "Bu ay en çok sayfa okuyan üyeler",
+    pagesRead: "sayfa okundu",
+    noMonthlyReaders: "Bu ay için okunmuş kitap verisi bulunamadı."
   },
   errors: {
     required: "Bu alan zorunludur",
@@ -204,13 +268,31 @@ export const tr = {
     notFound: "Sayfa bulunamadı",
     unauthorized: "Yetkisiz erişim",
     forbidden: "Erişim engellendi",
+    memberUpdateFailed: "Üye güncellenemedi. Lütfen tekrar deneyin.",
+    memberCreateFailed: "Üye oluşturulamadı. Lütfen tekrar deneyin."
   },
   sidebar: {
     managementSystem: "Yönetim Sistemi",
     admin: "Yönetici",
     user: "Kullanıcı",
     administrator: "Yönetici",
-    staff: "Personel"
+    staff: "Personel",
+    cancel: "İptal",
+    delete: "Sil",
+    edit: "Düzenle",
+    create: "Oluştur",
+    search: "Ara",
+    filter: "Filtrele",
+    actions: "İşlemler",
+    confirm: "Onayla",
+    back: "Geri",
+    next: "İleri",
+    yes: "Evet",
+    no: "Hayır",
+    language: "Dil",
+    turkish: "Türkçe",
+    english: "İngilizce",
+    saving: "Kaydediliyor..."
   },
   header: {
     overview: "Kütüphane genel bakış ve hızlı işlemler",
@@ -224,6 +306,8 @@ export const tr = {
     searchPlaceholder: "Kitap, üye ara..."
   },
   dashboard: {
+    title: "Ana Sayfa",
+    welcome: "Tekrar hoş geldiniz, {{name}}!",
     daysOverdue: "Geciken Günler",
     days: "{{count}} gün",
     action: "İşlem",
