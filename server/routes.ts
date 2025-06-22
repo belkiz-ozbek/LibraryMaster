@@ -6,6 +6,7 @@ import { insertUserSchema, insertBookSchema, insertBorrowingSchema, updateUserSc
 import { z } from "zod";
 import bcrypt from "bcrypt";
 import "./types";
+import { and, eq, desc, gt, gte, isNotNull, lte, sql } from "drizzle-orm";
 
 // Auth middleware
 function requireAuth(req: any, res: any, next: any) {
@@ -171,13 +172,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.delete("/api/users/:id", requireAuth, requireAdmin, async (req, res) => {
     try {
       const id = parseInt(req.params.id);
-      const success = await storage.deleteUser(id);
-      if (!success) {
-        return res.status(404).json({ message: "User not found" });
-      }
+      await storage.deleteUser(id);
       res.json({ message: "User deleted successfully" });
     } catch (error) {
-      res.status(500).json({ message: "Failed to delete user" });
+      res.status(404).json({ message: (error as Error).message });
     }
   });
 
@@ -251,13 +249,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.delete("/api/books/:id", requireAuth, requireAdmin, async (req, res) => {
     try {
       const id = parseInt(req.params.id);
-      const success = await storage.deleteBook(id);
-      if (!success) {
-        return res.status(404).json({ message: "Book not found" });
-      }
+      await storage.deleteBook(id);
       res.json({ message: "Book deleted successfully" });
     } catch (error) {
-      res.status(500).json({ message: "Failed to delete book" });
+      res.status(404).json({ message: (error as Error).message });
     }
   });
 
@@ -329,13 +324,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.delete("/api/borrowings/:id", requireAuth, requireAdmin, async (req, res) => {
     try {
       const id = parseInt(req.params.id);
-      const success = await storage.deleteBorrowing(id);
-      if (!success) {
-        return res.status(404).json({ message: "Borrowing not found" });
-      }
+      await storage.deleteBorrowing(id);
       res.json({ message: "Borrowing deleted successfully" });
     } catch (error) {
-      res.status(500).json({ message: "Failed to delete borrowing" });
+      res.status(404).json({ message: (error as Error).message });
     }
   });
 
@@ -366,6 +358,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       res.status(500).json({ message: "Failed to fetch active users" });
     }
+  });
+
+  app.get("/api/stats/top-readers-month", async (req, res) => {
+    const topReaders = await storage.getTopReadersMonth();
+    res.json(topReaders);
   });
 
   const httpServer = createServer(app);
