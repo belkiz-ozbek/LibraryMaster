@@ -205,7 +205,9 @@ export const tr = {
     statusReturned: "İade Edildi",
     statusOverdue: "Gecikmiş",
     statusDueSoon: "Yakında Teslim",
-    statusActive: "Aktif"
+    statusActive: "Aktif",
+    noMembersFound: "Üye bulunamadı.",
+    noBooksFound: "Kitap bulunamadı."
   },
   statistics: {
     title: "İstatistikler",

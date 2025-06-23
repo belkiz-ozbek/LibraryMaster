@@ -11,6 +11,7 @@ import { z } from "zod";
 import { format, addDays } from "date-fns";
 import Select, { SingleValue } from 'react-select';
 import { useTranslation } from "react-i18next";
+import { useState } from "react";
 
 const borrowFormSchema = insertBorrowingSchema.extend({
   notes: z.string().optional(),
@@ -22,6 +23,17 @@ interface BorrowFormProps {
   borrowing?: Borrowing | null;
   onSuccess: () => void;
   onCancel: () => void;
+}
+
+function normalize(str: string) {
+  return str
+    .toLocaleLowerCase('tr-TR')
+    .replace(/ı/g, 'i')
+    .replace(/ş/g, 's')
+    .replace(/ğ/g, 'g')
+    .replace(/ü/g, 'u')
+    .replace(/ö/g, 'o')
+    .replace(/ç/g, 'c');
 }
 
 export function BorrowForm({ borrowing, onSuccess, onCancel }: BorrowFormProps) {
@@ -89,11 +101,23 @@ export function BorrowForm({ borrowing, onSuccess, onCancel }: BorrowFormProps) 
     ];
   }
 
-  const statusOptions: OptionType[] = [
+  // Status için ayrı bir tip
+  type StatusOptionType = { value: string; label: string };
+  const statusOptions: StatusOptionType[] = [
     { value: "borrowed", label: t("borrowing.borrowed") },
     { value: "returned", label: t("borrowing.returned") },
     { value: "overdue", label: t("borrowing.overdue") },
   ];
+
+  const [memberInput, setMemberInput] = useState("");
+  const filteredMemberOptions = memberInput
+    ? memberOptions.filter(opt => normalize(opt.label).includes(normalize(memberInput)))
+    : [];
+
+  const [bookInput, setBookInput] = useState("");
+  const filteredBookOptions = bookInput
+    ? bookOptions.filter(opt => normalize(opt.label).includes(normalize(bookInput)))
+    : [];
 
   return (
     <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
@@ -101,13 +125,15 @@ export function BorrowForm({ borrowing, onSuccess, onCancel }: BorrowFormProps) 
         <div>
           <Label htmlFor="userId">{t("borrowing.member")} *</Label>
           <Select
-            options={memberOptions}
+            options={filteredMemberOptions}
             value={memberOptions.find(option => option.value === form.watch("userId"))}
+            onInputChange={setMemberInput}
             onChange={(option: SingleValue<OptionType>) => form.setValue("userId", option ? option.value : 0)}
             placeholder={t("borrowing.selectMember")}
             isClearable
             isSearchable
             noOptionsMessage={() => t("borrowing.noMembersFound")}
+            filterOption={null}
           />
           {form.formState.errors.userId && (
             <p className="text-sm text-destructive mt-1">{t("borrowing.pleaseSelectMember")}</p>
@@ -117,13 +143,15 @@ export function BorrowForm({ borrowing, onSuccess, onCancel }: BorrowFormProps) 
         <div>
           <Label htmlFor="bookId">{t("borrowing.book")} *</Label>
           <Select
-            options={bookOptions}
+            options={filteredBookOptions}
             value={bookOptions.find(option => option.value === form.watch("bookId"))}
+            onInputChange={setBookInput}
             onChange={(option: SingleValue<OptionType>) => form.setValue("bookId", option ? option.value : 0)}
             placeholder={t("borrowing.selectBook")}
             isClearable
             isSearchable
             noOptionsMessage={() => t("borrowing.noBooksFound")}
+            filterOption={null}
           />
           {form.formState.errors.bookId && (
             <p className="text-sm text-destructive mt-1">{t("borrowing.pleaseSelectBook")}</p>
@@ -156,7 +184,7 @@ export function BorrowForm({ borrowing, onSuccess, onCancel }: BorrowFormProps) 
           <Select
             options={statusOptions}
             value={statusOptions.find(option => option.value === form.watch("status"))}
-            onChange={(option: SingleValue<OptionType>) => form.setValue("status", option ? option.value : "borrowed")}
+            onChange={(option: SingleValue<StatusOptionType>) => form.setValue("status", option ? option.value : "borrowed")}
             placeholder={t("borrowing.status")}
             isClearable={false}
             isSearchable={false}
