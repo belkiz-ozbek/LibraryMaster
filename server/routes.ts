@@ -6,7 +6,9 @@ import { insertUserSchema, insertBookSchema, insertBorrowingSchema, updateUserSc
 import { z } from "zod";
 import bcrypt from "bcrypt";
 import "./types";
-import { and, eq, desc, gt, gte, isNotNull, lte, sql } from "drizzle-orm";
+import { and, eq, desc, gt, gte, isNotNull, lte, sql, count } from "drizzle-orm";
+import { db } from "./db";
+import { books, borrowings } from "@shared/schema";
 
 // Auth middleware
 function requireAuth(req: any, res: any, next: any) {
@@ -381,6 +383,48 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/stats/top-readers-month", async (req, res) => {
     const topReaders = await storage.getTopReadersMonth();
     res.json(topReaders);
+  });
+
+  // Haftalık ödünç alma ve iade istatistikleri
+  app.get("/api/stats/weekly-activity", requireAuth, async (req, res) => {
+    try {
+      const today = new Date();
+      const days = ["Pzt", "Sal", "Çar", "Per", "Cum", "Cmt", "Paz"];
+      const result = [];
+      for (let i = 6; i >= 0; i--) {
+        const d = new Date(today);
+        d.setDate(today.getDate() - i);
+        const dayLabel = days[d.getDay() === 0 ? 6 : d.getDay() - 1];
+        const dateStr = d.toISOString().split("T")[0];
+        // Borrowed
+        const [{ count: borrowed }] = await db
+          .select({ count: count() })
+          .from(borrowings)
+          .where(eq(borrowings.borrowDate, dateStr));
+        // Returned
+        const [{ count: returned }] = await db
+          .select({ count: count() })
+          .from(borrowings)
+          .where(eq(borrowings.returnDate, dateStr));
+        result.push({ day: dayLabel, borrowed, returned });
+      }
+      res.json(result);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch weekly activity" });
+    }
+  });
+
+  // Tür dağılımı
+  app.get("/api/stats/genre-distribution", requireAuth, async (req, res) => {
+    try {
+      const genres = await db
+        .select({ name: books.genre, value: count() })
+        .from(books)
+        .groupBy(books.genre);
+      res.json(genres);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch genre distribution" });
+    }
   });
 
   const httpServer = createServer(app);
