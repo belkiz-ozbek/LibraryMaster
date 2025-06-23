@@ -25,7 +25,7 @@ export function StatsCard({
   };
 
   return (
-    <Card className="p-6">
+    <Card className="p-6 h-full">
       <div className="flex items-center justify-between">
         <div>
           <p className="text-sm font-medium text-text-muted">{title}</p>
