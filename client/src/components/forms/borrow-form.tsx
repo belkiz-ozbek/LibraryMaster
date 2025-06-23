@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { apiRequest } from "@/lib/queryClient";
-import { insertBorrowingSchema, type Borrowing } from "@shared/schema";
+import { insertBorrowingSchema, type Borrowing, type Book, type User } from "@shared/schema";
 import { z } from "zod";
 import { format, addDays } from "date-fns";
 import Select, { SingleValue } from 'react-select';
@@ -41,12 +41,16 @@ export function BorrowForm({ borrowing, onSuccess, onCancel }: BorrowFormProps) 
   const today = new Date().toISOString().split('T')[0];
   const defaultDueDate = format(addDays(new Date(), 14), 'yyyy-MM-dd');
 
-  const { data: books = [] } = useQuery<any[]>({
+  const { data: books = [] } = useQuery<Book[]>({
     queryKey: ["/api/books"],
   });
 
-  const { data: users = [] } = useQuery<any[]>({
+  const { data: users = [] } = useQuery<User[]>({
     queryKey: ["/api/users"],
+  });
+
+  const { data: borrowings = [] } = useQuery<any[]>({
+    queryKey: ["/api/borrowings"],
   });
 
   const { t } = useTranslation();
@@ -78,28 +82,20 @@ export function BorrowForm({ borrowing, onSuccess, onCancel }: BorrowFormProps) 
     mutation.mutate(data);
   };
 
-  const availableBooks = books.filter(book => book.availableCopies > 0);
   const nonAdminUsers = users.filter(user => !user.isAdmin);
 
-  type OptionType = { value: number; label: string };
-  const memberOptions: OptionType[] = nonAdminUsers.map((user: any) => ({
+  type MemberOptionType = { value: number; label: string };
+  const memberOptions: MemberOptionType[] = nonAdminUsers.map((user) => ({
     value: user.id,
     label: `${user.name} (${user.email})`
   }));
-  const selectedBook = books.find(book => book.id === form.watch("bookId"));
-  let bookOptions: OptionType[] = availableBooks.map((book: any) => ({
+
+  type BookOptionType = { value: number; label: string; isDisabled: boolean };
+  const bookOptions: BookOptionType[] = books.map((book) => ({
     value: book.id,
-    label: `${book.title} by ${book.author} (${book.availableCopies} available)`
+    label: `${book.title} - ${book.author} (${book.availableCopies}/${book.totalCopies} ${t('books.availableCopies')})`,
+    isDisabled: book.availableCopies === 0,
   }));
-  if (selectedBook && !bookOptions.some(opt => opt.value === selectedBook.id)) {
-    bookOptions = [
-      ...bookOptions,
-      {
-        value: selectedBook.id,
-        label: `${selectedBook.title} by ${selectedBook.author} (${selectedBook.availableCopies} available)`
-      }
-    ];
-  }
 
   // Status için ayrı bir tip
   type StatusOptionType = { value: string; label: string };
@@ -112,12 +108,12 @@ export function BorrowForm({ borrowing, onSuccess, onCancel }: BorrowFormProps) 
   const [memberInput, setMemberInput] = useState("");
   const filteredMemberOptions = memberInput
     ? memberOptions.filter(opt => normalize(opt.label).includes(normalize(memberInput)))
-    : [];
+    : memberOptions;
 
   const [bookInput, setBookInput] = useState("");
   const filteredBookOptions = bookInput
     ? bookOptions.filter(opt => normalize(opt.label).includes(normalize(bookInput)))
-    : [];
+    : bookOptions;
 
   return (
     <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
@@ -128,7 +124,7 @@ export function BorrowForm({ borrowing, onSuccess, onCancel }: BorrowFormProps) 
             options={filteredMemberOptions}
             value={memberOptions.find(option => option.value === form.watch("userId"))}
             onInputChange={setMemberInput}
-            onChange={(option: SingleValue<OptionType>) => form.setValue("userId", option ? option.value : 0)}
+            onChange={(option: SingleValue<MemberOptionType>) => form.setValue("userId", option ? option.value : 0)}
             placeholder={t("borrowing.selectMember")}
             isClearable
             isSearchable
@@ -146,12 +142,18 @@ export function BorrowForm({ borrowing, onSuccess, onCancel }: BorrowFormProps) 
             options={filteredBookOptions}
             value={bookOptions.find(option => option.value === form.watch("bookId"))}
             onInputChange={setBookInput}
-            onChange={(option: SingleValue<OptionType>) => form.setValue("bookId", option ? option.value : 0)}
+            onChange={(option: SingleValue<BookOptionType>) => form.setValue("bookId", option ? option.value : 0)}
             placeholder={t("borrowing.selectBook")}
             isClearable
             isSearchable
             noOptionsMessage={() => t("borrowing.noBooksFound")}
             filterOption={null}
+            isOptionDisabled={(option: BookOptionType) => option.isDisabled}
+            formatOptionLabel={(option: BookOptionType) => (
+              <div title={option.isDisabled ? t('borrowing.notAvailable') : ''} style={{ color: option.isDisabled ? 'red' : 'inherit' }}>
+                {option.label}
+              </div>
+            )}
           />
           {form.formState.errors.bookId && (
             <p className="text-sm text-destructive mt-1">{t("borrowing.pleaseSelectBook")}</p>

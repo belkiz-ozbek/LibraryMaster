@@ -95,7 +95,8 @@ export const tr = {
     noBooksFound: "Aramanıza uygun kitap bulunamadı.",
     noBooksYet: "Henüz katalogda kitap yok.",
     availableCopiesTotal: "Mevcut Kopya",
-    uniqueGenres: "Benzersiz Tür"
+    uniqueGenres: "Benzersiz Tür",
+    pageCount: "Sayfa Sayısı"
   },
   members: {
     title: "Üyeler",
@@ -248,7 +249,10 @@ export const tr = {
     booksBorrowed: "Ödünç Alınan Kitaplar",
     rating: "Puan",
     notRated: "Puanlanmadı",
-    memberSince: "Üyelikten Beri"
+    memberSince: "Üyelikten Beri",
+    topReadersOfMonth: "Ayın En Çok Okuyanları",
+    topReadersOfMonthDesc: "Bu ay en çok sayfa okuyan üyeler",
+    pagesRead: "okunan sayfa"
   },
   errors: {
     required: "Bu alan zorunludur",
@@ -272,7 +276,8 @@ export const tr = {
     members: "Üyeleri yönet",
     borrowing: "Kitap ödünç işlemlerini yönet",
     returns: "Kitap iade işlemlerini yönet",
-    statistics: "Kütüphane istatistiklerini ve raporlarını görüntüle"
+    statistics: "Kütüphane istatistiklerini ve raporlarını görüntüle",
+    evaluations: "Üye Değerlendirmeleri"
   },
   dashboard: {
     quickActions: "Hızlı İşlemler",
