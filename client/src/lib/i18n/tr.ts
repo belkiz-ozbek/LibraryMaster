@@ -128,7 +128,29 @@ export const tr = {
     updateMemberInfo: "Aşağıdan üye bilgisini güncelleyin.",
     enterNewMember: "Yeni üye için bilgileri girin.",
     noNotes: "Not yok",
-    role: "Rol"
+    role: "Rol",
+    form: {
+      fullName: "Tam Adı",
+      email: "E-posta Adresi",
+      password: "Şifre",
+      passwordHint: "değiştirmeyecekseniz boş bırakın",
+      membershipDate: "Üyelik Tarihi",
+      adminPrivileges: "Yönetici ayrıcalıkları",
+      adminRating: "Admin Puanı (1-5)",
+      selectRating: "Puan seçin",
+      noRating: "Puan yok",
+      ratings: {
+        poor: "Kötü",
+        fair: "Orta",
+        good: "İyi",
+        veryGood: "Çok İyi",
+        excellent: "Mükemmel"
+      },
+      adminNotes: "Admin Notları",
+      adminNotesPlaceholder: "Bu üye hakkındaki notlar...",
+      updateMember: "Üyeyi Güncelle",
+      addMember: "Üye Ekle"
+    }
   },
   borrowing: {
     title: "Ödünç Alma",
