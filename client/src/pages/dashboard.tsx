@@ -127,6 +127,16 @@ export default function Dashboard() {
     queryKey: ["/api/activities/recent"],
   });
 
+  // Haftalık aktivite verisi
+  const { data: weeklyActivity = [] } = useQuery<any[]>({
+    queryKey: ["/api/stats/weekly-activity"],
+  });
+
+  // Tür dağılımı verisi
+  const { data: genreDistribution = [] } = useQuery<any[]>({
+    queryKey: ["/api/stats/genre-distribution"],
+  });
+
   const overdueColumns = [
     {
       key: "user.name",
@@ -294,15 +304,7 @@ export default function Dashboard() {
         <CardContent>
               <ResponsiveContainer width="100%" height={240}>
                 <BarChart
-                  data={[
-                    { day: 'Pzt', borrowed: 12, returned: 8 },
-                    { day: 'Sal', borrowed: 15, returned: 10 },
-                    { day: 'Çar', borrowed: 8, returned: 5 },
-                    { day: 'Per', borrowed: 18, returned: 12 },
-                    { day: 'Cum', borrowed: 23, returned: 18 },
-                    { day: 'Cmt', borrowed: 10, returned: 7 },
-                    { day: 'Paz', borrowed: 5, returned: 3 },
-                  ]}
+                  data={weeklyActivity}
                   margin={{ top: 5, right: 20, left: -10, bottom: 0 }}
                   barGap={4}
                 >
@@ -333,12 +335,7 @@ export default function Dashboard() {
               <ResponsiveContainer width="100%" height={240}>
                 <PieChart>
                   <Pie
-                    data={[
-                      { name: 'Roman', value: 400 },
-                      { name: 'Bilim Kurgu', value: 240 },
-                      { name: 'Tarih', value: 180 },
-                      { name: 'Felsefe', value: 120 },
-                    ]}
+                    data={genreDistribution}
                     cx="50%"
                     cy="50%"
                     innerRadius={60}
@@ -373,7 +370,7 @@ export default function Dashboard() {
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-                {recentActivities?.map((activity) => (
+                {recentActivities?.slice(0, 5).map((activity) => (
                   <div key={`${activity.type}-${activity.id}`} className="flex items-center">
                     <div className={`w-9 h-9 rounded-full flex items-center justify-center mr-4 ${activity.type === 'borrowing' ? 'bg-green-100 dark:bg-green-900/30' : 'bg-blue-100 dark:bg-blue-900/30'}`}>
                       {activity.type === 'borrowing' ? (

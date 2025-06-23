@@ -517,8 +517,7 @@ export class DatabaseStorage implements IStorage {
     .innerJoin(users, eq(borrowings.userId, users.id))
     .innerJoin(books, eq(borrowings.bookId, books.id))
     .where(eq(borrowings.status, 'borrowed'))
-    .orderBy(desc(borrowings.borrowDate))
-    .limit(limit);
+    .orderBy(desc(borrowings.borrowDate));
 
     const recentReturnsQuery = db.select({
       type: sql`'return' as type`,
@@ -534,8 +533,7 @@ export class DatabaseStorage implements IStorage {
       eq(borrowings.status, 'returned'),
       isNotNull(borrowings.returnDate)
     ))
-    .orderBy(desc(borrowings.returnDate))
-    .limit(limit);
+    .orderBy(desc(borrowings.returnDate));
 
     const [recentBorrowings, recentReturns] = await Promise.all([
       recentBorrowingsQuery,
@@ -543,7 +541,6 @@ export class DatabaseStorage implements IStorage {
     ]);
 
     const combined = [...recentBorrowings, ...recentReturns.filter(r => r.date)];
-    
     combined.sort((a, b) => new Date(b.date!).getTime() - new Date(a.date!).getTime());
 
     return combined.slice(0, limit);
