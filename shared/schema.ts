@@ -21,10 +21,11 @@ export const books = pgTable("books", {
   isbn: text("isbn").notNull().unique(),
   genre: text("genre").notNull(),
   publishYear: integer("publish_year").notNull(),
-  shelfNumber: text("shelf_number").notNull(),
+  shelfNumber: text("shelf_number"),
   availableCopies: integer("available_copies").default(1).notNull(),
-  totalCopies: integer("total_copies").default(1).notNull(),
-  pageCount: integer("page_count").notNull().default(0),
+  totalCopies: integer("total_copies").notNull().default(1),
+  pageCount: integer("page_count"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
 export const borrowings = pgTable("borrowings", {
