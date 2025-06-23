@@ -50,6 +50,7 @@ export interface IStorage {
   getMostBorrowedBooks(): Promise<Array<Book & { borrowCount: number }>>;
   getMostActiveUsers(): Promise<Array<User & { borrowCount: number }>>;
   getTopReadersMonth(): Promise<Array<{ userId: number; name: string; email: string; totalPagesRead: number }>>;
+  getRecentActivities(limit: number): Promise<any[]>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -174,6 +175,13 @@ export class DatabaseStorage implements IStorage {
   }
 
   async updateBorrowing(id: number, updateBorrowing: UpdateBorrowing): Promise<Borrowing | undefined> {
+    
+    // If the status is being set to 'returned', we forcefully set the return date on the server
+    // to ensure data integrity, regardless of what the client sends.
+    if (updateBorrowing.status === 'returned') {
+      updateBorrowing.returnDate = new Date().toISOString();
+    }
+    
     const [borrowing] = await db.update(borrowings)
       .set(updateBorrowing)
       .where(eq(borrowings.id, id))
@@ -372,6 +380,7 @@ export class DatabaseStorage implements IStorage {
       availableCopies: books.availableCopies,
       totalCopies: books.totalCopies,
       pageCount: books.pageCount,
+      createdAt: books.createdAt,
       borrowCount: sql<number>`count(${borrowings.bookId})`.as("borrow_count"),
     })
     .from(books)
@@ -428,6 +437,50 @@ export class DatabaseStorage implements IStorage {
       .limit(3);
 
     return topReaders;
+  }
+
+  async getRecentActivities(limit: number = 5) {
+    const recentBorrowingsQuery = db.select({
+      type: sql`'borrowing' as type`,
+      id: borrowings.id,
+      date: borrowings.borrowDate,
+      user: { id: users.id, name: users.name },
+      book: { id: books.id, title: books.title }
+    })
+    .from(borrowings)
+    .innerJoin(users, eq(borrowings.userId, users.id))
+    .innerJoin(books, eq(borrowings.bookId, books.id))
+    .where(eq(borrowings.status, 'borrowed'))
+    .orderBy(desc(borrowings.borrowDate))
+    .limit(limit);
+
+    const recentReturnsQuery = db.select({
+      type: sql`'return' as type`,
+      id: borrowings.id,
+      date: borrowings.returnDate,
+      user: { id: users.id, name: users.name },
+      book: { id: books.id, title: books.title }
+    })
+    .from(borrowings)
+    .innerJoin(users, eq(borrowings.userId, users.id))
+    .innerJoin(books, eq(borrowings.bookId, books.id))
+    .where(and(
+      eq(borrowings.status, 'returned'),
+      isNotNull(borrowings.returnDate)
+    ))
+    .orderBy(desc(borrowings.returnDate))
+    .limit(limit);
+
+    const [recentBorrowings, recentReturns] = await Promise.all([
+      recentBorrowingsQuery,
+      recentReturnsQuery,
+    ]);
+
+    const combined = [...recentBorrowings, ...recentReturns.filter(r => r.date)];
+    
+    combined.sort((a, b) => new Date(b.date!).getTime() - new Date(a.date!).getTime());
+
+    return combined.slice(0, limit);
   }
 }
 

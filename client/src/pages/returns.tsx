@@ -69,6 +69,7 @@ export default function Returns() {
       queryClient.invalidateQueries({ queryKey: ["/api/borrowings/active"] });
       queryClient.invalidateQueries({ queryKey: ["/api/borrowings/overdue"] });
       queryClient.invalidateQueries({ queryKey: ["/api/stats"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/activities/recent"] });
       setIsReturnDialogOpen(false);
       setSelectedBorrowing(null);
       setReturnNotes("");
@@ -148,7 +149,6 @@ export default function Returns() {
       id: selectedBorrowing.id,
       data: {
         status: "returned",
-        returnDate: returnDate,
         notes: returnNotes || selectedBorrowing.notes
       }
     });
