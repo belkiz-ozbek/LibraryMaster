@@ -188,6 +188,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.get("/api/borrowings/overdue", requireAuth, async (req, res) => {
+    try {
+      const overdueBorrowings = await storage.getOverdueBorrowings();
+      res.json(overdueBorrowings);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch overdue borrowings" });
+    }
+  });
+
   // Book routes
   app.get("/api/books", requireAuth, async (req, res) => {
     try {
@@ -286,8 +295,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get("/api/borrowings/overdue", requireAuth, async (req, res) => {
     try {
-      const borrowings = await storage.getOverdueBorrowings();
-      res.json(borrowings);
+      const overdueBorrowings = await storage.getOverdueBorrowings();
+      res.json(overdueBorrowings);
     } catch (error) {
       res.status(500).json({ message: "Failed to fetch overdue borrowings" });
     }

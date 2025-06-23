@@ -118,6 +118,8 @@ export default function Dashboard() {
     queryKey: ["/api/borrowings/overdue"],
   });
 
+  console.log("Gecikmiş Kitaplar (API'den gelen):", overdueBorrowings);
+
   const { data: recentActivities } = useQuery<RecentActivity[]>({
     queryKey: ["/api/activities/recent"],
   });
@@ -237,56 +239,56 @@ export default function Dashboard() {
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         <motion.div variants={itemVariants}>
-          <StatsCard
-            title={t("statistics.totalBooks")}
-            value={stats?.totalBooks || 0}
-            change={t("dashboard.changeBooks")}
-            changeType="positive"
-            icon={<Book size={20} />}
-            iconColor="bg-primary/10 text-primary"
-          />
+        <StatsCard
+          title={t("statistics.totalBooks")}
+          value={stats?.totalBooks || 0}
+          change={t("dashboard.changeBooks")}
+          changeType="positive"
+          icon={<Book size={20} />}
+          iconColor="bg-primary/10 text-primary"
+        />
         </motion.div>
         <motion.div variants={itemVariants}>
-          <StatsCard
-            title={t("statistics.activeMembers")}
-            value={stats?.totalUsers || 0}
-            change={t("dashboard.changeMembers")}
-            changeType="positive"
-            icon={<Users size={20} />}
-            iconColor="bg-secondary/10 text-secondary"
-          />
+        <StatsCard
+          title={t("statistics.activeMembers")}
+          value={stats?.totalUsers || 0}
+          change={t("dashboard.changeMembers")}
+          changeType="positive"
+          icon={<Users size={20} />}
+          iconColor="bg-secondary/10 text-secondary"
+        />
         </motion.div>
         <motion.div variants={itemVariants}>
-          <StatsCard
-            title={t("dashboard.booksBorrowed")}
-            value={stats?.activeBorrowings || 0}
-            change={t("dashboard.avgDays")}
-            changeType="neutral"
-            icon={<HandHeart size={20} />}
-            iconColor="bg-accent/10 text-accent"
-          />
+        <StatsCard
+          title={t("dashboard.booksBorrowed")}
+          value={stats?.activeBorrowings || 0}
+          change={t("dashboard.avgDays")}
+          changeType="neutral"
+          icon={<HandHeart size={20} />}
+          iconColor="bg-accent/10 text-accent"
+        />
         </motion.div>
         <motion.div variants={itemVariants}>
-          <StatsCard
-            title={t("dashboard.overdueItems")}
-            value={stats?.overdueBorrowings || 0}
-            change={t("dashboard.requiresAttention")}
-            changeType="negative"
-            icon={<AlertTriangle size={20} />}
-            iconColor="bg-destructive/10 text-destructive"
-          />
+        <StatsCard
+          title={t("dashboard.overdueItems")}
+          value={stats?.overdueBorrowings || 0}
+          change={t("dashboard.requiresAttention")}
+          changeType="negative"
+          icon={<AlertTriangle size={20} />}
+          iconColor="bg-destructive/10 text-destructive"
+        />
         </motion.div>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
         {/* Weekly Activity Chart */}
         <motion.div variants={itemVariants} className="lg:col-span-3">
-          <Card>
-            <CardHeader>
+      <Card>
+        <CardHeader>
               <CardTitle>Haftalık Aktivite</CardTitle>
               <CardDescription>Son 7 gündeki ödünç alma ve iade işlemleri.</CardDescription>
-            </CardHeader>
-            <CardContent>
+        </CardHeader>
+        <CardContent>
               <ResponsiveContainer width="100%" height={240}>
                 <BarChart
                   data={[
@@ -351,8 +353,8 @@ export default function Dashboard() {
                   <Tooltip cursor={{ fill: "hsl(var(--accent) / 0.1)" }} />
                 </PieChart>
               </ResponsiveContainer>
-            </CardContent>
-          </Card>
+        </CardContent>
+      </Card>
         </motion.div>
       </div>
 
@@ -360,14 +362,14 @@ export default function Dashboard() {
         {/* Son Aktiviteler */}
         <motion.div variants={itemVariants}>
           <Card className="h-full">
-            <CardHeader className="flex flex-row items-center justify-between">
-              <CardTitle>{t("dashboard.recentActivity")}</CardTitle>
+          <CardHeader className="flex flex-row items-center justify-between">
+            <CardTitle>{t("dashboard.recentActivity")}</CardTitle>
               <Button variant="link" size="sm" asChild>
                 <Link to="/borrowing">{t("dashboard.viewAll")}</Link>
               </Button>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
                 {recentActivities?.map((activity) => (
                   <div key={`${activity.type}-${activity.id}`} className="flex items-center">
                     <div className={`w-9 h-9 rounded-full flex items-center justify-center mr-4 ${activity.type === 'borrowing' ? 'bg-green-100 dark:bg-green-900/30' : 'bg-blue-100 dark:bg-blue-900/30'}`}>
@@ -389,21 +391,21 @@ export default function Dashboard() {
                     </div>
                   </div>
                 ))}
-              </div>
-            </CardContent>
-          </Card>
+            </div>
+          </CardContent>
+        </Card>
         </motion.div>
 
         {/* En Çok Ödünç Alınan Kitaplar */}
         <motion.div variants={itemVariants}>
           <Card className="h-full">
-            <CardHeader className="flex flex-row items-center justify-between">
-              <CardTitle>{t("dashboard.mostBorrowedBooks")}</CardTitle>
+          <CardHeader className="flex flex-row items-center justify-between">
+            <CardTitle>{t("dashboard.mostBorrowedBooks")}</CardTitle>
               <Button variant="link" size="sm" asChild>
                 <Link to="/statistics">{t("dashboard.viewAll")}</Link>
               </Button>
-            </CardHeader>
-            <CardContent>
+          </CardHeader>
+          <CardContent>
               <ul className="space-y-4">
                 {popularBooks?.slice(0,5).map((book, index) => (
                   <li key={book.id} className="flex items-center">
@@ -423,35 +425,38 @@ export default function Dashboard() {
                   </li>
                 ))}
               </ul>
-            </CardContent>
-          </Card>
+          </CardContent>
+        </Card>
         </motion.div>
       </div>
 
-      {/* Gecikmiş Öğeler */}
-      {overdueBorrowings && overdueBorrowings.length > 0 && (
-        <motion.div variants={itemVariants}>
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between">
-              <CardTitle className="flex items-center">
-                <TriangleAlert className="text-destructive mr-2" size={20} />
-                {t("dashboard.overdueItemsAttention")}
-              </CardTitle>
-              <Badge variant="destructive">
-                {t('dashboard.itemCount', {count: overdueBorrowings.length})}
-              </Badge>
-            </CardHeader>
-            <CardContent>
+      <motion.div variants={itemVariants}>
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between">
+            <div className="flex items-center gap-2">
+              <TriangleAlert className="h-5 w-5 text-destructive" />
+              <CardTitle>{t("dashboard.overdueItemsAttention")}</CardTitle>
+            </div>
+            {overdueBorrowings && overdueBorrowings.length > 0 && (
+              <Badge variant="destructive">{t("dashboard.itemCount", { count: overdueBorrowings.length })}</Badge>
+            )}
+          </CardHeader>
+          <CardContent>
+            {overdueBorrowings && overdueBorrowings.length > 0 ? (
               <DataTable
-                data={overdueBorrowings.slice(0, 5)}
                 columns={overdueColumns}
-                pageSize={5}
+                data={overdueBorrowings}
                 emptyMessage={t("dashboard.noOverdueItems")}
               />
-            </CardContent>
-          </Card>
-        </motion.div>
-      )}
+            ) : (
+              <div className="text-center py-10">
+                <p className="text-muted-foreground">{t("dashboard.noOverdueItems")}</p>
+                <p className="text-sm text-muted-foreground">{t("dashboard.noOverdueItemsDesc")}</p>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      </motion.div>
     </motion.div>
   );
 }

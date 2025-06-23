@@ -278,12 +278,13 @@ export class DatabaseStorage implements IStorage {
     .from(borrowings)
     .innerJoin(books, eq(borrowings.bookId, books.id))
     .innerJoin(users, eq(borrowings.userId, users.id))
-    .where(
-      and(
-        eq(borrowings.status, 'borrowed'),
-        lt(borrowings.dueDate, today)
+    .where(and(
+      lt(borrowings.dueDate, today),
+      or(
+        eq(borrowings.status, "borrowed"),
+        eq(borrowings.status, "overdue")
       )
-    )
+    ))
     .orderBy(asc(borrowings.dueDate));
   }
 
