@@ -21,7 +21,6 @@ export const tr = {
     language: "Dil",
     turkish: "Türkçe",
     english: "İngilizce",
-    saving: "Kaydediliyor..."
   },
   auth: {
     login: "Giriş Yap",
@@ -96,8 +95,7 @@ export const tr = {
     noBooksFound: "Aramanıza uygun kitap bulunamadı.",
     noBooksYet: "Henüz katalogda kitap yok.",
     availableCopiesTotal: "Mevcut Kopya",
-    uniqueGenres: "Benzersiz Tür",
-    pageCount: "Sayfa Sayısı"
+    uniqueGenres: "Benzersiz Tür"
   },
   members: {
     title: "Üyeler",
@@ -130,29 +128,7 @@ export const tr = {
     updateMemberInfo: "Aşağıdan üye bilgisini güncelleyin.",
     enterNewMember: "Yeni üye için bilgileri girin.",
     noNotes: "Not yok",
-    role: "Rol",
-    form: {
-      fullName: "Tam Adı",
-      email: "E-posta Adresi",
-      password: "Şifre",
-      passwordHint: "değiştirmeyecekseniz boş bırakın",
-      membershipDate: "Üyelik Tarihi",
-      adminPrivileges: "Yönetici ayrıcalıkları",
-      adminRating: "Admin Puanı (1-5)",
-      selectRating: "Puan seçin",
-      noRating: "Puan yok",
-      ratings: {
-        poor: "Kötü",
-        fair: "Orta",
-        good: "İyi",
-        veryGood: "Çok İyi",
-        excellent: "Mükemmel"
-      },
-      adminNotes: "Admin Notları",
-      adminNotesPlaceholder: "Bu üye hakkındaki notlar...",
-      updateMember: "Üyeyi Güncelle",
-      addMember: "Üye Ekle"
-    }
+    role: "Rol"
   },
   borrowing: {
     title: "Ödünç Alma",
@@ -207,13 +183,7 @@ export const tr = {
     statusReturned: "İade Edildi",
     statusOverdue: "Gecikmiş",
     statusDueSoon: "Yakında Teslim",
-    statusActive: "Aktif",
-    forbidden: "Erişim engellendi",
-    memberUpdateFailed: "Üye güncellenemedi. Lütfen tekrar deneyin.",
-    memberCreateFailed: "Üye oluşturulamadı. Lütfen tekrar deneyin.",
-    notFound: "Sayfa bulunamadı",
-    unauthorized: "Yetkisiz erişim",
-    serverError: "Sunucu hatası"
+    statusActive: "Aktif"
   },
   statistics: {
     title: "İstatistikler",
@@ -254,11 +224,7 @@ export const tr = {
     booksBorrowed: "Ödünç Alınan Kitaplar",
     rating: "Puan",
     notRated: "Puanlanmadı",
-    memberSince: "Üyelikten Beri",
-    topReadersOfMonth: "Ayın En Çok Okuyanları",
-    topReadersOfMonthDesc: "Bu ay en çok sayfa okuyan üyeler",
-    pagesRead: "sayfa okundu",
-    noMonthlyReaders: "Bu ay için okunmuş kitap verisi bulunamadı."
+    memberSince: "Üyelikten Beri"
   },
   errors: {
     required: "Bu alan zorunludur",
@@ -268,31 +234,13 @@ export const tr = {
     notFound: "Sayfa bulunamadı",
     unauthorized: "Yetkisiz erişim",
     forbidden: "Erişim engellendi",
-    memberUpdateFailed: "Üye güncellenemedi. Lütfen tekrar deneyin.",
-    memberCreateFailed: "Üye oluşturulamadı. Lütfen tekrar deneyin."
   },
   sidebar: {
     managementSystem: "Yönetim Sistemi",
     admin: "Yönetici",
     user: "Kullanıcı",
     administrator: "Yönetici",
-    staff: "Personel",
-    cancel: "İptal",
-    delete: "Sil",
-    edit: "Düzenle",
-    create: "Oluştur",
-    search: "Ara",
-    filter: "Filtrele",
-    actions: "İşlemler",
-    confirm: "Onayla",
-    back: "Geri",
-    next: "İleri",
-    yes: "Evet",
-    no: "Hayır",
-    language: "Dil",
-    turkish: "Türkçe",
-    english: "İngilizce",
-    saving: "Kaydediliyor..."
+    staff: "Personel"
   },
   header: {
     overview: "Kütüphane genel bakış ve hızlı işlemler",
@@ -306,36 +254,40 @@ export const tr = {
     searchPlaceholder: "Kitap, üye ara..."
   },
   dashboard: {
-    title: "Ana Sayfa",
+    title: "Gösterge Paneli",
+    description: "Kütüphane Yönetim Sistemi genel bakış.",
+    totalBooks: "Toplam Kitap",
+    activeMembers: "Aktif Üyeler",
+    booksBorrowed: "Ödünç Alınan Kitaplar",
+    overdueItems: "Geciken Kitaplar",
     welcome: "Tekrar hoş geldiniz, {{name}}!",
     daysOverdue: "Geciken Günler",
     days: "{{count}} gün",
-    action: "İşlem",
-    sendReminder: "Hatırlatma Gönder",
-    extendDueDate: "Son Tarihi Uzat",
     changeBooks: "%12 geçen aydan",
     changeMembers: "%8 geçen aydan",
-    booksBorrowed: "Ödünç Alınan Kitaplar",
     avgDays: "Ort. 9 gün",
-    overdueItems: "Gecikmiş Öğeler",
     requiresAttention: "Dikkat gerektiriyor",
+    recentActivity: "Son Aktiviteler",
+    viewAll: "Tümünü Gör",
+    borrowed: "ödünç aldı",
+    returned: "iade etti",
+    mostBorrowedBooks: "En Çok Ödünç Alınan Kitaplar",
+    overdueItemsAttention: "Dikkat Gerektiren Gecikmiş Öğeler",
+    noOverdueItems: "Gecikmiş öğe yok.",
+    borrowCount: "{{count}} kez",
+    itemCount: "{{count}} öğe",
+    action: "İşlem",
+    sendReminder: "Hatırlatma Gönder",
+    extendDueDate: "Tarihi Uzat",
+    noRecentActivity: "Son aktivite yok.",
+    noDataAvailable: "Veri bulunmuyor.",
     quickActions: "Hızlı İşlemler",
     addBookDesc: "Kataloğa yeni kitap ekle",
     addMemberDesc: "Yeni üye kaydı yap",
-    quickBorrow: "Hızlı Ödünç",
+    quickBorrow: "Hızlı Ödünç Al",
     quickBorrowDesc: "Kitabı tara ve ödünç al",
     processReturn: "İade İşlemi",
-    processReturnDesc: "Ödünç alınan kitabı iade et",
-    recentActivity: "Son Aktiviteler",
-    viewAll: "Tümünü Gör",
-    noRecentActivity: "Son aktivite yok",
-    borrowed: "ödünç aldı",
-    mostBorrowedBooks: "En Çok Ödünç Alınan Kitaplar",
-    noDataAvailable: "Veri yok",
-    times: "{{count}} kez",
-    overdueItemsAttention: "Dikkat Gerektiren Gecikmiş Öğeler",
-    items: "öğe",
-    noOverdueItems: "Gecikmiş öğe yok"
+    processReturnDesc: "Ödünç alınmış kitabı iade et"
   },
   notFound: {
     title: "404 Sayfa Bulunamadı",
