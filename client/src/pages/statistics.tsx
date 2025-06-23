@@ -303,7 +303,7 @@ export default function Statistics() {
       </motion.div>
 
       {/* Main Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 items-stretch">
         <motion.div variants={itemVariants}>
           <StatsCard
             title={t("statistics.totalBooks")}
