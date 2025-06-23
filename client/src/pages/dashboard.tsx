@@ -18,16 +18,19 @@ import {
   Clock,
   TriangleAlert 
 } from "lucide-react";
-import { format } from "date-fns";
+import { format, formatDistanceToNow } from "date-fns";
 import { useTranslation } from "react-i18next";
 import { Bar, BarChart, CartesianGrid, Legend, Pie, PieChart, ResponsiveContainer, Tooltip, XAxis, YAxis, Cell } from "recharts";
 import { motion } from "framer-motion";
+import { tr, enUS } from "date-fns/locale";
+import { Progress } from "@/components/ui/progress";
 
 interface Stats {
   totalBooks: number;
   totalUsers: number;
   activeBorrowings: number;
   overdueBorrowings: number;
+  borrowCount: number;
 }
 
 interface PopularBook {
@@ -51,10 +54,11 @@ interface OverdueBorrowing {
 }
 
 interface RecentActivity {
+  type: 'borrowing' | 'return';
   id: number;
+  date: string;
   user: { name: string };
   book: { title: string };
-  borrowDate: string;
 }
 
 const CustomTooltip = ({ active, payload, label }: any) => {
@@ -97,7 +101,7 @@ const itemVariants = {
 };
 
 export default function Dashboard() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const { data: stats } = useQuery<Stats>({
     queryKey: ["/api/stats"],
   });
@@ -114,11 +118,9 @@ export default function Dashboard() {
     queryKey: ["/api/borrowings/overdue"],
   });
 
-  const { data: activeBorrowings } = useQuery<RecentActivity[]>({
-    queryKey: ["/api/borrowings/active"],
+  const { data: recentActivities } = useQuery<RecentActivity[]>({
+    queryKey: ["/api/activities/recent"],
   });
-
-  const recentActivities: RecentActivity[] = activeBorrowings?.slice(0, 5) || [];
 
   const overdueColumns = [
     {
@@ -126,14 +128,14 @@ export default function Dashboard() {
       title: t("borrowing.member"),
       render: (value: string, row: any) => (
         <div className="flex items-center">
-          <div className="w-8 h-8 bg-text-muted/20 rounded-full flex items-center justify-center mr-3">
-            <span className="text-xs font-medium text-text-muted">
+          <div className="w-8 h-8 bg-muted rounded-full flex items-center justify-center mr-3">
+            <span className="text-xs font-medium text-muted-foreground">
               {value?.split(' ').map((n: string) => n[0]).join('').toUpperCase()}
             </span>
           </div>
           <div>
-            <p className="font-medium text-on-surface">{value}</p>
-            <p className="text-sm text-text-muted">{row.user.email}</p>
+            <p className="font-medium text-foreground">{value}</p>
+            <p className="text-sm text-muted-foreground">{row.user.email}</p>
           </div>
         </div>
       ),
@@ -143,8 +145,8 @@ export default function Dashboard() {
       title: t("borrowing.book"),
       render: (value: string, row: any) => (
         <div>
-          <p className="font-medium text-on-surface">{value}</p>
-          <p className="text-sm text-text-muted font-mono">ISBN: {row.book.isbn}</p>
+          <p className="font-medium text-foreground">{value}</p>
+          <p className="text-sm text-muted-foreground font-mono">ISBN: {row.book.isbn}</p>
         </div>
       ),
     },
@@ -184,6 +186,54 @@ export default function Dashboard() {
       animate="visible"
       variants={containerVariants}
     >
+      <motion.div variants={itemVariants}>
+        <Card>
+          <CardHeader>
+            <CardTitle>{t("dashboard.quickActions")}</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              <Link to="/books?action=add">
+                <div className="flex flex-col items-center justify-center p-4 border rounded-lg hover:bg-muted transition-colors text-center h-full">
+                  <div className="p-3 bg-blue-100 dark:bg-blue-900/30 rounded-full mb-2">
+                    <Plus className="h-6 w-6 text-blue-600 dark:text-blue-400" />
+                  </div>
+                  <p className="font-semibold text-sm">{t("books.addBook")}</p>
+                  <p className="text-xs text-muted-foreground">{t("dashboard.addBookDesc")}</p>
+                </div>
+              </Link>
+              <Link to="/members?action=add">
+                <div className="flex flex-col items-center justify-center p-4 border rounded-lg hover:bg-muted transition-colors text-center h-full">
+                  <div className="p-3 bg-green-100 dark:bg-green-900/30 rounded-full mb-2">
+                    <UserPlus className="h-6 w-6 text-green-600 dark:text-green-400" />
+                  </div>
+                  <p className="font-semibold text-sm">{t("members.addMember")}</p>
+                  <p className="text-xs text-muted-foreground">{t("dashboard.addMemberDesc")}</p>
+                </div>
+              </Link>
+               <Link to="/borrowing?action=add">
+                <div className="flex flex-col items-center justify-center p-4 border rounded-lg hover:bg-muted transition-colors text-center h-full">
+                  <div className="p-3 bg-orange-100 dark:bg-orange-900/30 rounded-full mb-2">
+                    <BarChart3 className="h-6 w-6 text-orange-600 dark:text-orange-400" />
+                  </div>
+                  <p className="font-semibold text-sm">{t("dashboard.quickBorrow")}</p>
+                  <p className="text-xs text-muted-foreground">{t("dashboard.quickBorrowDesc")}</p>
+                </div>
+              </Link>
+              <Link to="/returns">
+                <div className="flex flex-col items-center justify-center p-4 border rounded-lg hover:bg-muted transition-colors text-center h-full">
+                  <div className="p-3 bg-red-100 dark:bg-red-900/30 rounded-full mb-2">
+                    <Undo2 className="h-6 w-6 text-red-600 dark:text-red-400" />
+                  </div>
+                  <p className="font-semibold text-sm">{t("dashboard.processReturn")}</p>
+                  <p className="text-xs text-muted-foreground">{t("dashboard.processReturnDesc")}</p>
+                </div>
+              </Link>
+            </div>
+          </CardContent>
+        </Card>
+      </motion.div>
+
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         <motion.div variants={itemVariants}>
@@ -306,134 +356,79 @@ export default function Dashboard() {
         </motion.div>
       </div>
 
-      {/* Quick Actions */}
-      <motion.div variants={itemVariants}>
-        <Card>
-          <CardHeader>
-            <CardTitle>{t("dashboard.quickActions")}</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-              <Link href="/books">
-                <Button variant="outline" className="w-full h-auto p-4 flex items-center justify-start group border-primary/20 hover:border-primary hover:bg-primary/5">
-                  <div className="w-10 h-10 bg-primary/10 group-hover:bg-primary/20 rounded-lg flex items-center justify-center mr-3">
-                    <Plus className="text-primary" size={20} />
-                  </div>
-                  <div className="text-left">
-                    <p className="font-medium text-on-surface">{t("books.addBook")}</p>
-                    <p className="text-sm text-text-muted">{t("dashboard.addBookDesc")}</p>
-                  </div>
-                </Button>
-              </Link>
-              
-              <Link href="/members">
-                <Button variant="outline" className="w-full h-auto p-4 flex items-center justify-start group border-secondary/20 hover:border-secondary hover:bg-secondary/5">
-                  <div className="w-10 h-10 bg-secondary/10 group-hover:bg-secondary/20 rounded-lg flex items-center justify-center mr-3">
-                    <UserPlus className="text-secondary" size={20} />
-                  </div>
-                  <div className="text-left">
-                    <p className="font-medium text-on-surface">{t("members.addMember")}</p>
-                    <p className="text-sm text-text-muted">{t("dashboard.addMemberDesc")}</p>
-                  </div>
-                </Button>
-              </Link>
-              
-              <Link href="/borrowing">
-                <Button variant="outline" className="w-full h-auto p-4 flex items-center justify-start group border-accent/20 hover:border-accent hover:bg-accent/5">
-                  <div className="w-10 h-10 bg-accent/10 group-hover:bg-accent/20 rounded-lg flex items-center justify-center mr-3">
-                    <BarChart3 className="text-accent" size={20} />
-                  </div>
-                  <div className="text-left">
-                    <p className="font-medium text-on-surface">{t("dashboard.quickBorrow")}</p>
-                    <p className="text-sm text-text-muted">{t("dashboard.quickBorrowDesc")}</p>
-                  </div>
-                </Button>
-              </Link>
-              
-              <Link href="/returns">
-                <Button variant="outline" className="w-full h-auto p-4 flex items-center justify-start group border-destructive/20 hover:border-destructive hover:bg-destructive/5">
-                  <div className="w-10 h-10 bg-destructive/10 group-hover:bg-destructive/20 rounded-lg flex items-center justify-center mr-3">
-                    <Undo2 className="text-destructive" size={20} />
-                  </div>
-                  <div className="text-left">
-                    <p className="font-medium text-on-surface">{t("dashboard.processReturn")}</p>
-                    <p className="text-sm text-text-muted">{t("dashboard.processReturnDesc")}</p>
-                  </div>
-                </Button>
-              </Link>
-            </div>
-          </CardContent>
-        </Card>
-      </motion.div>
-
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Recent Activity */}
+        {/* Son Aktiviteler */}
         <motion.div variants={itemVariants}>
-          <Card>
+          <Card className="h-full">
             <CardHeader className="flex flex-row items-center justify-between">
               <CardTitle>{t("dashboard.recentActivity")}</CardTitle>
-              <Button variant="link" size="sm">{t("dashboard.viewAll")}</Button>
+              <Button variant="link" size="sm" asChild>
+                <Link to="/borrowing">{t("dashboard.viewAll")}</Link>
+              </Button>
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
-                {recentActivities.length === 0 ? (
-                  <p className="text-center text-text-muted py-8">{t("dashboard.noRecentActivity")}</p>
-                ) : (
-                  recentActivities.map((activity) => (
-                    <div key={activity.id} className="flex items-start space-x-3 p-3 rounded-lg hover:bg-muted/50 transition-colors">
-                      <div className="w-8 h-8 bg-secondary/10 rounded-full flex items-center justify-center flex-shrink-0">
-                        <Book className="text-secondary" size={14} />
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <p className="text-sm text-on-surface">
-                          <span className="font-medium">{activity.user.name}</span> {t("dashboard.borrowed")} <span className="font-medium">"{activity.book.title}"</span>
-                        </p>
-                        <p className="text-xs text-text-muted">
-                          {format(new Date(activity.borrowDate), "MMM dd, yyyy")}
-                        </p>
-                      </div>
+                {recentActivities?.map((activity) => (
+                  <div key={`${activity.type}-${activity.id}`} className="flex items-center">
+                    <div className={`w-9 h-9 rounded-full flex items-center justify-center mr-4 ${activity.type === 'borrowing' ? 'bg-green-100 dark:bg-green-900/30' : 'bg-blue-100 dark:bg-blue-900/30'}`}>
+                      {activity.type === 'borrowing' ? (
+                        <Book size={16} className="text-green-600 dark:text-green-400" />
+                      ) : (
+                        <Undo2 size={16} className="text-blue-600 dark:text-blue-400" />
+                      )}
                     </div>
-                  ))
-                )}
+                    <div className="flex-1">
+                      <p className="text-sm text-foreground">
+                        <span className="font-medium">{activity.user.name}</span>
+                        {activity.type === 'borrowing' ? ` ${t("dashboard.borrowed")} ` : ` ${t("dashboard.returned")} `}
+                        <span className="font-medium">"{activity.book.title}"</span>
+                      </p>
+                      <p className="text-xs text-muted-foreground">
+                        {format(new Date(activity.date), "MMM dd, yyyy")}
+                      </p>
+                    </div>
+                  </div>
+                ))}
               </div>
             </CardContent>
           </Card>
         </motion.div>
 
-        {/* Popular Books */}
+        {/* En Çok Ödünç Alınan Kitaplar */}
         <motion.div variants={itemVariants}>
-          <Card>
+          <Card className="h-full">
             <CardHeader className="flex flex-row items-center justify-between">
               <CardTitle>{t("dashboard.mostBorrowedBooks")}</CardTitle>
-              <Button variant="link" size="sm">{t("dashboard.viewAll")}</Button>
+              <Button variant="link" size="sm" asChild>
+                <Link to="/statistics">{t("dashboard.viewAll")}</Link>
+              </Button>
             </CardHeader>
             <CardContent>
-              <div className="space-y-4">
-                {!popularBooks || popularBooks.length === 0 ? (
-                  <p className="text-center text-text-muted py-8">{t("dashboard.noDataAvailable")}</p>
-                ) : (
-                  popularBooks.slice(0, 5).map((book, index) => (
-                    <div key={book.id} className="flex items-center space-x-4">
-                      <div className="w-8 h-8 bg-primary/10 rounded-full flex items-center justify-center flex-shrink-0">
-                        <span className="text-sm font-medium text-primary">{index + 1}</span>
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <p className="font-medium text-on-surface truncate">{book.title}</p>
-                        <p className="text-sm text-text-muted">{book.author}</p>
-                      </div>
-                      <Badge variant="secondary" className="font-mono">
-                        {book.borrowCount}x
-                      </Badge>
+              <ul className="space-y-4">
+                {popularBooks?.slice(0,5).map((book, index) => (
+                  <li key={book.id} className="flex items-center">
+                    <div className="w-8 h-8 bg-blue-100 dark:bg-blue-900/30 rounded-full flex items-center justify-center mr-3 flex-shrink-0">
+                      <span className="text-sm font-bold text-blue-600 dark:text-blue-400">{index + 1}</span>
                     </div>
-                  ))
-                )}
-              </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="font-medium text-foreground truncate">{book.title}</p>
+                      <p className="text-sm text-muted-foreground">{book.author}</p>
+                    </div>
+                    <div className="w-28 text-right ml-4">
+                      <span className="text-sm font-semibold text-foreground mr-2">
+                        {t('dashboard.borrowCount', {count: book.borrowCount})}
+                      </span>
+                      <Progress value={(book.borrowCount / (popularBooks[0]?.borrowCount || 1)) * 100} className="h-2 mt-1" />
+                    </div>
+                  </li>
+                ))}
+              </ul>
             </CardContent>
           </Card>
         </motion.div>
       </div>
 
-      {/* Overdue Items */}
+      {/* Gecikmiş Öğeler */}
       {overdueBorrowings && overdueBorrowings.length > 0 && (
         <motion.div variants={itemVariants}>
           <Card>
@@ -443,12 +438,12 @@ export default function Dashboard() {
                 {t("dashboard.overdueItemsAttention")}
               </CardTitle>
               <Badge variant="destructive">
-                {overdueBorrowings.length} {t("dashboard.items")}
+                {t('dashboard.itemCount', {count: overdueBorrowings.length})}
               </Badge>
             </CardHeader>
             <CardContent>
               <DataTable
-                data={overdueBorrowings.slice(0, 10)}
+                data={overdueBorrowings.slice(0, 5)}
                 columns={overdueColumns}
                 pageSize={5}
                 emptyMessage={t("dashboard.noOverdueItems")}
