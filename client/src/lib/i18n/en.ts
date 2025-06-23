@@ -229,7 +229,9 @@ export const en = {
     topReadersOfMonth: "Top Readers of the Month",
     topReadersOfMonthDesc: "Members who have read the most pages this month",
     pagesRead: "pages read",
-    noMonthlyReaders: "No book reading data found for this month."
+    noMonthlyReaders: "No book reading data found for this month.",
+    percentFromLastMonth: "%{{percent}} from last month",
+    avgDaysLabel: "Avg. {{days}} days"
   },
   errors: {
     required: "This field is required",
@@ -279,7 +281,16 @@ export const en = {
     sendReminder: "Send Reminder",
     extendDueDate: "Extend Due Date",
     daysOverdue: "Days Overdue",
-    action: "Action"
+    action: "Action",
+    mostBorrowedBooks: "Most Borrowed Books",
+    borrowCount: "{{count}} borrows",
+    borrowed: "borrowed",
+    returned: "returned",
+    avgDays: "vs. last 30 days",
+    requiresAttention: "requires attention",
+    booksBorrowed: "Books Borrowed",
+    percentFromLastMonth: "%{{percent}} from last month",
+    avgDaysLabel: "Avg. {{days}} days"
   },
   notFound: {
     title: "Page Not Found",

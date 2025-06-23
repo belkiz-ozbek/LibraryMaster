@@ -6,7 +6,7 @@ import {
   type BorrowingWithDetails, type UserWithBorrowings, type BookWithBorrowings
 } from "@shared/schema";
 import { db } from "./db";
-import { eq, desc, asc, like, or, and, count, sql, lt, gte, ilike, isNotNull } from "drizzle-orm";
+import { eq, desc, asc, like, or, and, count, sql, lt, gte, ilike, isNotNull, lte } from "drizzle-orm";
 
 export interface IStorage {
   // User operations
@@ -46,6 +46,9 @@ export interface IStorage {
     totalUsers: number;
     activeBorrowings: number;
     overdueBorrowings: number;
+    totalBooksChangePercent: number;
+    totalUsersChangePercent: number;
+    avgBorrowDays: number;
   }>;
   getMostBorrowedBooks(): Promise<Array<Book & { borrowCount: number }>>;
   getMostActiveUsers(): Promise<Array<User & { borrowCount: number }>>;
@@ -344,9 +347,16 @@ export class DatabaseStorage implements IStorage {
     totalUsers: number;
     activeBorrowings: number;
     overdueBorrowings: number;
+    totalBooksChangePercent: number;
+    totalUsersChangePercent: number;
+    avgBorrowDays: number;
   }> {
     const today = new Date().toISOString().split('T')[0];
-    
+    const now = new Date();
+    const startOfThisMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+    const startOfLastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+    const endOfLastMonth = new Date(now.getFullYear(), now.getMonth(), 0);
+
     const [booksCount] = await db.select({ count: count() }).from(books);
     const [usersCount] = await db.select({ count: count() }).from(users);
     const [activeBorrowingsCount] = await db.select({ count: count() })
@@ -361,11 +371,66 @@ export class DatabaseStorage implements IStorage {
         )
       );
 
+    // Bu ay eklenen kitap sayısı
+    const [booksThisMonth] = await db.select({ count: count() })
+      .from(books)
+      .where(gte(books.createdAt, startOfThisMonth));
+    // Geçen ay eklenen kitap sayısı
+    const [booksLastMonth] = await db.select({ count: count() })
+      .from(books)
+      .where(and(
+        gte(books.createdAt, startOfLastMonth),
+        lt(books.createdAt, startOfThisMonth)
+      ));
+    // Bu ay eklenen üye sayısı
+    const [usersThisMonth] = await db.select({ count: count() })
+      .from(users)
+      .where(gte(users.membershipDate, startOfThisMonth.toISOString().split('T')[0]));
+    // Geçen ay eklenen üye sayısı
+    const [usersLastMonth] = await db.select({ count: count() })
+      .from(users)
+      .where(and(
+        gte(users.membershipDate, startOfLastMonth.toISOString().split('T')[0]),
+        lt(users.membershipDate, startOfThisMonth.toISOString().split('T')[0])
+      ));
+    // Yüzdelik değişim hesapla
+    let totalBooksChangePercent;
+    if (booksLastMonth.count === 0 && booksThisMonth.count > 0) {
+      totalBooksChangePercent = 100;
+    } else if (booksLastMonth.count === 0) {
+      totalBooksChangePercent = 0;
+    } else {
+      totalBooksChangePercent = Math.round(((booksThisMonth.count - booksLastMonth.count) / booksLastMonth.count) * 100);
+    }
+    let totalUsersChangePercent;
+    if (usersLastMonth.count === 0 && usersThisMonth.count > 0) {
+      totalUsersChangePercent = 100;
+    } else if (usersLastMonth.count === 0) {
+      totalUsersChangePercent = 0;
+    } else {
+      totalUsersChangePercent = Math.round(((usersThisMonth.count - usersLastMonth.count) / usersLastMonth.count) * 100);
+    }
+
+    // Ortalama ödünç gününü hesapla
+    const borrowingsWithReturn = await db.select({
+      borrowDate: borrowings.borrowDate,
+      returnDate: borrowings.returnDate
+    }).from(borrowings).where(isNotNull(borrowings.returnDate));
+    const avgBorrowDays = borrowingsWithReturn.length
+      ? Math.round(borrowingsWithReturn.reduce((sum, b) => {
+          if (!b.returnDate) return sum;
+          return sum + ((new Date(b.returnDate).getTime() - new Date(b.borrowDate).getTime()) / (1000 * 60 * 60 * 24));
+        }, 0) / borrowingsWithReturn.length)
+      : 0;
+
     return {
       totalBooks: booksCount.count,
       totalUsers: usersCount.count,
       activeBorrowings: activeBorrowingsCount.count,
       overdueBorrowings: overdueBorrowingsCount.count,
+      totalBooksChangePercent,
+      totalUsersChangePercent,
+      avgBorrowDays
     };
   }
 

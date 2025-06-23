@@ -31,6 +31,9 @@ interface Stats {
   activeBorrowings: number;
   overdueBorrowings: number;
   borrowCount: number;
+  totalBooksChangePercent?: number;
+  totalUsersChangePercent?: number;
+  avgBorrowDays?: number;
 }
 
 interface PopularBook {
@@ -242,7 +245,7 @@ export default function Dashboard() {
         <StatsCard
           title={t("statistics.totalBooks")}
           value={stats?.totalBooks || 0}
-          change={t("dashboard.changeBooks")}
+          change={typeof stats?.totalBooksChangePercent === 'number' ? t("dashboard.percentFromLastMonth", { percent: stats.totalBooksChangePercent }) : t("dashboard.changeBooks")}
           changeType="positive"
           icon={<Book size={20} />}
           iconColor="bg-primary/10 text-primary"
@@ -252,7 +255,7 @@ export default function Dashboard() {
         <StatsCard
           title={t("statistics.activeMembers")}
           value={stats?.totalUsers || 0}
-          change={t("dashboard.changeMembers")}
+          change={typeof stats?.totalUsersChangePercent === 'number' ? t("dashboard.percentFromLastMonth", { percent: stats.totalUsersChangePercent }) : t("dashboard.changeMembers")}
           changeType="positive"
           icon={<Users size={20} />}
           iconColor="bg-secondary/10 text-secondary"
@@ -262,7 +265,7 @@ export default function Dashboard() {
         <StatsCard
           title={t("dashboard.booksBorrowed")}
           value={stats?.activeBorrowings || 0}
-          change={t("dashboard.avgDays")}
+          change={typeof stats?.avgBorrowDays === 'number' ? t("dashboard.avgDaysLabel", { days: stats.avgBorrowDays }) : t("dashboard.avgDays")}
           changeType="neutral"
           icon={<HandHeart size={20} />}
           iconColor="bg-accent/10 text-accent"

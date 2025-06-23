@@ -274,7 +274,16 @@ export const tr = {
     sendReminder: "Hatırlatma Gönder",
     extendDueDate: "Son Tarihi Uzat",
     daysOverdue: "Geciken Günler",
-    action: "İşlem"
+    action: "İşlem",
+    mostBorrowedBooks: "En Çok Ödünç Alınan Kitaplar",
+    borrowCount: "{{count}} ödünç",
+    borrowed: "ödünç aldı",
+    returned: "iade etti",
+    avgDays: "son 30 güne göre",
+    requiresAttention: "ilgi gerektiriyor",
+    booksBorrowed: "Ödünç Alınan Kitaplar",
+    percentFromLastMonth: "%{{percent}} geçen aydan",
+    avgDaysLabel: "Ort. {{days}} gün"
   },
   notFound: {
     title: "Sayfa Bulunamadı",
