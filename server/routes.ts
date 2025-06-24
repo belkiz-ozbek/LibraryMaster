@@ -238,12 +238,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post("/api/books", requireAuth, requireAdmin, async (req, res) => {
     try {
+      console.log("Book creation request body:", req.body);
       const bookData = insertBookSchema.parse(req.body);
+      if (!bookData.isbn || bookData.isbn.trim() === "") {
+        return res.status(400).json({ message: "ISBN alanı boş olamaz ve benzersiz olmalıdır." });
+      }
+      console.log("Parsed book data:", bookData);
       const book = await storage.createBook(bookData);
+      console.log("Created book:", book);
       res.status(201).json(book);
     } catch (error) {
+      console.error("Error creating book:", error);
       if (error instanceof z.ZodError) {
+        console.error("Zod validation errors:", error.errors);
         return res.status(400).json({ message: "Invalid book data", errors: error.errors });
+      }
+      // Duplicate ISBN için özel hata mesajı
+      if (error && typeof error === 'object' && 'code' in error && error.code === '23505') {
+        return res.status(400).json({ message: "Bu ISBN ile zaten bir kitap mevcut. Lütfen farklı bir ISBN girin." });
       }
       res.status(500).json({ message: "Failed to create book" });
     }
