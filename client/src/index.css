@@ -66,7 +66,9 @@
   }
 
   body {
-    @apply bg-surface text-on-surface;
+    /* Modern soft gradient background */
+    background: linear-gradient(135deg, #e0e7ff 0%, #f3f8ff 100%);
+    color: hsl(var(--on-surface));
     font-family: 'Roboto', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
   }
 }
@@ -209,3 +211,38 @@
     @apply w-full;
   }
 }
+
+@keyframes confetti-burst {
+  0% { opacity: 0; transform: scale(0.7) translateY(-20px); }
+  30% { opacity: 1; transform: scale(1.1) translateY(0); }
+  100% { opacity: 0.7; transform: scale(1) translateY(30px); }
+}
+.animate-confetti-burst {
+  animation: confetti-burst 1.2s cubic-bezier(0.4,0,0.2,1);
+}
+
+.soft-glow-spot {
+  background: radial-gradient(ellipse at center, rgba(255,244,180,0.7) 0%, rgba(255,244,180,0.2) 60%, rgba(255,244,180,0) 100%);
+  filter: blur(8px);
+  animation: soft-glow-pulse 2.5s ease-in-out infinite alternate;
+}
+@keyframes soft-glow-pulse {
+  0% { transform: scale(1) translateY(0); opacity: 0.85; }
+  100% { transform: scale(1.12) translateY(8px); opacity: 1; }
+}
+
+.aurora-background {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 140%;
+  height: 140%;
+  background: radial-gradient(ellipse at center, rgba(255, 235, 179, 0.4) 0%, rgba(252, 165, 165, 0.3) 30%, rgba(167, 139, 250, 0.2) 60%, rgba(255, 255, 255, 0) 100%);
+  animation: aurora-pulse 10s ease-in-out infinite alternate;
+  transform-origin: center;
+}
+@keyframes aurora-pulse {
+  0% { transform: translate(-50%, -50%) scale(1) rotate(-5deg); filter: blur(10px) brightness(1); }
+  50% { transform: translate(-50%, -48%) scale(1.2) rotate(5deg); filter: blur(14px) brightness(1.1); }
+  100% { transform: translate(-50%, -50%) scale(1) rotate(-5deg); filter: blur(10px) brightness(1); }
+} 
