@@ -16,11 +16,11 @@ import {
   Undo2,
   ArrowUp,
   Clock,
-  TriangleAlert 
+  TriangleAlert
 } from "lucide-react";
 import { format, formatDistanceToNow } from "date-fns";
 import { useTranslation } from "react-i18next";
-import { Bar, BarChart, CartesianGrid, Legend, Pie, PieChart, ResponsiveContainer, Tooltip, XAxis, YAxis, Cell } from "recharts";
+import { Bar, BarChart, CartesianGrid, Legend, Pie, PieChart, ResponsiveContainer, Tooltip, XAxis, YAxis, Cell, Area, AreaChart } from "recharts";
 import { motion } from "framer-motion";
 import { tr, enUS } from "date-fns/locale";
 import { Progress } from "@/components/ui/progress";
@@ -67,18 +67,16 @@ interface RecentActivity {
 const CustomTooltip = ({ active, payload, label }: any) => {
   if (active && payload && payload.length) {
     return (
-      <div className="bg-card p-3 rounded-lg border border-border shadow-lg">
+      <div className="bg-card p-3 rounded-lg border border-border shadow-lg backdrop-blur-sm">
         <p className="font-medium text-card-foreground">{label}</p>
-        <p style={{ color: payload[0].color }}>
-          {`${payload[0].name}: ${payload[0].value}`}
-        </p>
-        <p style={{ color: payload[1].color }}>
-          {`${payload[1].name}: ${payload[1].value}`}
-        </p>
+        {payload.map((entry: any, index: number) => (
+          <p key={index} style={{ color: entry.color }}>
+            {`${entry.name}: ${entry.value}`}
+          </p>
+        ))}
       </div>
     );
   }
-
   return null;
 };
 
@@ -103,8 +101,21 @@ const itemVariants = {
   },
 };
 
+// Dark theme uyumlu renk paleti
+const chartColors = {
+  primary: "hsl(var(--primary))",
+  secondary: "hsl(var(--secondary))", 
+  accent: "hsl(var(--accent))",
+  muted: "hsl(var(--muted-foreground))",
+  success: "#10b981",
+  warning: "#f59e0b",
+  danger: "hsl(var(--destructive))",
+  info: "#3b82f6"
+};
+
 export default function Dashboard() {
   const { t, i18n } = useTranslation();
+
   const { data: stats } = useQuery<Stats>({
     queryKey: ["/api/stats"],
   });
@@ -120,8 +131,6 @@ export default function Dashboard() {
   const { data: overdueBorrowings } = useQuery<OverdueBorrowing[]>({
     queryKey: ["/api/borrowings/overdue"],
   });
-
-  console.log("Gecikmiş Kitaplar (API'den gelen):", overdueBorrowings);
 
   const { data: recentActivities } = useQuery<RecentActivity[]>({
     queryKey: ["/api/activities/recent"],
@@ -294,32 +303,69 @@ export default function Dashboard() {
           </motion.div>
         </div>
 
+        {/* Charts Section */}
         <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
           {/* Weekly Activity Chart */}
           <motion.div variants={itemVariants} className="lg:col-span-3">
-        <Card>
-          <CardHeader>
+            <Card>
+              <CardHeader>
                 <CardTitle>Haftalık Aktivite</CardTitle>
-                <CardDescription>Son 7 gündeki ödünç alma ve iade işlemleri.</CardDescription>
-          </CardHeader>
-          <CardContent>
-                <ResponsiveContainer width="100%" height={240}>
-                  <BarChart
+                <CardDescription>Son 7 gündeki ödünç alma ve iade işlemleri</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <ResponsiveContainer width="100%" height={300}>
+                  <AreaChart
                     data={weeklyActivity}
-                    margin={{ top: 5, right: 20, left: -10, bottom: 0 }}
-                    barGap={4}
+                    margin={{ top: 10, right: 30, left: 0, bottom: 0 }}
                   >
+                    <defs>
+                      <linearGradient id="colorBorrowed" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="5%" stopColor={chartColors.primary} stopOpacity={0.8}/>
+                        <stop offset="95%" stopColor={chartColors.primary} stopOpacity={0.1}/>
+                      </linearGradient>
+                      <linearGradient id="colorReturned" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="5%" stopColor={chartColors.secondary} stopOpacity={0.8}/>
+                        <stop offset="95%" stopColor={chartColors.secondary} stopOpacity={0.1}/>
+                      </linearGradient>
+                    </defs>
                     <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="hsl(var(--border) / 0.5)" />
-                    <XAxis dataKey="day" tickLine={false} axisLine={false} stroke="hsl(var(--muted-foreground))" fontSize={12} />
-                    <YAxis tickLine={false} axisLine={false} stroke="hsl(var(--muted-foreground))" fontSize={12} />
+                    <XAxis 
+                      dataKey="day" 
+                      tickLine={false} 
+                      axisLine={false} 
+                      stroke="hsl(var(--muted-foreground))" 
+                      fontSize={12} 
+                    />
+                    <YAxis 
+                      tickLine={false} 
+                      axisLine={false} 
+                      stroke="hsl(var(--muted-foreground))" 
+                      fontSize={12} 
+                    />
                     <Tooltip
                       cursor={{ fill: "hsl(var(--accent) / 0.1)" }}
                       content={<CustomTooltip />}
                     />
-                    <Legend wrapperStyle={{ paddingTop: '20px' }} iconType="circle" />
-                    <Bar dataKey="borrowed" fill="hsl(var(--primary))" name="Ödünç Alınan" radius={[4, 4, 0, 0]} barSize={15} />
-                    <Bar dataKey="returned" fill="hsl(var(--secondary))" name="İade Edilen" radius={[4, 4, 0, 0]} barSize={15} />
-                  </BarChart>
+                    <Legend wrapperStyle={{ paddingTop: '10px' }} iconType="circle" />
+                    <Area 
+                      type="monotone" 
+                      dataKey="borrowed" 
+                      stroke={chartColors.primary} 
+                      fillOpacity={1} 
+                      fill="url(#colorBorrowed)" 
+                      name="Ödünç Alınan"
+                      strokeWidth={2}
+                    />
+                    <Area 
+                      type="monotone" 
+                      dataKey="returned" 
+                      stroke={chartColors.secondary} 
+                      fillOpacity={1} 
+                      fill="url(#colorReturned)" 
+                      name="İade Edilen"
+                      strokeWidth={2}
+                    />
+                  </AreaChart>
                 </ResponsiveContainer>
               </CardContent>
             </Card>
@@ -330,32 +376,39 @@ export default function Dashboard() {
             <Card>
               <CardHeader>
                 <CardTitle>Koleksiyon Dağılımı</CardTitle>
-                <CardDescription>Kitapların türlere göre dağılımı.</CardDescription>
+                <CardDescription>Kitapların türlere göre dağılımı</CardDescription>
               </CardHeader>
               <CardContent>
-                <ResponsiveContainer width="100%" height={240}>
+                <ResponsiveContainer width="100%" height={300}>
                   <PieChart>
                     <Pie
                       data={genreDistribution}
                       cx="50%"
                       cy="50%"
                       innerRadius={60}
-                      outerRadius={90}
-                      paddingAngle={5}
+                      outerRadius={100}
+                      paddingAngle={8}
                       dataKey="value"
                       labelLine={false}
                       label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
                     >
-                      <Cell fill="hsl(var(--primary))" />
-                      <Cell fill="hsl(var(--secondary))" />
-                      <Cell fill="hsl(var(--accent))" />
-                      <Cell fill="hsl(var(--muted-foreground))" />
+                      {genreDistribution.map((entry, index) => (
+                        <Cell 
+                          key={`cell-${index}`} 
+                          fill={Object.values(chartColors)[index % Object.values(chartColors).length]}
+                          stroke="hsl(var(--background))"
+                          strokeWidth={2}
+                        />
+                      ))}
                     </Pie>
-                    <Tooltip cursor={{ fill: "hsl(var(--accent) / 0.1)" }} />
+                    <Tooltip 
+                      cursor={{ fill: "hsl(var(--accent) / 0.1)" }}
+                      content={<CustomTooltip />}
+                    />
                   </PieChart>
                 </ResponsiveContainer>
-          </CardContent>
-        </Card>
+              </CardContent>
+            </Card>
           </motion.div>
         </div>
 
@@ -437,10 +490,13 @@ export default function Dashboard() {
               <div className="flex items-center gap-2">
                 <TriangleAlert className="h-5 w-5 text-destructive" />
                 <CardTitle>{t("dashboard.overdueItemsAttention")}</CardTitle>
+                {overdueBorrowings && overdueBorrowings.length > 0 && (
+                  <Badge variant="destructive">{t("dashboard.itemCount", { count: overdueBorrowings.length })}</Badge>
+                )}
               </div>
-              {overdueBorrowings && overdueBorrowings.length > 0 && (
-                <Badge variant="destructive">{t("dashboard.itemCount", { count: overdueBorrowings.length })}</Badge>
-              )}
+              <Button variant="link" size="sm" asChild>
+                <Link to="/borrowing?filter=overdue">{t("dashboard.viewAll")}</Link>
+              </Button>
             </CardHeader>
             <CardContent>
               {overdueBorrowings && overdueBorrowings.length > 0 ? (
