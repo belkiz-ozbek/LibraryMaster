@@ -505,6 +505,7 @@ export default function Dashboard() {
                 <DataTable
                   columns={overdueColumns}
                   data={overdueBorrowings}
+                  pageSize={5}
                   emptyMessage={t("dashboard.noOverdueItems")}
                 />
               ) : (
