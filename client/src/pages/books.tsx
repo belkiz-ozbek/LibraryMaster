@@ -225,41 +225,6 @@ export default function Books() {
         )}
       </motion.div>
 
-      {/* Search and Stats */}
-      <motion.div variants={itemVariants}>
-        <Card>
-          <CardHeader>
-            <div className="flex items-center justify-between">
-              <div>
-                <CardTitle>{t("books.catalog")}</CardTitle>
-                <CardDescription>
-                  {displayBooks.length} {t("books.inCollection")}
-                </CardDescription>
-              </div>
-              <div className="w-80">
-                <SearchInput
-                  placeholder={t("books.searchPlaceholder")}
-                  onSearch={setSearchQuery}
-                />
-              </div>
-            </div>
-          </CardHeader>
-          <CardContent>
-            <DataTable
-              data={displayBooks}
-              columns={columns}
-              loading={isLoading}
-              emptyMessage={
-                searchQuery.length > 2 
-                  ? t("books.noBooksFound")
-                  : t("books.noBooksYet")
-              }
-              pageSize={10}
-            />
-          </CardContent>
-        </Card>
-      </motion.div>
-
       {/* Quick Stats */}
       <motion.div variants={itemVariants} className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <Card>
@@ -301,6 +266,41 @@ export default function Books() {
                 <p className="text-sm text-text-muted">{t("books.uniqueGenres")}</p>
               </div>
             </div>
+          </CardContent>
+        </Card>
+      </motion.div>
+
+      {/* Search and Stats */}
+      <motion.div variants={itemVariants}>
+        <Card>
+          <CardHeader>
+            <div className="flex items-center justify-between">
+              <div>
+                <CardTitle>{t("books.catalog")}</CardTitle>
+                <CardDescription>
+                  {displayBooks.length} {t("books.inCollection")}
+                </CardDescription>
+              </div>
+              <div className="w-80">
+                <SearchInput
+                  placeholder={t("books.searchPlaceholder")}
+                  onSearch={setSearchQuery}
+                />
+              </div>
+            </div>
+          </CardHeader>
+          <CardContent>
+            <DataTable
+              data={displayBooks}
+              columns={columns}
+              loading={isLoading}
+              emptyMessage={
+                searchQuery.length > 2 
+                  ? t("books.noBooksFound")
+                  : t("books.noBooksYet")
+              }
+              pageSize={10}
+            />
           </CardContent>
         </Card>
       </motion.div>
