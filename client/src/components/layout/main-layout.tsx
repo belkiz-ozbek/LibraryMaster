@@ -1,5 +1,5 @@
 import { ReactNode, useState } from "react";
-import Sidebar from "./sidebar";
+import ModernSidebar from "./sidebar";
 import Header from "./header";
 import { Drawer, DrawerContent, DrawerTrigger } from "@/components/ui/drawer";
 import { Menu } from "lucide-react";
@@ -14,7 +14,7 @@ export default function MainLayout({ children }: MainLayoutProps) {
     <div className="flex h-screen overflow-hidden">
       {/* Sidebar - sadece büyük ekranda */}
       <div className="hidden lg:block">
-        <Sidebar />
+        <ModernSidebar />
       </div>
       {/* Mobilde açılır menü */}
       <Drawer open={open} onOpenChange={setOpen}>
@@ -24,7 +24,7 @@ export default function MainLayout({ children }: MainLayoutProps) {
           </button>
         </DrawerTrigger>
         <DrawerContent className="p-0 max-w-xs">
-          <Sidebar />
+          <ModernSidebar />
         </DrawerContent>
       </Drawer>
       <main className="flex-1 flex flex-col overflow-hidden">
@@ -33,7 +33,7 @@ export default function MainLayout({ children }: MainLayoutProps) {
           {children}
         </div>
         <footer className="w-full py-2 text-center text-xs text-muted-foreground bg-background flex items-center justify-center gap-2">
-          Bu sistem Ahdevefa Sosyal Yardımlaşma Kulübü tarafından geliştirilmiştir.
+          Bu sistem, Ahdevefa Sosyal Yardımlaşma Kulübü yazılım geliştirici ekibi tarafından geliştirilmiştir.
           <img src="/src/assets/ahdevefa-logo.png" alt="Ahdevefa Logo" className="h-5 inline-block align-middle" />
         </footer>
       </main>
