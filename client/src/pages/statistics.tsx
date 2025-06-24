@@ -17,8 +17,11 @@ import {
 } from "lucide-react";
 import { format } from "date-fns";
 import { useTranslation } from "react-i18next";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import type { User, Book, Borrowing } from "@shared/schema";
+import { useEffect, useRef, useState } from "react";
+import Confetti from 'react-dom-confetti';
+import Player from 'lottie-react';
 
 interface Stats {
   totalBooks: number;
@@ -236,6 +239,17 @@ export default function Statistics() {
     },
   ];
 
+  const [showChampions, setShowChampions] = useState(false);
+  const [confettiActive, setConfettiActive] = useState(false);
+  const podiumRef = useRef<HTMLDivElement>(null);
+  const confettiRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (showChampions && topReaders.length >= 3) {
+      setTimeout(() => setConfettiActive(true), 700);
+    }
+  }, [showChampions, topReaders]);
+
   // Show admin access required if not admin
   if (!user?.isAdmin) {
     return (
@@ -266,40 +280,142 @@ export default function Statistics() {
         <p className="text-text-muted">{t("statistics.analyticsDesc")}</p>
       </motion.div>
 
-      {/* Top Readers of the Month */}
+      {/* Top Readers of the Month - SAHNE/PODYUM EFEKTİ */}
       <motion.div variants={itemVariants}>
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center">
-              <Crown className="mr-2 text-yellow-500" />
-              {t("statistics.topReadersOfMonth")}
-            </CardTitle>
-            <CardDescription>{t("statistics.topReadersOfMonthDesc")}</CardDescription>
-          </CardHeader>
-          <CardContent>
-            {topReaders.length > 0 ? (
-              <div className="space-y-4">
-                {topReaders.map((reader, index) => (
-                  <div key={reader.userId} className="flex items-center">
-                    <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center mr-4 text-lg font-bold text-yellow-600">
-                      {index + 1}
-                    </div>
-                    <div className="flex-1">
-                      <p className="font-medium text-on-surface">{reader.name}</p>
-                      <p className="text-sm text-text-muted">{reader.email}</p>
-                    </div>
-                    <div className="text-right">
-                      <p className="font-bold text-on-surface">{reader.totalPagesRead.toLocaleString()}</p>
-                      <p className="text-sm text-text-muted">{t("statistics.pagesRead")}</p>
+        <div>
+          <AnimatePresence mode="wait">
+            {!showChampions ? (
+              <motion.div
+                key="show-button"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, scale: 0.8 }}
+                transition={{ duration: 0.4 }}
+                className="flex justify-center"
+              >
+                <button
+                  onClick={() => setShowChampions(true)}
+                  className="px-8 py-4 bg-gradient-to-r from-yellow-400 to-amber-500 text-white text-lg font-bold rounded-full shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105"
+                >
+                  🏆 Ayın Okuma Şampiyonlarını Göster
+                </button>
+              </motion.div>
+            ) : (
+              <motion.div
+                key="champions-view"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ duration: 0.5 }}
+                className="relative"
+              >
+                {/* Canlı Arka Plan */}
+                <div className="absolute inset-0 -z-10 overflow-hidden">
+                  <div className="aurora-background" />
+                </div>
+
+                {/* Başlık */}
+                <motion.div
+                  className="w-full flex flex-col items-center mb-6"
+                  initial="hidden"
+                  animate="visible"
+                  variants={{
+                    visible: { transition: { staggerChildren: 0.1 } },
+                  }}
+                >
+                  {/* Crown Icon */}
+                  <motion.div
+                    variants={{
+                      hidden: { opacity: 0, y: -50 },
+                      visible: { opacity: 1, y: 0, transition: { duration: 0.7, ease: "easeOut" } },
+                    }}
+                  >
+                    <Crown className="text-amber-400 drop-shadow-md" size={40} />
+                  </motion.div>
+
+                  {/* Text with Masking Animation */}
+                  <div className="bg-gradient-to-r from-yellow-500 to-amber-300 bg-clip-text text-transparent drop-shadow-sm text-3xl md:text-5xl font-light tracking-wider mt-2">
+                    <motion.div
+                      className="flex"
+                      variants={{
+                        visible: { transition: { staggerChildren: 0.05 } },
+                      }}
+                    >
+                      {"Ayın Okuma Şampiyonları".split("").map((char, index) => (
+                        <div key={index} className="overflow-hidden py-1">
+                          <motion.span
+                            className="inline-block"
+                            variants={{
+                              hidden: { y: "100%", opacity: 0.5 },
+                              visible: { y: "0%", opacity: 1, transition: { duration: 0.5, ease: "circOut" } },
+                            }}
+                          >
+                            {char === " " ? "\u00A0" : char}
+                          </motion.span>
+                        </div>
+                      ))}
+                    </motion.div>
+                  </div>
+                </motion.div>
+
+                {/* Podyum ve Confetti */}
+                <div ref={podiumRef} className="relative w-full flex flex-col items-center justify-center overflow-visible">
+                  {/* Konfeti animasyonu */}
+                  <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', zIndex: 30 }}>
+                    <div style={{ marginTop: 60 }}>
+                      <Confetti active={confettiActive} config={{
+                        angle: 90,
+                        spread: 120,
+                        startVelocity: 50,
+                        elementCount: 200,
+                        dragFriction: 0.1,
+                        duration: 2500,
+                        stagger: 3,
+                        width: '12px',
+                        height: '20px',
+                        colors: ['#FFD700', '#FF69B4', '#7FDBFF', '#B10DC9', '#FFF', '#F5F5F5'],
+                      }} />
                     </div>
                   </div>
-                ))}
-              </div>
-            ) : (
-              <p className="text-text-muted text-center py-4">{t("statistics.noMonthlyReaders")}</p>
+                  {/* Podyum ve kullanıcılar */}
+                  <div className="relative flex items-end justify-center gap-20 z-10 mt-10 w-[540px] mx-auto">
+                    {/* 2. */}
+                    <PodiumUser
+                      place={2}
+                      reader={topReaders[1]}
+                      height="h-28"
+                      podiumColor="bg-gray-200"
+                      borderColor="border-gray-300"
+                      avatarBg="bg-gray-100"
+                      delay={1.1}
+                    />
+                    {/* 1. */}
+                    <PodiumUser
+                      place={1}
+                      reader={topReaders[0]}
+                      height="h-40"
+                      podiumColor="bg-yellow-100"
+                      borderColor="border-yellow-400"
+                      avatarBg="bg-yellow-50"
+                      delay={0.5}
+                    />
+                    {/* 3. */}
+                    <PodiumUser
+                      place={3}
+                      reader={topReaders[2]}
+                      height="h-24"
+                      podiumColor="bg-yellow-50"
+                      borderColor="border-yellow-200"
+                      avatarBg="bg-yellow-100"
+                      delay={1.7}
+                    />
+                  </div>
+                  {/* Podyum taban */}
+                  <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-[540px] h-10 bg-gradient-to-t from-black/10 to-transparent rounded-b-3xl blur-sm z-0" />
+                </div>
+              </motion.div>
             )}
-          </CardContent>
-        </Card>
+          </AnimatePresence>
+        </div>
       </motion.div>
 
       {/* Main Stats */}
@@ -476,6 +592,54 @@ export default function Statistics() {
           </div>
         </CardContent>
       </Card>
+    </motion.div>
+  );
+}
+
+// --- SAHNE BİLEŞENLERİ ---
+
+function PodiumUser({ place, reader, height, podiumColor, borderColor, avatarBg, delay }: any) {
+  if (!reader) return <div className={`flex flex-col items-center justify-end w-24 ${height}`}></div>;
+  const avatar = reader.name.split(' ').map((n: string) => n[0]).join('').toUpperCase();
+  return (
+    <motion.div
+      initial={{ y: "100%", opacity: 0 }}
+      animate={{ y: "0%", opacity: 1 }}
+      transition={{ type: "spring", stiffness: 50, damping: 15, delay, mass: 1.2 }}
+      className="flex flex-col items-center justify-end w-24"
+    >
+      {/* Avatar ve taç */}
+      <motion.div
+        initial={{ opacity: 0, scale: 0.5 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ delay: delay + 0.4 }}
+        className="relative flex flex-col items-center mb-2"
+      >
+        <div className={`w-16 h-16 rounded-full flex items-center justify-center text-2xl font-bold ${avatarBg} border-2 ${borderColor} shadow-lg`}>
+          {avatar}
+        </div>
+        <span className={`absolute -bottom-3 left-1/2 -translate-x-1/2 w-8 h-8 flex items-center justify-center rounded-full text-base font-bold bg-white border ${borderColor} text-yellow-500 shadow`}>{place}</span>
+      </motion.div>
+      {/* Kullanıcı adı, email ve okunan sayfa (Gecikmeli Fade-in) */}
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: delay + 0.6 }}
+        className="text-center"
+      >
+        <div className="mb-1">
+          <p className="font-medium text-base text-gray-900 whitespace-nowrap">{reader.name}</p>
+          <p className="text-xs text-gray-400 whitespace-nowrap">{reader.email}</p>
+        </div>
+        <div className="mb-2">
+          <p className="font-semibold text-base text-yellow-700">{reader.totalPagesRead.toLocaleString()}</p>
+          <p className="text-xs text-gray-400">okunan sayfa</p>
+        </div>
+      </motion.div>
+      {/* Podyum kutusu */}
+      <motion.div
+        className={`w-full ${height} ${podiumColor} border ${borderColor} rounded-t-xl flex items-end justify-center shadow-md`}
+      />
     </motion.div>
   );
 }
