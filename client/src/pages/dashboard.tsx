@@ -4,6 +4,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { DataTable } from "@/components/ui/data-table";
+import { ActivityTimeline, ActivityItem } from "@/components/ui/activity-timeline";
 import { Link } from "wouter";
 import { 
   Book, 
@@ -135,6 +136,24 @@ export default function Dashboard() {
   const { data: recentActivities } = useQuery<RecentActivity[]>({
     queryKey: ["/api/activities/recent"],
   });
+
+  // Gelişmiş aktivite feed verisi
+  const { data: activityFeed = [] } = useQuery<any[]>({
+    queryKey: ["/api/activities/feed"],
+  });
+
+  // Aktivite verilerini dönüştür
+  const transformedActivities: ActivityItem[] = activityFeed.map((activity) => ({
+    id: activity.id,
+    type: activity.type,
+    title: activity.title,
+    description: activity.description,
+    user: activity.user,
+    book: activity.book,
+    date: activity.date,
+    status: activity.status,
+    metadata: activity.metadata
+  }));
 
   // Haftalık aktivite verisi
   const { data: weeklyActivity = [] } = useQuery<any[]>({
@@ -419,33 +438,16 @@ export default function Dashboard() {
             <CardHeader className="flex flex-row items-center justify-between">
               <CardTitle>{t("dashboard.recentActivity")}</CardTitle>
                 <Button variant="link" size="sm" asChild>
-                  <Link to="/borrowing">{t("dashboard.viewAll")}</Link>
+                  <Link to="/activities">{t("dashboard.viewAll")}</Link>
                 </Button>
             </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                  {recentActivities?.slice(0, 5).map((activity) => (
-                    <div key={`${activity.type}-${activity.id}`} className="flex items-center">
-                      <div className={`w-9 h-9 rounded-full flex items-center justify-center mr-4 ${activity.type === 'borrowing' ? 'bg-green-100 dark:bg-green-900/30' : 'bg-blue-100 dark:bg-blue-900/30'}`}>
-                        {activity.type === 'borrowing' ? (
-                          <Book size={16} className="text-green-600 dark:text-green-400" />
-                        ) : (
-                          <Undo2 size={16} className="text-blue-600 dark:text-blue-400" />
-                        )}
-                      </div>
-                      <div className="flex-1">
-                        <p className="text-sm text-foreground">
-                          <span className="font-medium">{activity.user.name}</span>
-                          {activity.type === 'borrowing' ? ` ${t("dashboard.borrowed")} ` : ` ${t("dashboard.returned")} `}
-                          <span className="font-medium">"{activity.book.title}"</span>
-                        </p>
-                        <p className="text-xs text-muted-foreground">
-                          {format(new Date(activity.date), "MMM dd, yyyy")}
-                        </p>
-                      </div>
-                    </div>
-                  ))}
-              </div>
+            <CardContent className="h-full">
+              <ActivityTimeline 
+                activities={transformedActivities}
+                maxItems={5}
+                showAvatars={true}
+                variant="compact"
+              />
             </CardContent>
           </Card>
           </motion.div>
@@ -459,9 +461,9 @@ export default function Dashboard() {
                   <Link to="/statistics">{t("dashboard.viewAll")}</Link>
                 </Button>
             </CardHeader>
-            <CardContent>
+            <CardContent className="h-full">
                 <ul className="space-y-4">
-                  {popularBooks?.slice(0,5).map((book, index) => (
+                  {popularBooks?.slice(0,6).map((book, index) => (
                     <li key={book.id} className="flex items-center">
                       <div className="w-8 h-8 bg-blue-100 dark:bg-blue-900/30 rounded-full flex items-center justify-center mr-3 flex-shrink-0">
                         <span className="text-sm font-bold text-blue-600 dark:text-blue-400">{index + 1}</span>

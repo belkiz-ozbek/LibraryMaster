@@ -57,13 +57,14 @@ export const tr = {
     }
   },
   navigation: {
-    dashboard: "Ana Sayfa",
+    dashboard: "Dashboard",
     books: "Kitaplar",
     members: "Üyeler",
     borrowing: "Ödünç Alma",
-    returns: "İade",
+    returns: "İadeler",
     evaluations: "Değerlendirmeler",
     statistics: "İstatistikler",
+    activities: "Aktiviteler"
   },
   books: {
     title: "Kitaplar",
@@ -380,5 +381,18 @@ export const tr = {
     clickToSetRating: "Puan vermek için yıldızlara tıklayın",
     notesPlaceholder: "Üye davranışı, dakikliği, kitap bakımı vb. hakkında not ekleyin.",
     saveEvaluation: "Değerlendirmeyi Kaydet"
+  },
+  activity: {
+    types: {
+      borrowing: "Ödünç Alma",
+      return: "İade",
+      member_added: "Üye Eklendi",
+      book_added: "Kitap Eklendi",
+      overdue: "Gecikmiş",
+      rating: "Değerlendirme",
+      achievement: "Başarı"
+    },
+    noActivities: "Henüz aktivite bulunmuyor",
+    noActivitiesDesc: "Yeni aktiviteler burada görünecek"
   },
 }; 

@@ -42,6 +42,7 @@ export const en = {
     returns: "Returns",
     evaluations: "Evaluations",
     statistics: "Statistics",
+    activities: "Activities"
   },
   books: {
     title: "Books",
@@ -358,5 +359,18 @@ export const en = {
     clickToSetRating: "Click on stars to set rating",
     notesPlaceholder: "Add notes about member behavior, punctuality, book care, etc.",
     saveEvaluation: "Save Evaluation"
+  },
+  activity: {
+    types: {
+      borrowing: "Borrowing",
+      return: "Return",
+      member_added: "Member Added",
+      book_added: "Book Added",
+      overdue: "Overdue",
+      rating: "Rating",
+      achievement: "Achievement"
+    },
+    noActivities: "No activities yet",
+    noActivitiesDesc: "New activities will appear here"
   },
 }; 

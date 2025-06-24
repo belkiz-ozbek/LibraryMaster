@@ -439,6 +439,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Gelişmiş aktivite feed endpoint'i
+  app.get("/api/activities/feed", requireAuth, async (req, res) => {
+    try {
+      const limit = parseInt(req.query.limit as string) || 20;
+      const activities = await storage.getActivityFeed(limit);
+      res.json(activities);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch activity feed" });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }

@@ -12,6 +12,7 @@ import Borrowing from "./pages/borrowing";
 import Returns from "./pages/returns";
 import Evaluations from "./pages/evaluations";
 import Statistics from "./pages/statistics";
+import Activities from "./pages/activities";
 import NotFound from "./pages/not-found";
 import LoginPage from "./pages/login";
 import { Button } from "./components/ui/button";
@@ -116,6 +117,7 @@ function Router() {
         <Route path="/returns" component={Returns} />
         <Route path="/evaluations" component={Evaluations} />
         <Route path="/statistics" component={Statistics} />
+        <Route path="/activities" component={Activities} />
         <Route component={NotFound} />
       </Switch>
     </MainLayout>
