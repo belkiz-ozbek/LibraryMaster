@@ -54,6 +54,7 @@ export interface IStorage {
   getMostActiveUsers(): Promise<Array<User & { borrowCount: number }>>;
   getTopReadersMonth(): Promise<Array<{ userId: number; name: string; email: string; totalPagesRead: number }>>;
   getRecentActivities(limit: number): Promise<any[]>;
+  getActivityFeed(limit: number): Promise<any[]>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -118,8 +119,15 @@ export class DatabaseStorage implements IStorage {
   }
 
   async createBook(insertBook: InsertBook): Promise<Book> {
-    const [book] = await db.insert(books).values(insertBook).returning();
-    return book;
+    try {
+      console.log("Storage createBook input:", insertBook);
+      const [book] = await db.insert(books).values(insertBook).returning();
+      console.log("Storage createBook result:", book);
+      return book;
+    } catch (error) {
+      console.error("Storage createBook error:", error);
+      throw error;
+    }
   }
 
   async updateBook(id: number, updateBook: UpdateBook): Promise<Book | undefined> {
@@ -544,6 +552,118 @@ export class DatabaseStorage implements IStorage {
     combined.sort((a, b) => new Date(b.date!).getTime() - new Date(a.date!).getTime());
 
     return combined.slice(0, limit);
+  }
+
+  async getActivityFeed(limit: number): Promise<any[]> {
+    // Son ödünç almalar
+    const recentBorrowings = await db.select({
+      id: sql`concat('borrow-', ${borrowings.id})`,
+      type: sql`'borrowing'`,
+      title: sql`concat(${users.name}, ' kitap ödünç aldı')`,
+      description: sql`concat('"', ${books.title}, '" kitabını ödünç aldı')`,
+      user: { name: users.name, email: users.email },
+      book: { title: books.title, author: books.author },
+      date: borrowings.borrowDate,
+      status: sql`'completed'`,
+      metadata: sql`json_build_object('bookId', ${books.id}, 'userId', ${users.id})`
+    })
+    .from(borrowings)
+    .innerJoin(users, eq(borrowings.userId, users.id))
+    .innerJoin(books, eq(borrowings.bookId, books.id))
+    .where(eq(borrowings.status, 'borrowed'))
+    .orderBy(desc(borrowings.borrowDate))
+    .limit(Math.floor(limit * 0.4));
+
+    // Son iadeler
+    const recentReturns = await db.select({
+      id: sql`concat('return-', ${borrowings.id})`,
+      type: sql`'return'`,
+      title: sql`concat(${users.name}, ' kitap iade etti')`,
+      description: sql`concat('"', ${books.title}, '" kitabını iade etti')`,
+      user: { name: users.name, email: users.email },
+      book: { title: books.title, author: books.author },
+      date: borrowings.returnDate,
+      status: sql`'completed'`,
+      metadata: sql`json_build_object('bookId', ${books.id}, 'userId', ${users.id})`
+    })
+    .from(borrowings)
+    .innerJoin(users, eq(borrowings.userId, users.id))
+    .innerJoin(books, eq(borrowings.bookId, books.id))
+    .where(and(
+      eq(borrowings.status, 'returned'),
+      isNotNull(borrowings.returnDate)
+    ))
+    .orderBy(desc(borrowings.returnDate))
+    .limit(Math.floor(limit * 0.3));
+
+    // Son eklenen kitaplar
+    const recentBooks = await db.select({
+      id: sql`concat('book-', ${books.id})`,
+      type: sql`'book_added'`,
+      title: sql`concat('Yeni kitap eklendi: "', ${books.title}, '"')`,
+      description: sql`concat(${books.author}, ' tarafından yazılan kitap kataloğa eklendi')`,
+      book: { title: books.title, author: books.author },
+      date: books.createdAt,
+      status: sql`'completed'`,
+      metadata: sql`json_build_object('bookId', ${books.id}, 'isbn', ${books.isbn}, 'genre', ${books.genre})`
+    })
+    .from(books)
+    .orderBy(desc(books.createdAt))
+    .limit(Math.floor(limit * 0.2));
+
+    // Son eklenen üyeler
+    const recentMembers = await db.select({
+      id: sql`concat('member-', ${users.id})`,
+      type: sql`'member_added'`,
+      title: sql`concat('Yeni üye eklendi: ', ${users.name})`,
+      description: sql`concat(${users.name}, ' sisteme üye olarak kaydedildi')`,
+      user: { name: users.name, email: users.email },
+      date: users.membershipDate,
+      status: sql`'completed'`,
+      metadata: sql`json_build_object('userId', ${users.id}, 'isAdmin', ${users.isAdmin})`
+    })
+    .from(users)
+    .orderBy(desc(users.membershipDate))
+    .limit(Math.floor(limit * 0.1));
+
+    // Gecikmiş ödünç almalar
+    const overdueItems = await db.select({
+      id: sql`concat('overdue-', ${borrowings.id})`,
+      type: sql`'overdue'`,
+      title: sql`concat('Gecikmiş kitap: ', ${books.title})`,
+      description: sql`concat(${users.name}, ' tarafından ödünç alınan kitap gecikti')`,
+      user: { name: users.name, email: users.email },
+      book: { title: books.title, author: books.author },
+      date: borrowings.dueDate,
+      status: sql`'pending'`,
+      metadata: sql`json_build_object('bookId', ${books.id}, 'userId', ${users.id})`
+    })
+    .from(borrowings)
+    .innerJoin(users, eq(borrowings.userId, users.id))
+    .innerJoin(books, eq(borrowings.bookId, books.id))
+    .where(and(
+      eq(borrowings.status, 'borrowed'),
+      lt(borrowings.dueDate, new Date().toISOString().split('T')[0])
+    ))
+    .orderBy(asc(borrowings.dueDate))
+    .limit(5);
+
+    // Tüm aktiviteleri birleştir ve tarihe göre sırala
+    const allActivities = [
+      ...recentBorrowings,
+      ...recentReturns,
+      ...recentBooks,
+      ...recentMembers,
+      ...overdueItems
+    ];
+
+    allActivities.sort((a, b) => {
+      const dateA = a.date ? new Date(a.date).getTime() : 0;
+      const dateB = b.date ? new Date(b.date).getTime() : 0;
+      return dateB - dateA;
+    });
+
+    return allActivities.slice(0, limit);
   }
 }
 
