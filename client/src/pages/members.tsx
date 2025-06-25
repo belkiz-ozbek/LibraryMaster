@@ -1,5 +1,6 @@
 import { useState, useMemo } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
+import { useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { DataTable } from "@/components/ui/data-table";
@@ -41,6 +42,7 @@ export default function Members() {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedMember, setSelectedMember] = useState<User | null>(null);
   const [isFormOpen, setIsFormOpen] = useState(false);
+  const [, setLocation] = useLocation();
   const { user } = useAuth();
   const { toast } = useToast();
   const { t } = useTranslation();
@@ -125,7 +127,12 @@ export default function Members() {
             </span>
           </div>
           <div>
-            <p className="font-medium text-on-surface">{value}</p>
+            <button
+              onClick={() => setLocation(`/members/${row.id}`)}
+              className="font-medium text-on-surface hover:text-primary transition-colors text-left"
+            >
+              {value}
+            </button>
             <p className="text-sm text-text-muted">{row.email}</p>
           </div>
         </div>

@@ -82,7 +82,6 @@ export const en = {
     addMember: "Add Member",
     editMember: "Edit Member",
     deleteMember: "Delete Member",
-    memberDetails: "Member Details",
     name: "Full Name",
     email: "Email",
     membershipDate: "Membership Date",
@@ -107,6 +106,57 @@ export const en = {
     updateMemberInfo: "Update member information below.",
     enterNewMember: "Enter the details for the new member.",
     noNotes: "No notes",
+    details: {
+      title: "Member Details",
+      subtitle: "Member information and history",
+      back: "Back",
+      memberNotFound: "Member not found",
+      backToMembers: "Back to Members",
+      loading: "Loading...",
+      membershipDate: "Membership Date",
+      adminRating: "Admin Rating",
+      noRating: "No rating",
+      role: "Role",
+      admin: "Administrator",
+      member: "Member",
+      adminNotes: "Admin Notes",
+      stats: {
+        totalBorrowed: "Total Borrowed",
+        returned: "Returned",
+        currentlyBorrowed: "Currently Borrowed",
+        overdue: "Overdue"
+      },
+      tabs: {
+        borrowings: "Borrowing History",
+        currentlyBorrowed: "Currently Borrowed",
+        overdue: "Overdue Books"
+      },
+      borrowings: {
+        title: "All Borrowing History",
+        description: "Member's complete book borrowing history",
+        noBorrowings: "No books borrowed yet",
+        book: "Book",
+        borrowDate: "Borrow Date",
+        dueDate: "Due Date",
+        returnDate: "Return Date",
+        status: "Status",
+        statuses: {
+          borrowed: "Borrowed",
+          returned: "Returned",
+          overdue: "Overdue"
+        }
+      },
+      currentlyBorrowed: {
+        title: "Currently Borrowed Books",
+        description: "Books currently borrowed by the member",
+        noBooks: "No books currently borrowed"
+      },
+      overdue: {
+        title: "Overdue Books",
+        description: "Member's overdue books",
+        noBooks: "No overdue books"
+      }
+    },
     form: {
       fullName: "Full Name",
       email: "Email Address",

@@ -8,6 +8,7 @@ import MainLayout from "./components/layout/main-layout";
 import Dashboard from "./pages/dashboard";
 import Books from "./pages/books";
 import Members from "./pages/members";
+import MemberDetails from "./pages/member-details";
 import Borrowing from "./pages/borrowing";
 import Returns from "./pages/returns";
 import Evaluations from "./pages/evaluations";
@@ -113,6 +114,7 @@ function Router() {
         <Route path="/dashboard" component={Dashboard} />
         <Route path="/books" component={Books} />
         <Route path="/members" component={Members} />
+        <Route path="/members/:id" component={MemberDetails} />
         <Route path="/borrowing" component={Borrowing} />
         <Route path="/returns" component={Returns} />
         <Route path="/evaluations" component={Evaluations} />

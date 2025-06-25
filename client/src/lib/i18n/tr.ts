@@ -40,7 +40,7 @@ export const tr = {
       passwordHint: "değiştirmeyecekseniz boş bırakın",
       membershipDate: "Üyelik Tarihi",
       adminPrivileges: "Yönetici ayrıcalıkları",
-      adminRating: "Admin Puanı (1-5)",
+      adminRating: "Admin Puanı",
       selectRating: "Puan seçin",
       noRating: "Puan yok",
       ratings: {
@@ -104,7 +104,6 @@ export const tr = {
     addMember: "Üye Ekle",
     editMember: "Üye Düzenle",
     deleteMember: "Üye Sil",
-    memberDetails: "Üye Detayları",
     name: "Ad Soyad",
     email: "E-posta",
     membershipDate: "Üyelik Tarihi",
@@ -131,6 +130,57 @@ export const tr = {
     enterNewMember: "Yeni üye için bilgileri girin.",
     noNotes: "Not yok",
     role: "Rol",
+    details: {
+      title: "Üye Detayları",
+      subtitle: "Üye bilgileri ve geçmişi",
+      back: "Geri",
+      memberNotFound: "Üye bulunamadı",
+      backToMembers: "Üyeler Sayfasına Dön",
+      loading: "Yükleniyor...",
+      membershipDate: "Üyelik Tarihi",
+      adminRating: "Admin Puanı",
+      noRating: "Puan yok",
+      role: "Rol",
+      admin: "Yönetici",
+      member: "Üye",
+      adminNotes: "Admin Notları",
+      stats: {
+        totalBorrowed: "Toplam Ödünç",
+        returned: "İade Edilen",
+        currentlyBorrowed: "Şu Anda Ödünç",
+        overdue: "Gecikmiş"
+      },
+      tabs: {
+        borrowings: "Ödünç Alma Geçmişi",
+        currentlyBorrowed: "Şu Anda Ödünç",
+        overdue: "Gecikmiş Kitaplar"
+      },
+      borrowings: {
+        title: "Tüm Ödünç Alma Geçmişi",
+        description: "Üyenin tüm kitap ödünç alma geçmişi",
+        noBorrowings: "Henüz kitap ödünç almamış",
+        book: "Kitap",
+        borrowDate: "Ödünç Alma Tarihi",
+        dueDate: "İade Tarihi",
+        returnDate: "İade Edilme Tarihi",
+        status: "Durum",
+        statuses: {
+          borrowed: "Ödünç Alındı",
+          returned: "İade Edildi",
+          overdue: "Gecikmiş"
+        }
+      },
+      currentlyBorrowed: {
+        title: "Şu Anda Ödünç Alınan Kitaplar",
+        description: "Üyenin şu anda ödünç aldığı kitaplar",
+        noBooks: "Şu anda ödünç alınan kitap yok"
+      },
+      overdue: {
+        title: "Gecikmiş Kitaplar",
+        description: "Üyenin gecikmiş kitapları",
+        noBooks: "Gecikmiş kitap yok"
+      }
+    },
     form: {
       fullName: "Tam Adı",
       email: "E-posta Adresi",

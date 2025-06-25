@@ -8,7 +8,7 @@ import bcrypt from "bcrypt";
 import "./types";
 import { and, eq, desc, gt, gte, isNotNull, lte, sql, count } from "drizzle-orm";
 import { db } from "./db";
-import { books, borrowings } from "@shared/schema";
+import { books, borrowings, users } from "@shared/schema";
 
 // Auth middleware
 function requireAuth(req: any, res: any, next: any) {
@@ -115,7 +115,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/users/:id", requireAuth, async (req, res) => {
     try {
       const id = parseInt(req.params.id);
-      const user = await storage.getUserWithBorrowings(id);
+      const user = await storage.getUser(id);
       if (!user) {
         return res.status(404).json({ message: "User not found" });
       }
@@ -124,6 +124,50 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(userWithoutPassword);
     } catch (error) {
       res.status(500).json({ message: "Failed to fetch user" });
+    }
+  });
+
+  app.get("/api/users/:id/borrowings", requireAuth, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const userBorrowings = await db
+        .select({
+          id: borrowings.id,
+          bookId: borrowings.bookId,
+          userId: borrowings.userId,
+          borrowDate: borrowings.borrowDate,
+          dueDate: borrowings.dueDate,
+          returnDate: borrowings.returnDate,
+          status: borrowings.status,
+          extensionRequested: borrowings.extensionRequested,
+          notes: borrowings.notes,
+          book: {
+            id: books.id,
+            title: books.title,
+            author: books.author,
+            isbn: books.isbn,
+            genre: books.genre,
+            publishYear: books.publishYear,
+            shelfNumber: books.shelfNumber,
+            availableCopies: books.availableCopies,
+            totalCopies: books.totalCopies,
+            pageCount: books.pageCount,
+            createdAt: books.createdAt,
+          },
+          user: {
+            id: sql`${id}`,
+            name: sql`(SELECT name FROM users WHERE id = ${id})`,
+            email: sql`(SELECT email FROM users WHERE id = ${id})`,
+          },
+        })
+        .from(borrowings)
+        .innerJoin(books, eq(borrowings.bookId, books.id))
+        .where(eq(borrowings.userId, id))
+        .orderBy(desc(borrowings.borrowDate));
+      
+      res.json(userBorrowings);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch user borrowings" });
     }
   });
 
