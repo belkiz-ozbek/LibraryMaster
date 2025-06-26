@@ -33,6 +33,7 @@ export default function Activities() {
 
   const { data: activities = [], isLoading, refetch } = useQuery<any[]>({
     queryKey: ["/api/activities/feed", { limit: 50 }],
+    refetchOnWindowFocus: true,
   });
 
   // Aktivite verilerini dönüştür
@@ -94,7 +95,12 @@ export default function Activities() {
               Kütüphane sistemindeki tüm aktiviteleri takip edin
             </p>
           </div>
-          <Button onClick={() => refetch()} variant="outline" size="sm">
+          <Button 
+            onClick={() => refetch()} 
+            variant="outline" 
+            size="sm"
+            className="transition-colors hover:bg-primary hover:text-white active:scale-95 focus:ring-2 focus:ring-primary/50"
+          >
             <RefreshCw size={16} className="mr-2" />
             Yenile
           </Button>

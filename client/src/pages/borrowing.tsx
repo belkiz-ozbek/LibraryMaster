@@ -15,6 +15,7 @@ import { format, differenceInDays } from "date-fns";
 import type { BorrowingWithDetails } from "@shared/schema";
 import { useTranslation } from "react-i18next";
 import { motion } from "framer-motion";
+import { useSearch } from "wouter";
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -44,18 +45,28 @@ export default function Borrowing() {
   const { user } = useAuth();
   const { toast } = useToast();
   const { t } = useTranslation();
+  const search = useSearch();
 
-  const { data: borrowings = [], isLoading } = useQuery<BorrowingWithDetails[]>({
+  const urlParams = new URLSearchParams(search);
+  const filter = urlParams.get("filter");
+
+  const { data: allBorrowings = [], isLoading: isLoadingAll } = useQuery<BorrowingWithDetails[]>({
     queryKey: ["/api/borrowings"],
+    enabled: !filter,
   });
 
-  const { data: activeBorrowings = [] } = useQuery<BorrowingWithDetails[]>({
+  const { data: activeBorrowings = [], isLoading: isLoadingActive } = useQuery<BorrowingWithDetails[]>({
     queryKey: ["/api/borrowings/active"],
+    enabled: filter === "active",
   });
 
-  const { data: overdueBorrowings = [] } = useQuery<BorrowingWithDetails[]>({
+  const { data: overdueBorrowings = [], isLoading: isLoadingOverdue } = useQuery<BorrowingWithDetails[]>({
     queryKey: ["/api/borrowings/overdue"],
+    enabled: filter === "overdue",
   });
+
+  const borrowings = filter === "overdue" ? overdueBorrowings : (filter === "active" ? activeBorrowings : allBorrowings);
+  const isLoading = isLoadingAll || isLoadingActive || isLoadingOverdue;
 
   const deleteBorrowingMutation = useMutation({
     mutationFn: (id: number) => apiRequest("DELETE", `/api/borrowings/${id}`),
@@ -78,15 +89,14 @@ export default function Borrowing() {
     },
   });
 
-  const filteredBorrowings = searchQuery.length > 2 
-    ? borrowings.filter((borrowing: BorrowingWithDetails) => 
-        borrowing.user.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        borrowing.user.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        borrowing.book.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        borrowing.book.author.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        borrowing.book.isbn.toLowerCase().includes(searchQuery.toLowerCase())
-      )
-    : borrowings;
+  const filteredBorrowings = borrowings.filter((borrowing: BorrowingWithDetails) => 
+    searchQuery.length === 0 ||
+    borrowing.user.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    borrowing.user.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    borrowing.book.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    borrowing.book.author.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    borrowing.book.isbn.toLowerCase().includes(searchQuery.toLowerCase())
+  );
 
   const handleEdit = (borrowing: BorrowingWithDetails) => {
     setSelectedBorrowing(borrowing);
@@ -246,8 +256,20 @@ export default function Borrowing() {
       {/* Header */}
       <motion.div variants={itemVariants} className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-on-surface">{t("borrowing.management")}</h1>
-          <p className="text-text-muted">{t("borrowing.managementDesc")}</p>
+          <h1 className="text-2xl font-bold text-on-surface">
+            {filter === "overdue"
+              ? t("borrowing.overdueTitle", "Geciken Ödünç Almalar")
+              : filter === "active"
+                ? t("borrowing.activeTitle", "Aktif Ödünç Almalar")
+                : t("borrowing.management")}
+          </h1>
+          <p className="text-text-muted">
+            {filter === "overdue"
+              ? t("borrowing.overdueDesc", "Vadesi geçmiş ve henüz iade edilmemiş kitaplar.")
+              : filter === "active"
+                ? t("borrowing.activeDesc", "Şu anda ödünçte olan kitaplar.")
+                : t("borrowing.managementDesc")}
+          </p>
         </div>
         <Dialog open={isFormOpen} onOpenChange={setIsFormOpen}>
           <DialogTrigger asChild>
