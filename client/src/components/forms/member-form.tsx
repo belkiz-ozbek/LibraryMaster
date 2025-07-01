@@ -43,7 +43,7 @@ export function MemberForm({ member, onSuccess, onCancel }: MemberFormProps) {
   });
 
   const mutation = useMutation({
-    mutationFn: (data: MemberFormData) => {
+    mutationFn: async (data: MemberFormData) => {
       const { password, ...restData } = data;
       const payload: Partial<MemberFormData> = restData;
       // Don't send empty password on edit
@@ -59,6 +59,11 @@ export function MemberForm({ member, onSuccess, onCancel }: MemberFormProps) {
       return apiRequest("POST", "/api/users", payload);
     },
     onSuccess,
+    onError: (error: any) => {
+      console.error('Mutation error:', error);
+      console.error('Error message:', error?.message);
+      console.error('Error object:', error);
+    },
   });
 
   const onSubmit = (data: MemberFormData) => {
@@ -162,7 +167,17 @@ export function MemberForm({ member, onSuccess, onCancel }: MemberFormProps) {
 
       {mutation.isError && (
         <p className="text-sm text-destructive mt-2">
-          {t(isEditing ? 'errors.memberUpdateFailed' : 'errors.memberCreateFailed')}
+          {(() => {
+            const errorMessage = mutation.error?.message || '';
+            // Email hatası kontrolü
+            if (errorMessage.includes('Bu e-posta adresi zaten kullanılıyor') || 
+                errorMessage.includes('already in use') ||
+                errorMessage.includes('400:') && errorMessage.includes('email')) {
+              return t('errors.emailAlreadyExists');
+            }
+            // Genel hata mesajları
+            return errorMessage || t(isEditing ? 'errors.memberUpdateFailed' : 'errors.memberCreateFailed');
+          })()}
         </p>
       )}
     </form>

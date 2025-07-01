@@ -313,6 +313,9 @@ export const tr = {
     notFound: "Sayfa bulunamadı",
     unauthorized: "Yetkisiz erişim",
     forbidden: "Erişim engellendi",
+    memberCreateFailed: "Üye oluşturulamadı",
+    memberUpdateFailed: "Üye güncellenemedi",
+    emailAlreadyExists: "Bu e-posta adresi zaten kullanılıyor. Lütfen farklı bir e-posta adresi girin.",
   },
   sidebar: {
     managementSystem: "Yönetim Sistemi",

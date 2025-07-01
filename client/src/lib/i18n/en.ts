@@ -292,6 +292,9 @@ export const en = {
     notFound: "Page not found",
     unauthorized: "Unauthorized access",
     forbidden: "Access forbidden",
+    memberCreateFailed: "Failed to create member",
+    memberUpdateFailed: "Failed to update member",
+    emailAlreadyExists: "This email address is already in use. Please use a different email address.",
   },
   sidebar: {
     managementSystem: "Management System",

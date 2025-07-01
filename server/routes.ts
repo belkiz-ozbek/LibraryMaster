@@ -175,6 +175,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const userData = insertUserSchema.parse(req.body);
       
+      // Check if email already exists
+      const existingUser = await storage.getUserByEmail(userData.email);
+      if (existingUser) {
+        return res.status(400).json({ message: "Bu e-posta adresi zaten kullanılıyor. Lütfen farklı bir e-posta adresi girin." });
+      }
+      
       // Hash password
       const hashedPassword = await bcrypt.hash(userData.password, 10);
       const userToCreate = { ...userData, password: hashedPassword };
@@ -194,6 +200,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const id = parseInt(req.params.id);
       const userData = updateUserSchema.parse(req.body);
+      
+      // Check if email is being changed and if it already exists
+      if (userData.email) {
+        const existingUser = await storage.getUserByEmail(userData.email);
+        if (existingUser && existingUser.id !== id) {
+          return res.status(400).json({ message: "Bu e-posta adresi zaten kullanılıyor. Lütfen farklı bir e-posta adresi girin." });
+        }
+      }
       
       // Hash password if provided
       if (userData.password) {
