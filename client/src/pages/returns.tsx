@@ -120,8 +120,7 @@ export default function Returns() {
 
   const recentReturns = allBorrowings
     .filter((b: BorrowingWithDetails) => b.status === "returned")
-    .sort((a: BorrowingWithDetails, b: BorrowingWithDetails) => new Date(b.returnDate!).getTime() - new Date(a.returnDate!).getTime())
-    .slice(0, 10);
+    .sort((a: BorrowingWithDetails, b: BorrowingWithDetails) => new Date(b.returnDate!).getTime() - new Date(a.returnDate!).getTime());
 
   const handleReturn = (borrowing: BorrowingWithDetails) => {
     setSelectedBorrowing(borrowing);
@@ -403,7 +402,7 @@ export default function Returns() {
               data={recentReturns}
               columns={recentReturnsColumns}
               emptyMessage={t("returns.noRecentReturns")}
-              pageSize={5}
+              pageSize={10}
             />
           </CardContent>
         </Card>

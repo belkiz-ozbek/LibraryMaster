@@ -347,6 +347,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Borrowing routes
+  const borrowingSchema = insertBorrowingSchema.extend({
+    borrowDate: z.union([z.string(), z.date()]).transform(val => typeof val === 'string' ? new Date(val) : val),
+  });
+
   app.get("/api/borrowings", requireAuth, async (req, res) => {
     try {
       const borrowings = await storage.getAllBorrowings();
@@ -376,21 +380,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post("/api/borrowings", requireAuth, async (req, res) => {
     try {
-      const borrowingData = insertBorrowingSchema.parse(req.body);
-      
+      const borrowingData = borrowingSchema.parse(req.body);
       // Check if book is available
       const book = await storage.getBook(borrowingData.bookId);
-      if (!book || book.availableCopies <= 0) {
-        return res.status(400).json({ message: "Book not available for borrowing" });
+      if (!book) {
+        return res.status(400).json({ message: "Kitap bulunamadı.", reason: "book_not_found" });
       }
-      
+      if (book.availableCopies <= 0) {
+        return res.status(400).json({ message: "Kitabın ödünç verilebilir kopyası yok.", reason: "no_available_copies" });
+      }
       const borrowing = await storage.createBorrowing(borrowingData);
       res.status(201).json(borrowing);
     } catch (error) {
       if (error instanceof z.ZodError) {
-        return res.status(400).json({ message: "Invalid borrowing data", errors: error.errors });
+        return res.status(400).json({ message: "Geçersiz ödünç alma verisi.", reason: "zod_validation", errors: error.errors });
       }
-      res.status(500).json({ message: "Failed to create borrowing" });
+      res.status(500).json({ message: "Ödünç alma işlemi sırasında sunucu hatası oluştu.", reason: (error as Error).message, stack: (error as Error).stack });
     }
   });
 

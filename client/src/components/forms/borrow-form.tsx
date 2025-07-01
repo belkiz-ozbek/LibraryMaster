@@ -14,6 +14,7 @@ import { useTranslation } from "react-i18next";
 import { useState } from "react";
 
 const borrowFormSchema = insertBorrowingSchema.extend({
+  borrowDate: z.date({ required_error: "Lütfen ödünç alma tarihi giriniz" }),
   notes: z.string().optional(),
 });
 
@@ -60,8 +61,8 @@ export function BorrowForm({ borrowing, onSuccess, onCancel }: BorrowFormProps) 
     defaultValues: {
       bookId: borrowing?.bookId || 0,
       userId: borrowing?.userId || 0,
-      borrowDate: borrowing?.borrowDate || today,
-      dueDate: borrowing?.dueDate || defaultDueDate,
+      borrowDate: borrowing?.borrowDate ? new Date(borrowing.borrowDate) : new Date(),
+      dueDate: borrowing?.dueDate ? new Date(borrowing.dueDate).toISOString().split('T')[0] : defaultDueDate,
       status: borrowing?.status || "borrowed",
       extensionRequested: borrowing?.extensionRequested || false,
       notes: borrowing?.notes || "",
@@ -79,7 +80,14 @@ export function BorrowForm({ borrowing, onSuccess, onCancel }: BorrowFormProps) 
   });
 
   const onSubmit = (data: BorrowFormData) => {
-    mutation.mutate(data);
+    const dueDateString = typeof data.dueDate === 'string' && data.dueDate.length === 10
+      ? data.dueDate
+      : new Date(data.dueDate).toISOString().split('T')[0];
+    const submitData = {
+      ...data,
+      dueDate: dueDateString,
+    };
+    mutation.mutate(submitData as any);
   };
 
   const nonAdminUsers = users.filter(user => !user.isAdmin);
