@@ -11,11 +11,13 @@ import {
   TrendingUp,
   Clock,
   AlertTriangle,
-  CheckCircle
+  CheckCircle,
+  Loader2
 } from "lucide-react";
 import { motion } from "framer-motion";
 import { useTranslation } from "react-i18next";
 import { useState } from "react";
+import { toast } from "@/components/ui/use-toast";
 
 interface ActivityStats {
   total: number;
@@ -30,6 +32,7 @@ export default function Activities() {
   const { t } = useTranslation();
   const [filter, setFilter] = useState<string>('all');
   const [variant, setVariant] = useState<'default' | 'compact' | 'detailed'>('default');
+  const [isRefreshing, setIsRefreshing] = useState(false);
 
   const { data: activities = [], isLoading, refetch } = useQuery<any[]>({
     queryKey: ["/api/activities/feed"],
@@ -85,6 +88,20 @@ export default function Activities() {
     },
   };
 
+  const handleRefresh = async () => {
+    setIsRefreshing(true);
+    const prev = JSON.stringify(activities);
+    const { data: newData } = await refetch();
+    setIsRefreshing(false);
+    if (JSON.stringify(newData) === prev) {
+      toast({
+        title: "Aktiviteler zaten güncel",
+        description: "Yeni bir aktivite bulunamadı.",
+        variant: "default",
+      });
+    }
+  };
+
   return (
     <div className="space-y-6">
       <motion.div variants={itemVariants}>
@@ -96,13 +113,19 @@ export default function Activities() {
             </p>
           </div>
           <Button 
-            onClick={() => refetch()} 
+            onClick={handleRefresh}
             variant="outline" 
             size="sm"
-            className="transition-colors hover:bg-primary hover:text-white active:scale-95 focus:ring-2 focus:ring-primary/50"
+            className={`transition-colors rounded-full shadow-md flex items-center gap-2 px-4 py-2 font-medium border border-primary/30
+              ${isRefreshing ? 'bg-blue-100 text-blue-700 cursor-wait' : ''}`}
+            disabled={isRefreshing}
           >
-            <RefreshCw size={16} className="mr-2" />
-            Yenile
+            {isRefreshing ? (
+              <Loader2 size={18} className="animate-spin mr-1" />
+            ) : (
+              <RefreshCw size={16} className="mr-1" />
+            )}
+            {isRefreshing ? 'Yenileniyor...' : 'Yenile'}
           </Button>
         </div>
       </motion.div>
