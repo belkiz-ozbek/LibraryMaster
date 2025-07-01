@@ -32,7 +32,7 @@ export default function Activities() {
   const [variant, setVariant] = useState<'default' | 'compact' | 'detailed'>('default');
 
   const { data: activities = [], isLoading, refetch } = useQuery<any[]>({
-    queryKey: ["/api/activities/feed", { limit: 50 }],
+    queryKey: ["/api/activities/feed"],
     refetchOnWindowFocus: true,
   });
 
@@ -241,7 +241,6 @@ export default function Activities() {
             ) : (
               <ActivityTimeline 
                 activities={filteredActivities}
-                maxItems={50}
                 showAvatars={true}
                 variant={variant}
               />

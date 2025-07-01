@@ -109,7 +109,7 @@ const statusColors = {
 
 export function ActivityTimeline({ 
   activities, 
-  maxItems = 10, 
+  maxItems, 
   showAvatars = true,
   variant = 'default',
   className = '' 
@@ -117,7 +117,7 @@ export function ActivityTimeline({
   const { t, i18n } = useTranslation();
   const locale = i18n.language === 'tr' ? tr : enUS;
   
-  const displayedActivities = activities.slice(0, maxItems);
+  const displayedActivities = maxItems ? activities.slice(0, maxItems) : activities;
 
   const getActivityIcon = (type: ActivityItem['type']) => {
     const IconComponent = activityIcons[type];
@@ -125,7 +125,31 @@ export function ActivityTimeline({
   };
 
   const getTimeAgo = (date: string) => {
-    return formatDistanceToNow(new Date(date), { 
+    let parsedDate: Date;
+    
+    // Tarih formatını kontrol et ve parse et
+    if (typeof date === 'string') {
+      if (date.includes('T')) {
+        // ISO format: 2025-06-24T22:56:19.934Z
+        parsedDate = new Date(date);
+      } else if (date.includes(' ')) {
+        // String format: 2025-06-26 14:47:08.016 - yerel saat dilimi olarak yorumla
+        // Z eklemiyoruz çünkü bu yerel saat dilimi
+        parsedDate = new Date(date.replace(' ', 'T'));
+      } else {
+        // Sadece tarih: 2025-06-26 - bugünün tarihi ise şu anki saati kullan
+        const today = new Date().toISOString().split('T')[0];
+        if (date === today) {
+          parsedDate = new Date();
+        } else {
+          parsedDate = new Date(date + 'T12:00:00');
+        }
+      }
+    } else {
+      parsedDate = new Date(date);
+    }
+    
+    return formatDistanceToNow(parsedDate, { 
       addSuffix: true, 
       locale 
     });

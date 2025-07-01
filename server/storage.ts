@@ -54,7 +54,7 @@ export interface IStorage {
   getMostActiveUsers(): Promise<Array<User & { borrowCount: number }>>;
   getTopReadersMonth(): Promise<Array<{ userId: number; name: string; email: string; totalPagesRead: number }>>;
   getRecentActivities(limit: number): Promise<any[]>;
-  getActivityFeed(limit: number): Promise<any[]>;
+  getActivityFeed(limit?: number): Promise<any[]>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -190,7 +190,8 @@ export class DatabaseStorage implements IStorage {
     // If the status is being set to 'returned', we forcefully set the return date on the server
     // to ensure data integrity, regardless of what the client sends.
     if (updateBorrowing.status === 'returned') {
-      updateBorrowing.returnDate = new Date().toISOString();
+      // Sadece tarih kısmını al (saat bilgisi olmadan)
+      updateBorrowing.returnDate = new Date().toISOString().split('T')[0];
     }
     
     const [borrowing] = await db.update(borrowings)
@@ -554,7 +555,7 @@ export class DatabaseStorage implements IStorage {
     return combined.slice(0, limit);
   }
 
-  async getActivityFeed(limit: number): Promise<any[]> {
+  async getActivityFeed(limit?: number): Promise<any[]> {
     // Son ödünç almalar
     const recentBorrowings = await db.select({
       id: sql`concat('borrow-', ${borrowings.id})`,
@@ -571,8 +572,7 @@ export class DatabaseStorage implements IStorage {
     .innerJoin(users, eq(borrowings.userId, users.id))
     .innerJoin(books, eq(borrowings.bookId, books.id))
     .where(eq(borrowings.status, 'borrowed'))
-    .orderBy(desc(borrowings.borrowDate))
-    .limit(Math.floor(limit * 0.4));
+    .orderBy(desc(borrowings.borrowDate));
 
     // Son iadeler
     const recentReturns = await db.select({
@@ -593,8 +593,7 @@ export class DatabaseStorage implements IStorage {
       eq(borrowings.status, 'returned'),
       isNotNull(borrowings.returnDate)
     ))
-    .orderBy(desc(borrowings.returnDate))
-    .limit(Math.floor(limit * 0.3));
+    .orderBy(desc(borrowings.returnDate));
 
     // Son eklenen kitaplar
     const recentBooks = await db.select({
@@ -608,8 +607,7 @@ export class DatabaseStorage implements IStorage {
       metadata: sql`json_build_object('bookId', ${books.id}, 'isbn', ${books.isbn}, 'genre', ${books.genre})`
     })
     .from(books)
-    .orderBy(desc(books.createdAt))
-    .limit(Math.floor(limit * 0.2));
+    .orderBy(desc(books.createdAt));
 
     // Son eklenen üyeler
     const recentMembers = await db.select({
@@ -623,8 +621,7 @@ export class DatabaseStorage implements IStorage {
       metadata: sql`json_build_object('userId', ${users.id}, 'isAdmin', ${users.isAdmin})`
     })
     .from(users)
-    .orderBy(desc(users.membershipDate))
-    .limit(Math.floor(limit * 0.1));
+    .orderBy(desc(users.membershipDate));
 
     // Gecikmiş ödünç almalar
     const overdueItems = await db.select({
@@ -645,8 +642,7 @@ export class DatabaseStorage implements IStorage {
       eq(borrowings.status, 'borrowed'),
       lt(borrowings.dueDate, new Date().toISOString().split('T')[0])
     ))
-    .orderBy(asc(borrowings.dueDate))
-    .limit(5);
+    .orderBy(asc(borrowings.dueDate));
 
     // Tüm aktiviteleri birleştir ve tarihe göre sırala
     const allActivities = [
@@ -657,13 +653,67 @@ export class DatabaseStorage implements IStorage {
       ...overdueItems
     ];
 
+    // Tarih formatını düzelt ve sırala
     allActivities.sort((a, b) => {
-      const dateA = a.date ? new Date(a.date).getTime() : 0;
-      const dateB = b.date ? new Date(b.date).getTime() : 0;
-      return dateB - dateA;
+      let dateA: number, dateB: number;
+      
+      // Tarih formatını normalize et
+      if (a.date) {
+        if (typeof a.date === 'string') {
+          // Eğer tarih string ise, ISO formatına çevir
+          if (a.date.includes('T')) {
+            dateA = new Date(a.date).getTime();
+          } else if (a.date.includes(' ')) {
+            // Eğer "YYYY-MM-DD HH:MM:SS" formatındaysa - yerel saat dilimi olarak yorumla
+            dateA = new Date(a.date.replace(' ', 'T')).getTime();
+          } else {
+            // Eğer sadece tarih varsa (YYYY-MM-DD), saat ekle - bugünün tarihi ise şu anki saati kullan
+            const today = new Date().toISOString().split('T')[0];
+            if (a.date === today) {
+              dateA = new Date().getTime();
+            } else {
+              dateA = new Date(a.date + 'T12:00:00').getTime();
+            }
+          }
+        } else if (a.date instanceof Date) {
+          dateA = a.date.getTime();
+        } else {
+          dateA = 0;
+        }
+      } else {
+        dateA = 0;
+      }
+      
+      if (b.date) {
+        if (typeof b.date === 'string') {
+          if (b.date.includes('T')) {
+            dateB = new Date(b.date).getTime();
+          } else if (b.date.includes(' ')) {
+            // Eğer "YYYY-MM-DD HH:MM:SS" formatındaysa - yerel saat dilimi olarak yorumla
+            dateB = new Date(b.date.replace(' ', 'T')).getTime();
+          } else {
+            // Eğer sadece tarih varsa (YYYY-MM-DD), saat ekle - bugünün tarihi ise şu anki saati kullan
+            const today = new Date().toISOString().split('T')[0];
+            if (b.date === today) {
+              dateB = new Date().getTime();
+            } else {
+              dateB = new Date(b.date + 'T12:00:00').getTime();
+            }
+          }
+        } else if (b.date instanceof Date) {
+          dateB = b.date.getTime();
+        } else {
+          dateB = 0;
+        }
+      } else {
+        dateB = 0;
+      }
+      
+      return dateB - dateA; // En yeni tarih önce
     });
 
-    return allActivities.slice(0, limit);
+    // Eğer limit belirtilmişse uygula, yoksa tümünü döndür
+    return limit ? allActivities.slice(0, limit) : allActivities;
   }
 }
 
