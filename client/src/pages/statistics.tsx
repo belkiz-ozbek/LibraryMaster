@@ -306,16 +306,16 @@ export default function Statistics() {
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 transition={{ duration: 0.5 }}
-                className="relative"
+                className="relative max-w-3xl mx-auto rounded-2xl overflow-hidden border border-[#ede7f6] shadow-none bg-gradient-to-tr from-[#e0c3fc] via-[#f3e7fa] via-[#ede7f6] via-[#d4e0fc] via-[#eaf6fb] to-[#a1c4fd] bg-opacity-100 backdrop-blur-0 mt-8 mb-8"
               >
                 {/* Canlı Arka Plan */}
-                <div className="absolute inset-0 -z-10 overflow-hidden">
-                  <div className="aurora-background" />
+                <div className="absolute inset-0 -z-10 overflow-hidden rounded-2xl pointer-events-none">
+                  {/* Soft pastel confetti veya blur efekti istenirse buraya eklenebilir */}
                 </div>
 
                 {/* Başlık */}
                 <motion.div
-                  className="w-full flex flex-col items-center mb-6"
+                  className="w-full flex flex-col items-center mb-4 px-4 pt-5"
                   initial="hidden"
                   animate="visible"
                   variants={{
@@ -329,11 +329,11 @@ export default function Statistics() {
                       visible: { opacity: 1, y: 0, transition: { duration: 0.7, ease: "easeOut" } },
                     }}
                   >
-                    <Crown className="text-amber-400 drop-shadow-md" size={40} />
+                    <Crown className="text-amber-400 drop-shadow-md" size={32} />
                   </motion.div>
 
                   {/* Text with Masking Animation */}
-                  <div className="bg-gradient-to-r from-yellow-500 to-amber-300 bg-clip-text text-transparent drop-shadow-sm text-3xl md:text-5xl font-light tracking-wider mt-2">
+                  <div className="bg-gradient-to-r from-yellow-500 to-amber-300 bg-clip-text text-transparent drop-shadow-sm text-2xl md:text-3xl font-semibold tracking-tight mt-1">
                     <motion.div
                       className="flex"
                       variants={{
@@ -358,10 +358,10 @@ export default function Statistics() {
                 </motion.div>
 
                 {/* Podyum ve Confetti */}
-                <div ref={podiumRef} className="relative w-full flex flex-col items-center justify-center overflow-visible">
+                <div ref={podiumRef} className="relative w-full flex flex-col items-center justify-center overflow-visible pb-4 px-2">
                   {/* Konfeti animasyonu */}
                   <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', zIndex: 30 }}>
-                    <div style={{ marginTop: 60 }}>
+                    <div style={{ marginTop: 40 }}>
                       <Confetti active={confettiActive} config={{
                         angle: 90,
                         spread: 120,
@@ -377,40 +377,40 @@ export default function Statistics() {
                     </div>
                   </div>
                   {/* Podyum ve kullanıcılar */}
-                  <div className="relative flex items-end justify-center gap-20 z-10 mt-10 w-[540px] mx-auto">
+                  <div className="relative flex items-end justify-center gap-12 z-10 mt-6 w-[340px] mx-auto">
                     {/* 2. */}
                     <PodiumUser
                       place={2}
                       reader={topReaders[1]}
-                      height="h-28"
-                      podiumColor="bg-gray-200"
-                      borderColor="border-gray-300"
-                      avatarBg="bg-gray-100"
+                      height="h-20"
+                      podiumColor="bg-gradient-to-t from-blue-100 via-gray-100 to-gray-200"
+                      borderColor="border-blue-200"
+                      avatarBg="bg-gradient-to-br from-gray-300 via-gray-100 to-blue-100"
                       delay={1.1}
                     />
                     {/* 1. */}
                     <PodiumUser
                       place={1}
                       reader={topReaders[0]}
-                      height="h-40"
-                      podiumColor="bg-yellow-100"
-                      borderColor="border-yellow-400"
-                      avatarBg="bg-yellow-50"
+                      height="h-28"
+                      podiumColor="bg-gradient-to-t from-yellow-200 via-yellow-50 to-yellow-100"
+                      borderColor="border-yellow-300"
+                      avatarBg="bg-gradient-to-br from-yellow-200 via-yellow-50 to-yellow-100"
                       delay={0.5}
                     />
                     {/* 3. */}
                     <PodiumUser
                       place={3}
                       reader={topReaders[2]}
-                      height="h-24"
-                      podiumColor="bg-yellow-50"
-                      borderColor="border-yellow-200"
-                      avatarBg="bg-yellow-100"
+                      height="h-16"
+                      podiumColor="bg-gradient-to-t from-orange-200 via-orange-100 to-yellow-100"
+                      borderColor="border-orange-300"
+                      avatarBg="bg-gradient-to-br from-orange-300 via-orange-100 to-yellow-100"
                       delay={1.7}
                     />
                   </div>
                   {/* Podyum taban */}
-                  <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-[540px] h-10 bg-gradient-to-t from-black/10 to-transparent rounded-b-3xl blur-sm z-0" />
+                  <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-[340px] h-7 bg-gradient-to-t from-black/10 to-transparent rounded-b-2xl blur-sm z-0" />
                 </div>
               </motion.div>
             )}
@@ -544,54 +544,6 @@ export default function Statistics() {
           </Card>
         </motion.div>
       </div>
-
-      {/* Collection Overview */}
-      <Card>
-        <CardHeader>
-          <CardTitle>{t("statistics.collectionOverview")}</CardTitle>
-          <CardDescription>{t("statistics.collectionOverviewDesc")}</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {Array.from(new Set(allBooks.map(book => book.genre))).map(genre => {
-              const genreBooks = allBooks.filter(book => book.genre === genre);
-              const totalInGenre = genreBooks.reduce((sum, book) => sum + book.totalCopies, 0);
-              const availableInGenre = genreBooks.reduce((sum, book) => sum + book.availableCopies, 0);
-              const genreUtilization = totalInGenre > 0 ? ((totalInGenre - availableInGenre) / totalInGenre * 100) : 0;
-              return (
-                <div key={genre} className="p-4 border rounded-lg">
-                  <div className="flex items-center justify-between mb-2">
-                    <h3 className="font-medium text-on-surface">{genre}</h3>
-                    <Badge variant="outline">{genreBooks.length} {t("statistics.titles")}</Badge>
-                  </div>
-                  <div className="space-y-1 text-sm text-text-muted">
-                    <div className="flex justify-between">
-                      <span>{t("statistics.totalCopiesLabel")}</span>
-                      <span>{totalInGenre}</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span>{t("statistics.availableLabel")}</span>
-                      <span>{availableInGenre}</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span>{t("statistics.utilizationLabel")}</span>
-                      <span>{genreUtilization.toFixed(1)}%</span>
-                    </div>
-                  </div>
-                  <div className="mt-2">
-                    <div className="w-full h-2 bg-gray-200 rounded-full overflow-hidden">
-                      <div 
-                        className="h-full bg-primary rounded-full" 
-                        style={{ width: `${genreUtilization}%` }}
-                      />
-                    </div>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        </CardContent>
-      </Card>
     </motion.div>
   );
 }
