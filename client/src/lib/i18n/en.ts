@@ -229,6 +229,7 @@ export const en = {
     daysOverdue: "{{count}} days overdue",
     dueToday: "Due today",
     statusReturned: "Returned",
+    returnedLate: "Returned Late",
     statusOverdue: "Overdue",
     statusDueSoon: "Due Soon",
     statusActive: "Active",

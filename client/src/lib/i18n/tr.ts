@@ -255,6 +255,7 @@ export const tr = {
     daysOverdue: "{{count}} gün gecikti",
     dueToday: "Bugün teslim edilecek",
     statusReturned: "İade Edildi",
+    returnedLate: "Geç İade Edildi",
     statusOverdue: "Gecikmiş",
     statusDueSoon: "Yakında Teslim",
     statusActive: "Aktif",

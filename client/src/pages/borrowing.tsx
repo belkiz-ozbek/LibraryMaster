@@ -124,7 +124,12 @@ export default function Borrowing() {
 
   const getStatusBadge = (borrowing: BorrowingWithDetails) => {
     if (borrowing.status === "returned") {
-      return <Badge variant="secondary">{t("borrowing.statusReturned")}</Badge>;
+      const wasOverdue = new Date(borrowing.returnDate!) > new Date(borrowing.dueDate);
+      return (
+        <Badge variant={wasOverdue ? "destructive" : "secondary"}>
+          {wasOverdue ? t("borrowing.returnedLate") : t("borrowing.statusReturned")}
+        </Badge>
+      );
     }
     
     const today = new Date();
