@@ -148,6 +148,18 @@ export class DatabaseStorage implements IStorage {
   }
 
   async deleteBook(id: number): Promise<void> {
+    // Önce kitabın aktif ödünç alma kaydı olup olmadığını kontrol et
+    const activeBorrowings = await db.select()
+      .from(borrowings)
+      .where(and(
+        eq(borrowings.bookId, id),
+        eq(borrowings.status, 'borrowed')
+      ));
+    
+    if (activeBorrowings.length > 0) {
+      throw new Error(`Bu kitap şu anda ${activeBorrowings.length} kişi tarafından ödünç alınmış durumda. Kitap silinemez.`);
+    }
+    
     const result = await db.delete(books).where(eq(books.id, id));
     if (result.rowCount === 0) {
       throw new Error(`Book with id ${id} not found`);
@@ -641,6 +653,7 @@ export class DatabaseStorage implements IStorage {
     .orderBy(desc(users.membershipDate));
 
     // Gecikmiş ödünç almalar (timestamp karşılaştırması)
+    const today = new Date().toISOString().split('T')[0];
     const overdueItems = await db.select({
       id: sql`concat('overdue-', ${borrowings.id})`,
       type: sql`'overdue'`,
@@ -657,7 +670,7 @@ export class DatabaseStorage implements IStorage {
     .innerJoin(books, eq(borrowings.bookId, books.id))
     .where(and(
       eq(borrowings.status, 'borrowed'),
-      lt(borrowings.dueDate, new Date())
+      lt(borrowings.dueDate, today)
     ))
     .orderBy(asc(borrowings.dueDate));
 

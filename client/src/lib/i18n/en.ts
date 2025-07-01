@@ -62,6 +62,8 @@ export const en = {
     editSuccess: "Book updated successfully",
     deleteSuccess: "Book deleted successfully",
     deleteConfirm: "Are you sure you want to delete this book?",
+    deleteError: "Failed to delete book",
+    deleteErrorBorrowed: "This book is currently borrowed. Cannot delete book.",
     management: "Book Management",
     managementDesc: "Manage your library's book collection",
     actions: "Actions",

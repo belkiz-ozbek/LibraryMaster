@@ -6,6 +6,7 @@ import { DataTable } from "@/components/ui/data-table";
 import { SearchInput } from "@/components/ui/search-input";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { BookForm } from "@/components/forms/book-form";
 import { useAuth } from "@/lib/auth";
 import { apiRequest, queryClient } from "@/lib/queryClient";
@@ -36,10 +37,41 @@ const itemVariants = {
   },
 };
 
+function getFriendlyDeleteErrorMessage(error: string) {
+  if (!error) return "Bilinmeyen bir hata oluştu.";
+
+  if (
+    error.includes("violates foreign key constraint") ||
+    error.includes("borrowings_book_id_books_id_fk")
+  ) {
+    return "Bu kitap şu anda ödünçte veya geçmişte ödünç alınmış. Kitap silinemez.";
+  }
+
+  if (
+    error.includes("not found") ||
+    error.includes("Book with id") ||
+    error.includes("404")
+  ) {
+    return "Kitap bulunamadı veya zaten silinmiş.";
+  }
+
+  if (
+    error.includes("ödünç alınmış durumda") ||
+    error.includes("Kitap silinemez")
+  ) {
+    return error; // Zaten kullanıcı dostu
+  }
+
+  // Diğer tüm durumlar için:
+  return "Kitap silinemedi. Lütfen daha sonra tekrar deneyin.";
+}
+
 export default function Books() {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedBook, setSelectedBook] = useState<Book | null>(null);
   const [isFormOpen, setIsFormOpen] = useState(false);
+  const [bookToDelete, setBookToDelete] = useState<Book | null>(null);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
   const { user } = useAuth();
   const { toast } = useToast();
   const { t } = useTranslation();
@@ -54,20 +86,30 @@ export default function Books() {
   });
 
   const deleteBookMutation = useMutation({
-    mutationFn: (id: number) => apiRequest("DELETE", `/api/books/${id}`),
+    mutationFn: async (id: number) => {
+      const response = await fetch(`/api/books/${id}`, {
+        method: "DELETE",
+        credentials: "include",
+      });
+      
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || "Kitap silinemedi");
+      }
+      
+      return response.json();
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/books"] });
+      setBookToDelete(null);
+      setDeleteError(null);
       toast({
-        title: "Book deleted",
-        description: "The book has been successfully deleted.",
+        title: t("books.deleteSuccess"),
+        description: t("books.deleteSuccess"),
       });
     },
-    onError: () => {
-      toast({
-        title: "Error",
-        description: "Failed to delete book.",
-        variant: "destructive",
-      });
+    onError: (error: any) => {
+      setDeleteError(getFriendlyDeleteErrorMessage(error.message || t("errors.serverError")));
     },
   });
 
@@ -78,9 +120,14 @@ export default function Books() {
     setIsFormOpen(true);
   };
 
-  const handleDelete = (id: number) => {
-    if (confirm("Are you sure you want to delete this book?")) {
-      deleteBookMutation.mutate(id);
+  const handleDelete = (book: Book) => {
+    setBookToDelete(book);
+  };
+
+  const confirmDelete = () => {
+    if (bookToDelete) {
+      setDeleteError(null);
+      deleteBookMutation.mutate(bookToDelete.id);
     }
   };
 
@@ -167,7 +214,7 @@ export default function Books() {
               <Button
                 variant="ghost"
                 size="sm"
-                onClick={() => handleDelete(row.id)}
+                onClick={() => handleDelete(row)}
                 disabled={deleteBookMutation.isPending}
               >
                 <Trash2 size={16} />
@@ -304,6 +351,51 @@ export default function Books() {
           </CardContent>
         </Card>
       </motion.div>
+
+      {/* Delete Confirmation Dialog */}
+      {bookToDelete && (
+        <Dialog open={true} onOpenChange={(open) => {
+          if (!open) {
+            setBookToDelete(null);
+            setDeleteError(null);
+          }
+        }}>
+          <DialogContent className="max-w-md mx-auto">
+            <DialogHeader>
+              <DialogTitle>{t("books.deleteBook")}</DialogTitle>
+              <div className="space-y-4">
+                {deleteError && (
+                  <div className="bg-red-100 text-red-700 border border-red-300 rounded px-3 py-2 text-sm">
+                    {deleteError}
+                  </div>
+                )}
+                <p>{t("books.deleteConfirm")}</p>
+                <p className="font-medium text-destructive">
+                  "{bookToDelete.title}" - {bookToDelete.author}
+                </p>
+              </div>
+            </DialogHeader>
+            <div className="flex justify-end space-x-2">
+              <Button
+                variant="outline"
+                onClick={() => {
+                  setBookToDelete(null);
+                  setDeleteError(null);
+                }}
+              >
+                {t("common.cancel")}
+              </Button>
+              <Button
+                onClick={confirmDelete}
+                variant="destructive"
+                disabled={deleteBookMutation.isPending}
+              >
+                {deleteBookMutation.isPending ? t("common.loading") : t("common.delete")}
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+      )}
     </motion.div>
   );
 }

@@ -340,9 +340,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const id = parseInt(req.params.id);
       await storage.deleteBook(id);
-      res.json({ message: "Book deleted successfully" });
+      res.json({ message: "Kitap başarıyla silindi" });
     } catch (error) {
-      res.status(404).json({ message: (error as Error).message });
+      const errorMessage = (error as Error).message;
+      // Eğer kitap aktif ödünç alma kaydı varsa 400 hatası döndür
+      if (errorMessage.includes("ödünç alınmış durumda")) {
+        res.status(400).json({ message: errorMessage });
+      } else {
+        res.status(404).json({ message: errorMessage });
+      }
     }
   });
 

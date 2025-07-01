@@ -15,6 +15,7 @@ import { useTranslation } from "react-i18next";
 const memberFormSchema = insertUserSchema.extend({
   adminRating: z.number().min(1).max(5).optional(),
   adminNotes: z.string().optional(),
+  membershipDate: z.union([z.string(), z.date()]).transform(val => typeof val === 'string' ? new Date(val) : val),
 });
 
 type MemberFormData = z.infer<typeof memberFormSchema>;
@@ -36,7 +37,7 @@ export function MemberForm({ member, onSuccess, onCancel }: MemberFormProps) {
       email: member?.email || "",
       password: "",
       isAdmin: member?.isAdmin || false,
-      membershipDate: member?.membershipDate || new Date().toISOString().split('T')[0],
+      membershipDate: member?.membershipDate ? new Date(member.membershipDate) : new Date(),
       adminRating: member?.adminRating || undefined,
       adminNotes: member?.adminNotes || "",
     },
@@ -66,7 +67,7 @@ export function MemberForm({ member, onSuccess, onCancel }: MemberFormProps) {
     },
   });
 
-  const onSubmit = (data: MemberFormData) => {
+  const onSubmit: import("react-hook-form").SubmitHandler<MemberFormData> = (data) => {
     mutation.mutate(data);
   };
 

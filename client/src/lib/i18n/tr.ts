@@ -84,6 +84,8 @@ export const tr = {
     editSuccess: "Kitap başarıyla güncellendi",
     deleteSuccess: "Kitap başarıyla silindi",
     deleteConfirm: "Bu kitabı silmek istediğinizden emin misiniz?",
+    deleteError: "Kitap silinemedi",
+    deleteErrorBorrowed: "Bu kitap şu anda ödünç alınmış durumda. Kitap silinemez.",
     management: "Kitap Yönetimi",
     managementDesc: "Kütüphanenizin kitap koleksiyonunu yönetin",
     actions: "İşlemler",
