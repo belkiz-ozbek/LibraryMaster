@@ -470,12 +470,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
         const [{ count: borrowed }] = await db
           .select({ count: count() })
           .from(borrowings)
-          .where(eq(borrowings.borrowDate, dateStr));
+          .where(sql`to_char(${borrowings.borrowDate}, 'YYYY-MM-DD') = ${dateStr}`);
         // Returned
         const [{ count: returned }] = await db
           .select({ count: count() })
           .from(borrowings)
-          .where(eq(borrowings.returnDate, dateStr));
+          .where(sql`to_char(${borrowings.returnDate}, 'YYYY-MM-DD') = ${dateStr}`);
         result.push({ day: dayLabel, borrowed, returned });
       }
       res.json(result);

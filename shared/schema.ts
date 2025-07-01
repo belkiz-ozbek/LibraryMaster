@@ -9,7 +9,7 @@ export const users = pgTable("users", {
   email: text("email").notNull().unique(),
   password: text("password").notNull(),
   isAdmin: boolean("is_admin").default(false).notNull(),
-  membershipDate: date("membership_date").notNull(),
+  membershipDate: timestamp("membership_date").notNull(),
   adminRating: integer("admin_rating").default(0),
   adminNotes: text("admin_notes"),
 });
@@ -32,9 +32,9 @@ export const borrowings = pgTable("borrowings", {
   id: serial("id").primaryKey(),
   bookId: integer("book_id").notNull().references(() => books.id),
   userId: integer("user_id").notNull().references(() => users.id),
-  borrowDate: date("borrow_date").notNull(),
+  borrowDate: timestamp("borrow_date").notNull(),
   dueDate: date("due_date").notNull(),
-  returnDate: date("return_date"),
+  returnDate: timestamp("return_date"),
   status: text("status").notNull().default("borrowed"), // borrowed, returned, overdue
   extensionRequested: boolean("extension_requested").default(false),
   notes: text("notes"),
