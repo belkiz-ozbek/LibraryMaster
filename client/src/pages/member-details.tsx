@@ -80,7 +80,14 @@ export default function MemberDetails() {
     );
   };
 
-  const getStatusBadge = (status: string) => {
+  const getStatusBadge = (status: string, row?: BorrowingWithDetails) => {
+    if (
+      status === "returned" &&
+      row?.returnDate &&
+      new Date(row.returnDate) > new Date(row.dueDate)
+    ) {
+      return <Badge variant="destructive">{t('members.details.borrowings.lateReturn')}</Badge>;
+    }
     switch (status) {
       case "borrowed":
         return <Badge variant="default">{t('members.details.borrowings.statuses.borrowed')}</Badge>;
@@ -120,13 +127,13 @@ export default function MemberDetails() {
     {
       key: "returnDate",
       title: t('members.details.borrowings.returnDate'),
-      render: (value: string | null) => 
+      render: (value: string | null) =>
         value ? format(new Date(value), "dd MMM yyyy", { locale: tr }) : "-",
     },
     {
       key: "status",
       title: t('members.details.borrowings.status'),
-      render: (value: string) => getStatusBadge(value),
+      render: (value: string, row: BorrowingWithDetails) => getStatusBadge(value, row),
     },
   ];
 

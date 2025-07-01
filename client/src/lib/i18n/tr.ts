@@ -165,6 +165,7 @@ export const tr = {
         borrowDate: "Ödünç Alma Tarihi",
         dueDate: "İade Tarihi",
         returnDate: "İade Edilme Tarihi",
+        lateReturn: "Geç İade Edildi",
         status: "Durum",
         statuses: {
           borrowed: "Ödünç Alındı",
