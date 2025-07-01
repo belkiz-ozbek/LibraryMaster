@@ -56,32 +56,32 @@ export default function Sidebar() {
   };
 
   return (
-    <aside className={`relative bg-white shadow-material flex flex-col border-r border-gray-200 transition-all duration-300 ${isCollapsed ? 'w-20' : 'w-64'} h-screen`}>
+    <aside className={`relative bg-white/90 backdrop-blur-md flex flex-col border-r border-gray-100 shadow-lg transition-all duration-300 ${isCollapsed ? 'w-16' : 'w-60'} h-screen overflow-hidden`}>
       {/* Daralt/Genişlet Butonu */}
       <button
-        className="absolute top-6 -right-4 z-10 w-8 h-8 rounded-full bg-white border border-gray-200 shadow flex items-center justify-center hover:bg-gray-50 transition-colors duration-300"
+        className="absolute top-6 -right-4 z-10 w-7 h-7 rounded-full bg-white/80 border border-gray-200 shadow-sm hover:bg-blue-50 transition-all duration-300"
         onClick={() => setIsCollapsed((prev) => !prev)}
         type="button"
         tabIndex={0}
         aria-label={isCollapsed ? 'Menüyü genişlet' : 'Menüyü daralt'}
       >
-        {isCollapsed ? <ChevronRight size={20} /> : <ChevronLeft size={20} />}
+        {isCollapsed ? <ChevronRight size={18} /> : <ChevronLeft size={18} />}
       </button>
       <TooltipProvider>
       {/* Header */}
-      <div className={`p-6 border-b border-gray-200 flex items-center space-x-3 ${isCollapsed ? 'justify-center' : ''} transition-all duration-300`}> 
-        <div className="w-10 h-10 bg-primary rounded-lg flex items-center justify-center transition-all duration-300">
-          <Book className="text-white text-lg" size={20} />
+      <div className={`p-6 border-b border-gray-100 flex items-center space-x-3 ${isCollapsed ? 'justify-center' : ''} transition-all duration-300 bg-white/80`}> 
+        <div className="w-9 h-9 bg-gradient-to-br from-blue-500 to-purple-400 rounded-xl flex items-center justify-center shadow-md ring-2 ring-blue-100">
+          <Book className="text-white" size={20} />
         </div>
         {!isCollapsed && (
           <div className="transition-opacity duration-300 opacity-100">
-            <h1 className="text-xl font-medium text-on-surface">LibraryMS</h1>
-            <p className="text-sm text-text-muted">{t('sidebar.managementSystem')}</p>
+            <h1 className="text-xl font-bold text-gray-900 tracking-tight">LibraryMS</h1>
+            <p className="text-xs text-gray-400 font-medium">{t('sidebar.managementSystem')}</p>
           </div>
         )}
       </div>
       {/* Navigation */}
-      <nav className={`flex-1 px-4 py-6 space-y-2 ${isCollapsed ? 'px-2' : ''} transition-all duration-300`}>
+      <nav className={`flex-1 px-3 py-6 space-y-1 ${isCollapsed ? 'px-1' : ''} transition-all duration-300`}>
         {navigation.map((item) => {
           const isActive = location === item.href || (location === "/" && item.href === "/dashboard");
           const Icon = item.icon;
@@ -92,11 +92,11 @@ export default function Sidebar() {
                   <TooltipTrigger asChild>
                     <Button
                       variant="ghost"
-                      className={`w-full justify-center ${isActive 
-                        ? "bg-primary/10 text-primary hover:bg-primary/15" 
-                        : "text-text-muted hover:bg-gray-50 hover:text-on-surface"} px-2 transition-all duration-300`}
+                      className={`w-full justify-center rounded-lg ${isActive 
+                        ? "bg-gradient-to-r from-blue-100/80 to-purple-100/80 text-blue-700 shadow-md border-l-4 border-blue-400" 
+                        : "text-gray-400 hover:bg-blue-50/60 hover:text-blue-600"} px-0 transition-all duration-200 h-11`}
                     >
-                      <Icon size={18} />
+                      <Icon size={19} />
                     </Button>
                   </TooltipTrigger>
                   <TooltipContent side="right">{item.name}</TooltipContent>
@@ -104,12 +104,14 @@ export default function Sidebar() {
               ) : (
                 <Button
                   variant="ghost"
-                  className={`w-full justify-start ${isActive 
-                    ? "bg-primary/10 text-primary hover:bg-primary/15" 
-                    : "text-text-muted hover:bg-gray-50 hover:text-on-surface"} transition-all duration-300`}
+                  className={`w-full justify-start rounded-lg font-medium ${isActive 
+                    ? "bg-gradient-to-r from-blue-100/80 to-purple-100/80 text-blue-700 shadow-md border-l-4 border-blue-400" 
+                    : "text-gray-600 hover:bg-blue-50/60 hover:text-blue-600"} transition-all duration-200 h-11 group px-3`}
                 >
-                  <Icon size={18} className="mr-3" />
-                  <span className="transition-opacity duration-300 opacity-100">{item.name}</span>
+                  <span className={`flex items-center space-x-3`}>
+                    <Icon size={19} />
+                    <span className="transition-opacity duration-200 opacity-100 text-[15px] tracking-tight">{item.name}</span>
+                  </span>
                 </Button>
               )}
             </Link>
@@ -117,10 +119,10 @@ export default function Sidebar() {
         })}
         {/* Admin Section */}
         {user?.isAdmin && (
-          <div className={`pt-6 mt-6 border-t border-gray-200 ${isCollapsed ? 'px-2' : ''} transition-all duration-300`}>
+          <div className={`pt-5 mt-5 border-t border-gray-100 ${isCollapsed ? 'px-1' : ''} transition-all duration-300`}> 
             {!isCollapsed && (
-              <p className="px-4 mb-3 text-xs font-medium text-text-muted uppercase tracking-wider transition-opacity duration-300 opacity-100">
-                {t('sidebar.admin')}
+              <p className="px-3 mb-2 text-[11px] font-semibold text-purple-500 uppercase tracking-widest flex items-center gap-1">
+                <Star size={13} className="inline-block text-purple-300 mr-1" /> {t('sidebar.admin')}
               </p>
             )}
             {adminNavigation.map((item) => {
@@ -133,11 +135,11 @@ export default function Sidebar() {
                       <TooltipTrigger asChild>
                         <Button
                           variant="ghost"
-                          className={`w-full justify-center ${isActive 
-                            ? "bg-primary/10 text-primary hover:bg-primary/15" 
-                            : "text-text-muted hover:bg-gray-50 hover:text-on-surface"} px-2 transition-all duration-300`}
+                          className={`w-full justify-center rounded-lg ${isActive 
+                            ? "bg-gradient-to-r from-purple-100/80 to-blue-100/80 text-purple-700 shadow-md border-l-4 border-purple-400" 
+                            : "text-gray-400 hover:bg-purple-50/60 hover:text-purple-600"} px-0 transition-all duration-200 h-11`}
                         >
-                          <Icon size={18} />
+                          <Icon size={19} />
                         </Button>
                       </TooltipTrigger>
                       <TooltipContent side="right">{item.name}</TooltipContent>
@@ -145,12 +147,14 @@ export default function Sidebar() {
                   ) : (
                     <Button
                       variant="ghost"
-                      className={`w-full justify-start ${isActive 
-                        ? "bg-primary/10 text-primary hover:bg-primary/15" 
-                        : "text-text-muted hover:bg-gray-50 hover:text-on-surface"} transition-all duration-300`}
+                      className={`w-full justify-start rounded-lg font-medium ${isActive 
+                        ? "bg-gradient-to-r from-purple-100/80 to-blue-100/80 text-purple-700 shadow-md border-l-4 border-purple-400" 
+                        : "text-gray-600 hover:bg-purple-50/60 hover:text-purple-600"} transition-all duration-200 h-11 group px-3`}
                     >
-                      <Icon size={18} className="mr-3" />
-                      <span className="transition-opacity duration-300 opacity-100">{item.name}</span>
+                      <span className={`flex items-center space-x-3`}>
+                        <Icon size={19} />
+                        <span className="transition-opacity duration-200 opacity-100 text-[15px] tracking-tight">{item.name}</span>
+                      </span>
                     </Button>
                   )}
                 </Link>
@@ -160,20 +164,22 @@ export default function Sidebar() {
         )}
       </nav>
       {/* User Profile */}
-      <div className={`p-4 border-t border-gray-200 flex items-center space-x-3 ${isCollapsed ? 'justify-center' : ''} transition-all duration-300`}>
-        <div className="w-8 h-8 bg-primary rounded-full flex items-center justify-center transition-all duration-300">
-          <span className="text-xs font-medium text-white">
+      <div className={`p-4 border-t border-gray-100 flex items-center space-x-3 ${isCollapsed ? 'justify-center' : ''} transition-all duration-300 bg-white/80`}> 
+        <div className="w-10 h-10 bg-white rounded-full flex items-center justify-center shadow ring-2 ring-blue-100">
+          <span className="text-sm font-semibold text-blue-700 select-none">
             {user ? getInitials(user.name) : "U"}
           </span>
         </div>
         {!isCollapsed && (
-          <div className="flex-1 min-w-0 transition-opacity duration-300 opacity-100">
-            <p className="text-sm font-medium text-on-surface truncate">
+          <div className="flex-1 min-w-0 transition-opacity duration-200 opacity-100">
+            <p className="text-sm font-semibold text-gray-900 truncate">
               {user?.name || t('sidebar.user')}
             </p>
-            <p className="text-xs text-text-muted">
-              {user?.isAdmin ? t('sidebar.administrator') : t('sidebar.staff')}
-            </p>
+            <div className="flex items-center gap-1 mt-0.5">
+              <span className={`text-[11px] px-2 py-0.5 rounded-full font-medium border ${user?.isAdmin ? 'bg-purple-50 text-purple-600 border-purple-200' : 'bg-blue-50 text-blue-600 border-blue-200'}`}> 
+                {user?.isAdmin ? t('sidebar.administrator') : t('sidebar.staff')}
+              </span>
+            </div>
           </div>
         )}
         {!isCollapsed && (
@@ -181,9 +187,10 @@ export default function Sidebar() {
             variant="ghost"
             size="sm"
             onClick={handleLogout}
-            className="text-text-muted hover:text-on-surface"
+            className="text-gray-400 hover:text-red-500 transition-colors duration-200"
+            aria-label="Çıkış yap"
           >
-            <LogOut size={16} />
+            <LogOut size={17} />
           </Button>
         )}
       </div>

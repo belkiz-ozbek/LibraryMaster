@@ -3,7 +3,7 @@ import { useLocation } from "wouter";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Search, Bell, Globe } from "lucide-react";
+import { Search, Bell, Globe, LogOut } from "lucide-react";
 import { useAuth } from "@/lib/auth";
 import { useTranslation } from "react-i18next";
 import {
@@ -55,31 +55,35 @@ export default function Header() {
   };
 
   return (
-    <header className="bg-white shadow-sm border-b border-gray-200 px-6 py-4">
+    <header className="bg-white border-b border-gray-100 px-8 py-5 transition-all duration-300">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-medium text-on-surface">{currentTitle}</h1>
+          <h1 className="text-xl font-semibold text-gray-900 tracking-tight">
+            {currentTitle}
+          </h1>
           {currentDescription && (
-            <p className="text-sm text-text-muted">{currentDescription}</p>
+            <p className="text-xs text-gray-400 font-normal mt-0.5">
+              {currentDescription}
+            </p>
           )}
         </div>
         
-        <div className="flex items-center space-x-4">
+        <div className="flex items-center space-x-6">
           {/* Search Box */}
           <form onSubmit={handleSearch} className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-text-muted" size={16} />
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={16} />
             <Input
               type="text"
               placeholder={t("header.searchPlaceholder")}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-80 pl-10 pr-4 py-2"
+              className="w-56 pl-9 pr-3 py-1.5 rounded-md bg-white border border-gray-200 focus:ring-1 focus:ring-blue-100 text-sm"
             />
           </form>
           
           {/* Notification Bell */}
-          <Button variant="ghost" size="sm" className="relative">
-            <Bell size={20} className="text-text-muted" />
+          <Button variant="ghost" size="sm" className="relative rounded-full hover:bg-gray-50 transition-colors">
+            <Bell size={20} className="text-gray-400" />
             <Badge 
               variant="destructive" 
               className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center p-0 text-xs"
@@ -90,22 +94,25 @@ export default function Header() {
 
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="icon">
-                <Globe className="h-5 w-5" />
+              <Button variant="ghost" size="icon" className="rounded-full hover:bg-gray-50 transition-colors">
+                <Globe className="h-5 w-5 text-gray-400" />
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuItem onClick={() => changeLanguage('tr')}>
-                {t('common.turkish')}
+            <DropdownMenuContent align="end" className="min-w-[140px] rounded-xl shadow p-1">
+              <DropdownMenuItem onClick={() => changeLanguage('tr')} className={`flex items-center gap-2 px-3 py-2 rounded-lg transition-colors ${i18n.language === 'tr' ? 'bg-blue-50 font-semibold' : ''}`}>
+                <span className="text-lg">🇹🇷</span>
+                <span>Turkish</span>
               </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => changeLanguage('en')}>
-                {t('common.english')}
+              <DropdownMenuItem onClick={() => changeLanguage('en')} className={`flex items-center gap-2 px-3 py-2 rounded-lg transition-colors ${i18n.language === 'en' ? 'bg-blue-50 font-semibold' : ''}`}>
+                <span className="text-lg">🇺🇸</span>
+                <span>English</span>
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
 
-          <Button variant="ghost" onClick={logout}>
+          <Button variant="ghost" onClick={logout} className="rounded-full px-3 py-1.5 text-gray-500 hover:text-red-500 hover:bg-red-50 transition-colors font-normal flex items-center gap-2 text-sm">
             {t('auth.logout')}
+            <LogOut size={16} />
           </Button>
         </div>
       </div>
