@@ -14,9 +14,12 @@ import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { Undo2, Check, Clock, AlertTriangle, Calendar } from "lucide-react";
 import { format, differenceInDays } from "date-fns";
+import { tr as trLocale } from "date-fns/locale";
 import type { BorrowingWithDetails } from "@shared/schema";
 import { useTranslation } from "react-i18next";
 import { motion } from "framer-motion";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
+import { Link } from "react-router-dom";
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -48,6 +51,9 @@ export default function Returns() {
   const { user } = useAuth();
   const { toast } = useToast();
   const { t } = useTranslation();
+  const [extendDialogOpen, setExtendDialogOpen] = useState(false);
+  const [borrowingToExtend, setBorrowingToExtend] = useState<BorrowingWithDetails | null>(null);
+  const [newDueDate, setNewDueDate] = useState<string>("");
 
   const { data: activeBorrowings = [], isLoading } = useQuery<BorrowingWithDetails[]>({
     queryKey: ["/api/borrowings/active"],
@@ -130,15 +136,11 @@ export default function Returns() {
   };
 
   const handleExtendDueDate = (borrowing: BorrowingWithDetails) => {
-    const newDueDate = new Date(borrowing.dueDate);
-    newDueDate.setDate(newDueDate.getDate() + 7); // Extend by 7 days
-    
-    if (confirm(`Extend due date to ${format(newDueDate, "MMM dd, yyyy")}?`)) {
-      extendDueDateMutation.mutate({
-        id: borrowing.id,
-        newDueDate: format(newDueDate, 'yyyy-MM-dd')
-      });
-    }
+    const newDue = new Date(borrowing.dueDate);
+    newDue.setDate(newDue.getDate() + 7);
+    setBorrowingToExtend(borrowing);
+    setNewDueDate(format(newDue, "yyyy-MM-dd"));
+    setExtendDialogOpen(true);
   };
 
   const confirmReturn = () => {
@@ -151,6 +153,17 @@ export default function Returns() {
         notes: returnNotes || selectedBorrowing.notes
       }
     });
+  };
+
+  const confirmExtendDueDate = () => {
+    if (borrowingToExtend && newDueDate) {
+      extendDueDateMutation.mutate({
+        id: borrowingToExtend.id,
+        newDueDate: newDueDate
+      });
+      setExtendDialogOpen(false);
+      setBorrowingToExtend(null);
+    }
   };
 
   const getStatusBadge = (borrowing: BorrowingWithDetails) => {
@@ -198,7 +211,9 @@ export default function Returns() {
             </span>
           </div>
           <div>
-            <p className="font-medium text-on-surface">{value}</p>
+            <Link to={`/members/${row.user.id}`} className="font-medium text-on-surface hover:underline hover:text-primary transition-colors">
+              {value}
+            </Link>
             <p className="text-sm text-text-muted">{row.user.email}</p>
           </div>
         </div>
@@ -306,10 +321,7 @@ export default function Returns() {
     >
       {/* Header */}
       <motion.div variants={itemVariants} className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-on-surface">{t("returns.management")}</h1>
-          <p className="text-text-muted">{t("returns.managementDesc")}</p>
-        </div>
+        {/* Başlık ve açıklama kaldırıldı, sadece header'da görünecek */}
       </motion.div>
 
       {/* Quick Stats */}
@@ -460,6 +472,27 @@ export default function Returns() {
           </DialogContent>
         </Dialog>
       )}
+
+      {/* Süre Uzatma Onay Dialogu */}
+      <AlertDialog open={extendDialogOpen} onOpenChange={setExtendDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>{t("returns.extend")}</AlertDialogTitle>
+            <AlertDialogDescription>
+              {borrowingToExtend && (
+                <>
+                  {t("Süreyi şu tarihe uzatmak istediğinize emin misiniz?")}<br />
+                  <span className="font-semibold">{format(new Date(newDueDate), "PPP", { locale: trLocale })}</span>
+                </>
+              )}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>{t("common.cancel")}</AlertDialogCancel>
+            <AlertDialogAction onClick={confirmExtendDueDate}>{t("common.confirm")}</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </motion.div>
   );
 }

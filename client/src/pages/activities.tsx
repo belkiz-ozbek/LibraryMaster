@@ -105,18 +105,12 @@ export default function Activities() {
   return (
     <div className="space-y-6">
       <motion.div variants={itemVariants}>
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-3xl font-bold text-foreground">Aktivite Akışı</h1>
-            <p className="text-muted-foreground">
-              Kütüphane sistemindeki tüm aktiviteleri takip edin
-            </p>
-          </div>
+        <div className="flex items-center justify-end">
           <Button 
             onClick={handleRefresh}
-            variant="outline" 
+            variant="default"
             size="sm"
-            className={`transition-colors rounded-full shadow-md flex items-center gap-2 px-4 py-2 font-medium border border-primary/30
+            className={`bg-primary text-white transition-colors rounded-full shadow-md flex items-center gap-2 px-4 py-2 font-medium
               ${isRefreshing ? 'bg-blue-100 text-blue-700 cursor-wait' : ''}`}
             disabled={isRefreshing}
           >

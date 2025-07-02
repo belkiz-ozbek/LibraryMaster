@@ -234,11 +234,7 @@ export default function Books() {
       variants={containerVariants}
     >
       {/* Header */}
-      <motion.div variants={itemVariants} className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-on-surface">{t("books.management")}</h1>
-          <p className="text-text-muted">{t("books.managementDesc")}</p>
-        </div>
+      <motion.div variants={itemVariants} className="flex items-center justify-end">
         {user?.isAdmin && (
           <Dialog open={isFormOpen} onOpenChange={setIsFormOpen}>
             <DialogTrigger asChild>

@@ -22,6 +22,7 @@ import type { User, Book, Borrowing } from "@shared/schema";
 import { useEffect, useRef, useState } from "react";
 import Confetti from 'react-dom-confetti';
 import Player from 'lottie-react';
+import { Link } from "react-router-dom";
 
 interface Stats {
   totalBooks: number;
@@ -196,7 +197,9 @@ export default function Statistics() {
             </span>
           </div>
           <div>
-            <p className="font-medium text-on-surface">{value}</p>
+            <Link to={`/members/${row.id}`} className="font-medium text-on-surface hover:underline hover:text-primary transition-colors">
+              {value}
+            </Link>
             <p className="text-sm text-text-muted">{row.email}</p>
           </div>
         </div>
@@ -276,8 +279,7 @@ export default function Statistics() {
     >
       {/* Header */}
       <motion.div variants={itemVariants}>
-        <h1 className="text-2xl font-bold text-on-surface">{t("statistics.titleAndReports")}</h1>
-        <p className="text-text-muted">{t("statistics.analyticsDesc")}</p>
+        {/* Başlık ve açıklama kaldırıldı, sadece header'da görünecek */}
       </motion.div>
 
       {/* Top Readers of the Month - SAHNE/PODYUM EFEKTİ */}

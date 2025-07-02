@@ -16,6 +16,7 @@ import type { BorrowingWithDetails } from "@shared/schema";
 import { useTranslation } from "react-i18next";
 import { motion } from "framer-motion";
 import { useSearch } from "wouter";
+import { Link } from "react-router-dom";
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -182,7 +183,9 @@ export default function Borrowing() {
             </span>
           </div>
           <div>
-            <p className="font-medium text-on-surface">{value}</p>
+            <Link to={`/members/${row.user.id}`} className="font-medium text-on-surface hover:underline hover:text-primary transition-colors">
+              {value}
+            </Link>
             <p className="text-sm text-text-muted">{row.user.email}</p>
           </div>
         </div>
@@ -259,23 +262,7 @@ export default function Borrowing() {
       variants={containerVariants}
     >
       {/* Header */}
-      <motion.div variants={itemVariants} className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-on-surface">
-            {filter === "overdue"
-              ? t("borrowing.overdueTitle", "Geciken Ödünç Almalar")
-              : filter === "active"
-                ? t("borrowing.activeTitle", "Aktif Ödünç Almalar")
-                : t("borrowing.management")}
-          </h1>
-          <p className="text-text-muted">
-            {filter === "overdue"
-              ? t("borrowing.overdueDesc", "Vadesi geçmiş ve henüz iade edilmemiş kitaplar.")
-              : filter === "active"
-                ? t("borrowing.activeDesc", "Şu anda ödünçte olan kitaplar.")
-                : t("borrowing.managementDesc")}
-          </p>
-        </div>
+      <motion.div variants={itemVariants} className="flex items-center justify-end">
         <Dialog open={isFormOpen} onOpenChange={setIsFormOpen}>
           <DialogTrigger asChild>
             <Button onClick={() => setSelectedBorrowing(null)}>

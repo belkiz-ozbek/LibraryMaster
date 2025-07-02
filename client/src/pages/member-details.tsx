@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useParams, useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
@@ -62,6 +62,10 @@ export default function MemberDetails() {
     },
     enabled: !!id,
   });
+
+  useEffect(() => {
+    document.title = t('members.details.title') + ' | LibraryMS';
+  }, [t]);
 
   const renderStars = (rating: number | null) => {
     if (!rating) return <span className="text-muted-foreground">{t('members.details.noRating')}</span>;
@@ -189,10 +193,6 @@ export default function MemberDetails() {
             <ArrowLeft size={16} />
             <span>{t('members.details.back')}</span>
           </Button>
-          <div>
-            <h1 className="text-2xl font-bold">{t('members.details.title')}</h1>
-            <p className="text-muted-foreground">{t('members.details.subtitle')}</p>
-          </div>
         </div>
       </motion.div>
 

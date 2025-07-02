@@ -17,6 +17,7 @@ import { format } from "date-fns";
 import type { User } from "@shared/schema";
 import { useTranslation } from "react-i18next";
 import { motion } from "framer-motion";
+import { Link } from "react-router-dom";
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -151,7 +152,9 @@ export default function Evaluations() {
             </span>
           </div>
           <div>
-            <p className="font-medium text-on-surface">{value}</p>
+            <Link to={`/members/${row.id}`} className="font-medium text-on-surface hover:underline hover:text-primary transition-colors">
+              {value}
+            </Link>
             <p className="text-sm text-text-muted">{row.email}</p>
           </div>
         </div>
@@ -235,10 +238,7 @@ export default function Evaluations() {
     >
       {/* Header */}
       <motion.div variants={itemVariants} className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-on-surface">{t("evaluations.title")}</h1>
-          <p className="text-text-muted">{t("evaluations.subtitle")}</p>
-        </div>
+        {/* Başlık ve açıklama kaldırıldı, sadece header'da görünecek */}
       </motion.div>
 
       {/* Quick Stats */}

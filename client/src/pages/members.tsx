@@ -1,6 +1,6 @@
 import { useState, useMemo } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
-import { useLocation } from "wouter";
+import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { DataTable } from "@/components/ui/data-table";
@@ -42,7 +42,6 @@ export default function Members() {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedMember, setSelectedMember] = useState<User | null>(null);
   const [isFormOpen, setIsFormOpen] = useState(false);
-  const [, setLocation] = useLocation();
   const { user } = useAuth();
   const { toast } = useToast();
   const { t } = useTranslation();
@@ -127,12 +126,12 @@ export default function Members() {
             </span>
           </div>
           <div>
-            <button
-              onClick={() => setLocation(`/members/${row.id}`)}
-              className="font-medium text-on-surface hover:text-primary transition-colors text-left"
+            <Link
+              to={`/members/${row.id}`}
+              className="font-medium text-on-surface hover:underline hover:text-primary transition-colors"
             >
               {value}
-            </button>
+            </Link>
             <p className="text-sm text-text-muted">{row.email}</p>
           </div>
         </div>
@@ -208,41 +207,7 @@ export default function Members() {
     >
       {/* Header */}
       <motion.div variants={itemVariants} className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-on-surface">{t("members.management")}</h1>
-          <p className="text-text-muted">{t("members.managementDesc")}</p>
-        </div>
-        {user?.isAdmin && (
-          <Dialog open={isFormOpen} onOpenChange={setIsFormOpen}>
-            <DialogTrigger asChild>
-              <Button onClick={() => setSelectedMember(null)}>
-                <Plus size={16} className="mr-2" />
-                {t("members.addMember")}
-              </Button>
-            </DialogTrigger>
-            <DialogContent className="max-w-2xl">
-              <DialogHeader>
-                <DialogTitle>
-                  {selectedMember ? t("members.editMember") : t("members.addNewMember")}
-                </DialogTitle>
-                <DialogDescription>
-                  {selectedMember 
-                    ? t("members.updateMemberInfo")
-                    : t("members.enterNewMember")
-                  }
-                </DialogDescription>
-              </DialogHeader>
-              <MemberForm
-                member={selectedMember}
-                onSuccess={handleFormSuccess}
-                onCancel={() => {
-                  setIsFormOpen(false);
-                  setSelectedMember(null);
-                }}
-              />
-            </DialogContent>
-          </Dialog>
-        )}
+        {/* Başlık ve açıklama kaldırıldı, sadece header'da görünecek */}
       </motion.div>
 
       {/* Search and Stats */}

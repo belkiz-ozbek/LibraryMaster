@@ -41,8 +41,19 @@ export default function Header() {
     "/statistics": t("header.statistics"),
   };
 
-  const currentTitle = pageTitle[location as keyof typeof pageTitle] || t("header.pageNotFound");
-  const currentDescription = pageDescription[location as keyof typeof pageDescription] || "";
+  const currentTitle =
+    location.startsWith("/members/")
+      ? t("members.details.title")
+      : location.startsWith("/activities")
+        ? "Aktivite Akışı"
+        : pageTitle[location as keyof typeof pageTitle] || t("header.pageNotFound");
+
+  const currentDescription =
+    location.startsWith("/members/")
+      ? t("members.details.subtitle")
+      : location.startsWith("/activities")
+        ? "Kütüphane sistemindeki tüm aktiviteleri takip edin"
+        : pageDescription[location as keyof typeof pageDescription] || "";
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
