@@ -13,9 +13,11 @@ import { z } from "zod";
 import { useTranslation } from "react-i18next";
 
 const memberFormSchema = insertUserSchema.extend({
+  firstName: z.string().min(2, 'İsim gerekli'),
+  lastName: z.string().min(2, 'Soyisim gerekli'),
   adminRating: z.number().min(1).max(5).optional(),
   adminNotes: z.string().optional(),
-  membershipDate: z.union([z.string(), z.date()]).transform(val => typeof val === 'string' ? new Date(val) : val),
+  membershipDate: z.string(),
 });
 
 type MemberFormData = z.infer<typeof memberFormSchema>;
@@ -31,17 +33,24 @@ export function MemberForm({ member, onSuccess, onCancel }: MemberFormProps) {
   const { t } = useTranslation();
 
   const todayStr = new Date().toISOString().slice(0, 10);
-  const form = useForm<MemberFormData>({
+  let firstName = '';
+  let lastName = '';
+  if (typeof member?.name === 'string' && member.name.trim().length > 0) {
+    const [first, ...rest] = String(member.name).trim().split(' ');
+    firstName = first ?? '';
+    lastName = rest.length > 0 ? rest.join(' ') : '';
+  }
+  const form = useForm<MemberFormData & { firstName: string; lastName: string }>({
     resolver: zodResolver(memberFormSchema),
     defaultValues: {
+      firstName,
+      lastName,
       name: member?.name || "",
       email: member?.email || "",
       password: "",
       isAdmin: member?.isAdmin || false,
-      membershipDate: member?.membershipDate
-        ? (typeof member.membershipDate === 'string'
-            ? member.membershipDate.slice(0, 10)
-            : member.membershipDate.toISOString().slice(0, 10))
+      membershipDate: typeof member?.membershipDate === 'string'
+        ? (member.membershipDate as string).slice(0, 10)
         : todayStr,
       adminRating: member?.adminRating || undefined,
       adminNotes: member?.adminNotes || "",
@@ -72,10 +81,9 @@ export function MemberForm({ member, onSuccess, onCancel }: MemberFormProps) {
     },
   });
 
-  const onSubmit: import("react-hook-form").SubmitHandler<MemberFormData> = (data) => {
-    if (typeof data.membershipDate === "string") {
-      data.membershipDate = new Date(data.membershipDate);
-    }
+  const onSubmit: import("react-hook-form").SubmitHandler<MemberFormData & { firstName: string; lastName: string }> = (data) => {
+    // İsim ve soyismi birleştirip name olarak gönder
+    data.name = `${data.firstName} ${data.lastName}`.trim();
     mutation.mutate(data);
   };
 
@@ -83,14 +91,25 @@ export function MemberForm({ member, onSuccess, onCancel }: MemberFormProps) {
     <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6 p-2">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div className="flex flex-col gap-2">
-          <Label htmlFor="name" className="font-semibold text-gray-800">{t('members.form.fullName')} *</Label>
+          <Label htmlFor="firstName" className="font-semibold text-gray-800">{t('members.form.firstName')} *</Label>
           <Input
-            id="name"
-            {...form.register("name")}
+            id="firstName"
+            {...form.register("firstName")}
             className="rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition"
           />
-          {form.formState.errors.name && <p className="text-xs text-red-500 mt-0.5">{form.formState.errors.name.message}</p>}
+          {form.formState.errors.firstName && <p className="text-xs text-red-500 mt-0.5">{form.formState.errors.firstName.message}</p>}
         </div>
+        <div className="flex flex-col gap-2">
+          <Label htmlFor="lastName" className="font-semibold text-gray-800">{t('members.form.lastName')} *</Label>
+          <Input
+            id="lastName"
+            {...form.register("lastName")}
+            className="rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition"
+          />
+          {form.formState.errors.lastName && <p className="text-xs text-red-500 mt-0.5">{form.formState.errors.lastName.message}</p>}
+        </div>
+      </div>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div className="flex flex-col gap-2">
           <Label htmlFor="email" className="font-semibold text-gray-800">{t('members.form.email')} *</Label>
           <Input
@@ -101,9 +120,8 @@ export function MemberForm({ member, onSuccess, onCancel }: MemberFormProps) {
           />
           {form.formState.errors.email && <p className="text-xs text-red-500 mt-0.5">{form.formState.errors.email.message}</p>}
         </div>
-      </div>
-
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        {/* Şifre alanı sadece isAdmin ise göster */}
+        {form.watch('isAdmin') && (
         <div className="flex flex-col gap-2">
           <Label htmlFor="password" className="font-semibold text-gray-800">
             {t('members.form.password')} {isEditing ? `(${t('members.form.passwordHint')})` : "*"}
@@ -116,6 +134,7 @@ export function MemberForm({ member, onSuccess, onCancel }: MemberFormProps) {
           />
           {form.formState.errors.password && <p className="text-xs text-red-500 mt-0.5">{form.formState.errors.password.message}</p>}
         </div>
+        )}
         <div className="flex flex-col gap-2">
           <Label htmlFor="membershipDate" className="font-semibold text-gray-800">{t('members.form.membershipDate')} *</Label>
           <Input
