@@ -57,7 +57,7 @@ export const tr = {
     }
   },
   navigation: {
-    dashboard: "Dashboard",
+    dashboard: "Ana Sayfa",
     books: "Kitaplar",
     members: "Üyeler",
     borrowing: "Ödünç Alma",
@@ -204,7 +204,9 @@ export const tr = {
       adminNotes: "Admin Notları",
       adminNotesPlaceholder: "Bu üye hakkındaki notlar...",
       updateMember: "Üyeyi Güncelle",
-      addMember: "Üye Ekle"
+      addMember: "Üye Ekle",
+      firstName: "İsim",
+      lastName: "Soyisim"
     }
   },
   borrowing: {
