@@ -175,6 +175,11 @@ export class DatabaseStorage implements IStorage {
   }
 
   async searchBooks(query: string): Promise<Book[]> {
+    // Boş sorgu durumunda tüm kitapları döndür
+    if (!query || query.trim() === '') {
+      return await this.getAllBooks();
+    }
+    
     const q = `%${query.toLowerCase()}%`;
     const results = await db.select().from(books).where(
       or(

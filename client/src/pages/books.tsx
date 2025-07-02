@@ -82,8 +82,16 @@ export default function Books() {
 
   const { data: searchResults = [] } = useQuery<Book[]>({
     queryKey: [`/api/books/search?q=${encodeURIComponent(searchQuery)}`],
-    enabled: searchQuery.length > 2,
+    enabled: searchQuery.length > 0, // 1 karakter yeterli
   });
+
+  // Arama yapılıyorsa arama sonuçlarını, yapılmıyorsa tüm kitapları göster
+  const displayBooks: Book[] = searchQuery.length > 0 ? searchResults : books;
+
+  // Debug için console.log
+  console.log('Search Query:', searchQuery);
+  console.log('Search Results:', searchResults);
+  console.log('Display Books:', displayBooks);
 
   const deleteBookMutation = useMutation({
     mutationFn: async (id: number) => {
@@ -112,8 +120,6 @@ export default function Books() {
       setDeleteError(getFriendlyDeleteErrorMessage(error.message || t("errors.serverError")));
     },
   });
-
-  const displayBooks: Book[] = searchQuery.length > 2 ? searchResults : books;
 
   const handleEdit = (book: Book) => {
     setSelectedBook(book);
@@ -338,7 +344,7 @@ export default function Books() {
               columns={columns}
               loading={isLoading}
               emptyMessage={
-                searchQuery.length > 2 
+                searchQuery.length > 0 
                   ? t("books.noBooksFound")
                   : t("books.noBooksYet")
               }
