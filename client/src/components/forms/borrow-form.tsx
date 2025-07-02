@@ -124,10 +124,10 @@ export function BorrowForm({ borrowing, onSuccess, onCancel }: BorrowFormProps) 
     : bookOptions;
 
   return (
-    <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-      <div className="grid grid-cols-2 gap-4">
-        <div>
-          <Label htmlFor="userId">{t("borrowing.member")} *</Label>
+    <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6 p-2">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="flex flex-col gap-2">
+          <Label htmlFor="userId" className="font-semibold text-gray-800">{t("borrowing.member")} *</Label>
           <Select
             options={filteredMemberOptions}
             value={memberOptions.find(option => option.value === form.watch("userId"))}
@@ -138,14 +138,19 @@ export function BorrowForm({ borrowing, onSuccess, onCancel }: BorrowFormProps) 
             isSearchable
             noOptionsMessage={() => t("borrowing.noMembersFound")}
             filterOption={null}
+            classNamePrefix="react-select"
+            styles={{
+              control: (base) => ({ ...base, borderRadius: 8, boxShadow: '0 1px 2px #e5e7eb', borderColor: '#d1d5db', minHeight: 42 }),
+              menu: (base) => ({ ...base, borderRadius: 8, zIndex: 20 }),
+            }}
           />
           {form.formState.errors.userId && (
-            <p className="text-sm text-destructive mt-1">{t("borrowing.pleaseSelectMember")}</p>
+            <p className="text-xs text-red-500 mt-0.5">{t("borrowing.pleaseSelectMember")}</p>
           )}
         </div>
 
-        <div>
-          <Label htmlFor="bookId">{t("borrowing.book")} *</Label>
+        <div className="flex flex-col gap-2">
+          <Label htmlFor="bookId" className="font-semibold text-gray-800">{t("borrowing.book")} *</Label>
           <Select
             options={filteredBookOptions}
             value={bookOptions.find(option => option.value === form.watch("bookId"))}
@@ -162,35 +167,42 @@ export function BorrowForm({ borrowing, onSuccess, onCancel }: BorrowFormProps) 
                 {option.label}
               </div>
             )}
+            classNamePrefix="react-select"
+            styles={{
+              control: (base) => ({ ...base, borderRadius: 8, boxShadow: '0 1px 2px #e5e7eb', borderColor: '#d1d5db', minHeight: 42 }),
+              menu: (base) => ({ ...base, borderRadius: 8, zIndex: 20 }),
+            }}
           />
           {form.formState.errors.bookId && (
-            <p className="text-sm text-destructive mt-1">{t("borrowing.pleaseSelectBook")}</p>
+            <p className="text-xs text-red-500 mt-0.5">{t("borrowing.pleaseSelectBook")}</p>
           )}
         </div>
       </div>
 
-      <div className="grid grid-cols-2 gap-4">
-        <div>
-          <Label htmlFor="borrowDate">{t("borrowing.borrowDate")} *</Label>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="flex flex-col gap-2">
+          <Label htmlFor="borrowDate" className="font-semibold text-gray-800">{t("borrowing.borrowDate")} *</Label>
           <Input
             id="borrowDate"
             type="date"
             {...form.register("borrowDate")}
+            className="rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition"
           />
         </div>
-        <div>
-          <Label htmlFor="dueDate">{t("borrowing.dueDate")} *</Label>
+        <div className="flex flex-col gap-2">
+          <Label htmlFor="dueDate" className="font-semibold text-gray-800">{t("borrowing.dueDate")} *</Label>
           <Input
             id="dueDate"
             type="date"
             {...form.register("dueDate")}
+            className="rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition"
           />
         </div>
       </div>
 
       {isEditing && (
-        <div>
-          <Label htmlFor="status">{t("borrowing.status")}</Label>
+        <div className="flex flex-col gap-2">
+          <Label htmlFor="status" className="font-semibold text-gray-800">{t("borrowing.status")}</Label>
           <Select
             options={statusOptions}
             value={statusOptions.find(option => option.value === form.watch("status"))}
@@ -198,32 +210,38 @@ export function BorrowForm({ borrowing, onSuccess, onCancel }: BorrowFormProps) 
             placeholder={t("borrowing.status")}
             isClearable={false}
             isSearchable={false}
+            classNamePrefix="react-select"
+            styles={{
+              control: (base) => ({ ...base, borderRadius: 8, boxShadow: '0 1px 2px #e5e7eb', borderColor: '#d1d5db', minHeight: 42 }),
+              menu: (base) => ({ ...base, borderRadius: 8, zIndex: 20 }),
+            }}
           />
         </div>
       )}
 
-      <div>
-        <Label htmlFor="notes">{t("borrowing.notes")}</Label>
+      <div className="flex flex-col gap-2">
+        <Label htmlFor="notes" className="font-semibold text-gray-800">{t("borrowing.notes")}</Label>
         <Textarea
           id="notes"
           {...form.register("notes")}
           placeholder={t("borrowing.notesPlaceholder")}
           rows={3}
+          className="rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition"
         />
       </div>
 
-      <div className="flex justify-end space-x-3 pt-4">
-        <Button type="button" variant="outline" onClick={onCancel}>
-          {t("common.cancel")}
+      <div className="flex justify-end space-x-3 pt-6">
+        <Button type="button" variant="outline" onClick={onCancel} className="rounded-lg px-6 py-2 text-base">
+          {t('common.cancel')}
         </Button>
-        <Button type="submit" disabled={mutation.isPending}>
-          {mutation.isPending ? t("borrowing.processing") : isEditing ? t("borrowing.updateBorrowing") : t("borrowing.createBorrowing")}
+        <Button type="submit" disabled={mutation.isPending} className="rounded-lg px-6 py-2 text-base">
+          {mutation.isPending ? t('common.saving') : isEditing ? t('borrowing.updateBorrowing') : t('borrowing.createBorrowing')}
         </Button>
       </div>
 
       {mutation.isError && (
-        <p className="text-sm text-destructive mt-2">
-          {t("borrowing.failed", { action: isEditing ? t("borrowing.updateBorrowing") : t("borrowing.createBorrowing") })}
+        <p className="text-sm text-red-600 mt-2 text-center font-medium">
+          {mutation.error?.message || t(isEditing ? 'borrowing.failed' : 'borrowing.failed')}
         </p>
       )}
     </form>

@@ -176,7 +176,7 @@ export default function Members() {
               <Button
                 variant="ghost"
                 size="sm"
-                onClick={() => handleEdit(row)}
+                onClick={() => { setSelectedMember(row); setIsFormOpen(true); }}
               >
                 <Edit size={16} />
               </Button>
@@ -207,8 +207,31 @@ export default function Members() {
     >
       {/* Header */}
       <motion.div variants={itemVariants} className="flex items-center justify-between">
-        {/* Başlık ve açıklama kaldırıldı, sadece header'da görünecek */}
+        <div />
+        <Button onClick={() => { setSelectedMember(null); setIsFormOpen(true); }}>
+          <Plus size={16} className="mr-2" />
+          {t('members.form.addMember')}
+        </Button>
       </motion.div>
+
+      {/* Ortak Dialog (Ekle/Düzenle) */}
+      <Dialog open={isFormOpen} onOpenChange={setIsFormOpen}>
+        <DialogContent className="max-w-lg w-full">
+          <DialogHeader>
+            <DialogTitle>
+              {selectedMember ? t('members.form.updateMember') : t('members.form.addMember')}
+            </DialogTitle>
+            <DialogDescription>
+              {selectedMember ? t('members.updateMemberInfo') : t('members.enterNewMember')}
+            </DialogDescription>
+          </DialogHeader>
+          <MemberForm
+            member={selectedMember}
+            onSuccess={handleFormSuccess}
+            onCancel={() => setIsFormOpen(false)}
+          />
+        </DialogContent>
+      </Dialog>
 
       {/* Search and Stats */}
       <motion.div variants={itemVariants}>

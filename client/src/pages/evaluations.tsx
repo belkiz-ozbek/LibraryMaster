@@ -132,8 +132,8 @@ export default function Evaluations() {
 
   const getRatingBadge = (rating: number | null) => {
     if (!rating) return <Badge variant="outline">{t("evaluations.notRated")}</Badge>;
-    
-    if (rating >= 4) return <Badge variant="default" className="bg-secondary">{t("evaluations.excellent")}</Badge>;
+    if (rating === 5) return <Badge variant="default" className="bg-secondary">{t("evaluations.excellent")}</Badge>;
+    if (rating === 4) return <Badge variant="default" style={{background:'#e0e7ff', color:'#3730a3'}}>{t("members.form.ratings.veryGood")}</Badge>;
     if (rating >= 3) return <Badge variant="secondary">{t("evaluations.good")}</Badge>;
     if (rating >= 2) return <Badge variant="outline" className="border-accent text-accent">{t("evaluations.fair")}</Badge>;
     return <Badge variant="destructive">{t("evaluations.poor")}</Badge>;
