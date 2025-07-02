@@ -56,16 +56,16 @@ export default function Sidebar() {
   };
 
   return (
-    <aside className={`relative bg-white/90 backdrop-blur-md flex flex-col border-r border-gray-100 shadow-lg transition-all duration-300 ${isCollapsed ? 'w-16' : 'w-60'} h-screen overflow-hidden`}>
+    <aside className={`relative bg-white/90 backdrop-blur-md flex flex-col border-r border-gray-100 shadow-lg transition-all duration-300 ${isCollapsed ? 'w-24' : 'w-60'} h-screen overflow-visible`}>
       {/* Daralt/Genişlet Butonu */}
       <button
-        className="absolute top-6 -right-4 z-10 w-7 h-7 rounded-full bg-white/80 border border-gray-200 shadow-sm hover:bg-blue-50 transition-all duration-300"
+        className="absolute top-16 -right-6 z-10 w-9 h-9 flex items-center justify-center rounded-full overflow-visible bg-white/80 border border-gray-200 shadow-sm hover:bg-blue-50 transition-all duration-300"
         onClick={() => setIsCollapsed((prev) => !prev)}
         type="button"
         tabIndex={0}
         aria-label={isCollapsed ? 'Menüyü genişlet' : 'Menüyü daralt'}
       >
-        {isCollapsed ? <ChevronRight size={18} /> : <ChevronLeft size={18} />}
+        {isCollapsed ? <ChevronRight size={20} /> : <ChevronLeft size={20} />}
       </button>
       <TooltipProvider>
       {/* Header */}
