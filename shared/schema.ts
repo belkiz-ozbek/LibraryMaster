@@ -62,6 +62,11 @@ export const borrowingsRelations = relations(borrowings, ({ one }) => ({
 // Insert schemas
 export const insertUserSchema = createInsertSchema(users).omit({
   id: true,
+}).extend({
+  membershipDate: z.preprocess(
+    (val) => typeof val === 'string' ? new Date(val) : val,
+    z.date()
+  )
 });
 
 export const insertBookSchema = createInsertSchema(books).omit({

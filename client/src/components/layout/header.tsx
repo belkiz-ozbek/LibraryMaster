@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { useLocation } from "wouter";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -14,8 +14,11 @@ import {
 } from "../ui/dropdown-menu";
 
 export default function Header() {
-  const [location] = useLocation();
+  const [location, setLocation] = useLocation();
   const [searchQuery, setSearchQuery] = useState("");
+  const [searchResults, setSearchResults] = useState<any>({ books: [], users: [] });
+  const [searchLoading, setSearchLoading] = useState(false);
+  const [showDropdown, setShowDropdown] = useState(false);
   const { logout } = useAuth();
   const { t, i18n } = useTranslation();
 
@@ -55,10 +58,45 @@ export default function Header() {
         ? "Kütüphane sistemindeki tüm aktiviteleri takip edin"
         : pageDescription[location as keyof typeof pageDescription] || "";
 
-  const handleSearch = (e: React.FormEvent) => {
+  const handleSearch = async (e: React.FormEvent) => {
     e.preventDefault();
-    // TODO: Implement global search functionality
-    console.log("Searching for:", searchQuery);
+    if (searchQuery.length < 2) return;
+    setSearchLoading(true);
+    try {
+      const [booksRes, usersRes] = await Promise.all([
+        fetch(`/api/books/search?q=${encodeURIComponent(searchQuery)}`),
+        fetch(`/api/users/search?q=${encodeURIComponent(searchQuery)}`),
+      ]);
+      const [books, users] = await Promise.all([
+        booksRes.json(),
+        usersRes.json(),
+      ]);
+      setSearchResults({ books, users });
+      setShowDropdown(true);
+    } catch (err) {
+      setSearchResults({ books: [], users: [] });
+    } finally {
+      setSearchLoading(false);
+    }
+  };
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setSearchQuery(value);
+    if (value.length >= 2) {
+      handleSearch(new Event('submit') as any);
+    } else {
+      setShowDropdown(false);
+      setSearchResults({ books: [], users: [] });
+    }
+  };
+
+  const handleResultClick = (type: string, id: number) => {
+    setShowDropdown(false);
+    setSearchQuery("");
+    setSearchResults({ books: [], users: [] });
+    if (type === "book") setLocation(`/books/${id}`);
+    if (type === "user") setLocation(`/members/${id}`);
   };
 
   const changeLanguage = (lng: string) => {
@@ -81,28 +119,53 @@ export default function Header() {
         
         <div className="flex items-center space-x-6">
           {/* Search Box */}
-          <form onSubmit={handleSearch} className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={16} />
-            <Input
-              type="text"
-              placeholder={t("header.searchPlaceholder")}
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-56 pl-9 pr-3 py-1.5 rounded-md bg-white border border-gray-200 focus:ring-1 focus:ring-blue-100 text-sm"
-            />
-          </form>
+          <div className="relative">
+            <form onSubmit={handleSearch} autoComplete="off">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={16} />
+              <Input
+                type="text"
+                placeholder="Üye ara"
+                value={searchQuery}
+                onChange={handleInputChange}
+                onFocus={() => searchQuery.length >= 2 && setShowDropdown(true)}
+                className="w-80 pl-9 pr-3 py-2 rounded-lg bg-white border border-gray-200 focus:ring-2 focus:ring-blue-200 text-sm placeholder-gray-400"
+              />
+            </form>
+            {showDropdown && (searchQuery.length >= 2) && (
+              <div className="absolute z-50 mt-2 w-96 bg-white border border-gray-200 rounded-xl shadow-2xl max-h-96 overflow-auto">
+                {searchLoading ? (
+                  <div className="p-4 text-center text-gray-500 text-sm">Aranıyor...</div>
+                ) : (
+                  <>
+                    {searchResults.users.length > 0 && (
+                      <div>
+                        <div className="px-6 pt-3 pb-2 text-xs font-semibold text-gray-400 uppercase tracking-wider">Üyeler</div>
+                        {searchResults.users.map((user: any) => (
+                          <div
+                            key={user.id}
+                            className="flex items-center gap-4 px-6 py-3 cursor-pointer hover:bg-blue-50 transition-colors rounded-lg mb-1"
+                            onClick={() => handleResultClick('user', user.id)}
+                          >
+                            <div className="flex-shrink-0 w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 font-bold text-lg uppercase shadow-sm">
+                              {user.name?.[0] || '?'}
+                            </div>
+                            <div className="flex flex-col">
+                              <span className="font-medium text-gray-900 text-base">{user.name}</span>
+                              <span className="text-xs text-gray-500">{user.email}</span>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                    {searchResults.users.length === 0 && (
+                      <div className="p-6 text-center text-gray-500 text-sm">Sonuç bulunamadı</div>
+                    )}
+                  </>
+                )}
+              </div>
+            )}
+          </div>
           
-          {/* Notification Bell */}
-          <Button variant="ghost" size="sm" className="relative rounded-full hover:bg-gray-50 transition-colors">
-            <Bell size={20} className="text-gray-400" />
-            <Badge 
-              variant="destructive" 
-              className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center p-0 text-xs"
-            >
-              3
-            </Badge>
-          </Button>
-
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" size="icon" className="rounded-full hover:bg-gray-50 transition-colors">

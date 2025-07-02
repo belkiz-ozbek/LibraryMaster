@@ -95,8 +95,8 @@ export class DatabaseStorage implements IStorage {
   async searchUsers(query: string): Promise<User[]> {
     return await db.select().from(users).where(
       or(
-        like(users.name, `%${query}%`),
-        like(users.email, `%${query}%`)
+        sql`LOWER(${users.name}) LIKE LOWER(${query} || '%')`,
+        ilike(users.email, `%${query}%`)
       )
     );
   }
