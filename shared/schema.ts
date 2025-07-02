@@ -6,8 +6,8 @@ import { z } from "zod";
 export const users = pgTable("users", {
   id: serial("id").primaryKey(),
   name: text("name").notNull(),
-  email: text("email").notNull().unique(),
-  password: text("password").notNull(),
+  email: text("email"),
+  password: text("password"),
   isAdmin: boolean("is_admin").default(false).notNull(),
   membershipDate: timestamp("membership_date").notNull(),
   adminRating: integer("admin_rating").default(0),
@@ -66,7 +66,9 @@ export const insertUserSchema = createInsertSchema(users).omit({
   membershipDate: z.preprocess(
     (val) => typeof val === 'string' ? new Date(val) : val,
     z.date()
-  )
+  ),
+  email: z.string().email().or(z.literal('')).optional(),
+  password: z.string().optional(),
 });
 
 export const insertBookSchema = createInsertSchema(books).omit({

@@ -52,7 +52,7 @@ export interface IStorage {
   }>;
   getMostBorrowedBooks(): Promise<Array<Book & { borrowCount: number }>>;
   getMostActiveUsers(): Promise<Array<User & { borrowCount: number }>>;
-  getTopReadersMonth(): Promise<Array<{ userId: number; name: string; email: string; totalPagesRead: number }>>;
+  getTopReadersMonth(): Promise<Array<{ userId: number; name: string; email: string | null; totalPagesRead: number }>>;
   getRecentActivities(limit: number): Promise<any[]>;
   getActivityFeed(limit?: number): Promise<any[]>;
 }
@@ -65,6 +65,9 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getUserByEmail(email: string): Promise<User | undefined> {
+    if (!email || email.trim() === '') {
+      return undefined;
+    }
     const [user] = await db.select().from(users).where(eq(users.email, email));
     return user || undefined;
   }
@@ -75,6 +78,11 @@ export class DatabaseStorage implements IStorage {
       ...insertUser,
       membershipDate: new Date()
     };
+    
+    // Password yoksa boş string olarak ayarla
+    if (!userWithDate.password) {
+      userWithDate.password = '';
+    }
     
     const [user] = await db.insert(users).values(userWithDate).returning();
     return user;
@@ -514,7 +522,7 @@ export class DatabaseStorage implements IStorage {
     .limit(10);
   }
 
-  async getTopReadersMonth(): Promise<Array<{ userId: number; name: string; email: string; totalPagesRead: number }>> {
+  async getTopReadersMonth(): Promise<Array<{ userId: number; name: string; email: string | null; totalPagesRead: number }>> {
     const now = new Date();
     const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
     const endOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0);

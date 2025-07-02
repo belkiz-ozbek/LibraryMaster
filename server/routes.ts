@@ -175,15 +175,30 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const userData = insertUserSchema.parse(req.body);
       
-      // Check if email already exists
-      const existingUser = await storage.getUserByEmail(userData.email);
-      if (existingUser) {
-        return res.status(400).json({ message: "Bu e-posta adresi zaten kullanılıyor. Lütfen farklı bir e-posta adresi girin." });
+      // Admin validasyonu - admin ise email ve şifre zorunlu
+      if (userData.isAdmin) {
+        if (!userData.email || userData.email.trim() === '') {
+          return res.status(400).json({ message: "Admin kullanıcılar için e-posta adresi zorunludur" });
+        }
+        if (!userData.password || userData.password.trim() === '') {
+          return res.status(400).json({ message: "Admin kullanıcılar için şifre zorunludur" });
+        }
       }
       
-      // Hash password
-      const hashedPassword = await bcrypt.hash(userData.password, 10);
-      const userToCreate = { ...userData, password: hashedPassword };
+      // Email varsa benzersizlik kontrolü yap
+      if (userData.email) {
+        const existingUser = await storage.getUserByEmail(userData.email);
+        if (existingUser) {
+          return res.status(400).json({ message: "Bu e-posta adresi zaten kullanılıyor. Lütfen farklı bir e-posta adresi girin." });
+        }
+      }
+      
+      // Hash password if provided
+      let userToCreate = { ...userData };
+      if (userData.password) {
+        const hashedPassword = await bcrypt.hash(userData.password, 10);
+        userToCreate.password = hashedPassword;
+      }
       
       const user = await storage.createUser(userToCreate);
       const { password: _, ...userWithoutPassword } = user;
@@ -201,10 +216,30 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const id = parseInt(req.params.id);
       const userData = updateUserSchema.parse(req.body);
       
-      // Check if email is being changed and if it already exists
+      // Mevcut kullanıcıyı al
+      const existingUser = await storage.getUser(id);
+      if (!existingUser) {
+        return res.status(404).json({ message: "User not found" });
+      }
+      
+      // Admin validasyonu - admin ise email ve şifre zorunlu
+      const willBeAdmin = userData.isAdmin !== undefined ? userData.isAdmin : existingUser.isAdmin;
+      if (willBeAdmin) {
+        const email = userData.email !== undefined ? userData.email : existingUser.email;
+        const password = userData.password !== undefined ? userData.password : existingUser.password;
+        
+        if (!email || email.trim() === '') {
+          return res.status(400).json({ message: "Admin kullanıcılar için e-posta adresi zorunludur" });
+        }
+        if (!password || password.trim() === '') {
+          return res.status(400).json({ message: "Admin kullanıcılar için şifre zorunludur" });
+        }
+      }
+      
+      // Email varsa benzersizlik kontrolü yap
       if (userData.email) {
-        const existingUser = await storage.getUserByEmail(userData.email);
-        if (existingUser && existingUser.id !== id) {
+        const userWithEmail = await storage.getUserByEmail(userData.email);
+        if (userWithEmail && userWithEmail.id !== id) {
           return res.status(400).json({ message: "Bu e-posta adresi zaten kullanılıyor. Lütfen farklı bir e-posta adresi girin." });
         }
       }

@@ -18,6 +18,8 @@ const memberFormSchema = insertUserSchema.extend({
   adminRating: z.number().min(1).max(5).optional(),
   adminNotes: z.string().optional(),
   membershipDate: z.string(),
+  email: z.string().email({ message: 'Geçersiz e-posta adresi' }).or(z.literal('')).optional(), // Boş bırakılabilir veya geçerli email
+  password: z.string().optional(), // Şifre opsiyonel
 });
 
 type MemberFormData = z.infer<typeof memberFormSchema>;
@@ -61,10 +63,11 @@ export function MemberForm({ member, onSuccess, onCancel }: MemberFormProps) {
     mutationFn: async (data: MemberFormData) => {
       const { password, ...restData } = data;
       const payload: Partial<MemberFormData> = restData;
-      // Don't send empty password on edit
-      if (isEditing && password) {
+      
+      // Admin ise password zorunlu, değilse opsiyonel
+      if (data.isAdmin && password) {
         payload.password = password;
-      } else if (!isEditing) {
+      } else if (!data.isAdmin && password) {
         payload.password = password;
       }
       
@@ -111,7 +114,9 @@ export function MemberForm({ member, onSuccess, onCancel }: MemberFormProps) {
       </div>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div className="flex flex-col gap-2">
-          <Label htmlFor="email" className="font-semibold text-gray-800">{t('members.form.email')} *</Label>
+          <Label htmlFor="email" className="font-semibold text-gray-800">
+            {t('members.form.email')} {form.watch('isAdmin') ? '*' : ''}
+          </Label>
           <Input
             id="email"
             type="email"
