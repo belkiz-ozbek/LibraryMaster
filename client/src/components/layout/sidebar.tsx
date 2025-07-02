@@ -17,6 +17,8 @@ import {
 import { useTranslation } from "react-i18next";
 import { useState } from "react";
 import { Tooltip, TooltipTrigger, TooltipContent, TooltipProvider } from "@/components/ui/tooltip";
+import ahdevefaLogo from "@/assets/ahdevefa-logo.png";
+import yetimVakfiLogo from "@/assets/yetim-vakfi-logo.png";
 
 export default function Sidebar() {
   const [location] = useLocation();
@@ -69,15 +71,35 @@ export default function Sidebar() {
       </button>
       <TooltipProvider>
       {/* Header */}
-      <div className={`p-6 border-b border-gray-100 flex items-center space-x-3 ${isCollapsed ? 'justify-center' : ''} transition-all duration-300 bg-white/80`}> 
-        <div className="w-9 h-9 bg-gradient-to-br from-blue-500 to-purple-400 rounded-xl flex items-center justify-center shadow-md ring-2 ring-blue-100">
-          <Book className="text-white" size={20} />
-        </div>
-        {!isCollapsed && (
-          <div className="transition-opacity duration-300 opacity-100">
-            <h1 className="text-xl font-bold text-gray-900 tracking-tight">LibraryMS</h1>
-            <p className="text-xs text-gray-400 font-medium">{t('sidebar.managementSystem')}</p>
+      <div className={`${isCollapsed ? 'p-3' : 'p-6'} border-b border-gray-100 ${isCollapsed ? 'flex justify-center' : 'flex flex-col items-center space-y-3'} transition-all duration-300 bg-white/80`}> 
+        {isCollapsed ? (
+          <div className="flex items-center justify-center">
+            <img 
+              src={yetimVakfiLogo} 
+              alt="Yetim Vakfi Logo" 
+              className="h-8 w-auto object-contain"
+            />
           </div>
+        ) : (
+          <>
+            <div className="flex items-center space-x-2">
+              <img 
+                src={ahdevefaLogo} 
+                alt="Ahdevefa Logo" 
+                className="h-10 w-auto object-contain"
+              />
+              <div className="w-px h-8 bg-gray-300"></div>
+              <img 
+                src={yetimVakfiLogo} 
+                alt="Yetim Vakfi Logo" 
+                className="h-10 w-auto object-contain"
+              />
+            </div>
+            <div className="transition-opacity duration-300 opacity-100 text-center">
+              <h1 className="text-xl font-bold text-gray-900 tracking-tight">LibraryMS</h1>
+              <p className="text-xs text-gray-400 font-medium">{t('sidebar.managementSystem')}</p>
+            </div>
+          </>
         )}
       </div>
       {/* Navigation */}
