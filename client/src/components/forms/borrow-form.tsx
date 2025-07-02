@@ -90,10 +90,11 @@ export function BorrowForm({ borrowing, onSuccess, onCancel }: BorrowFormProps) 
     mutation.mutate(submitData as any);
   };
 
-  const nonAdminUsers = users.filter(user => !user.isAdmin);
+  // Artık adminler de ödünç alabilir, filtreleme yok
+  const selectableUsers = users;
 
   type MemberOptionType = { value: number; label: string };
-  const memberOptions: MemberOptionType[] = nonAdminUsers.map((user) => ({
+  const memberOptions: MemberOptionType[] = selectableUsers.map((user) => ({
     value: user.id,
     label: `${user.name} (${user.email})`
   }));

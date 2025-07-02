@@ -84,8 +84,7 @@ export default function Evaluations() {
       )
     : members;
 
-  // Filter out admin users for evaluation
-  const evaluableMembers = filteredMembers.filter((member: User) => !member.isAdmin);
+  const evaluableMembers = filteredMembers;
 
   const handleEvaluate = (member: User) => {
     setSelectedMember(member);

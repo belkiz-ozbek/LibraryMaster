@@ -103,7 +103,7 @@ export default function Statistics() {
   const availableCopies = allBooks.reduce((sum, book) => sum + book.availableCopies, 0);
   const utilizationRate = totalCopies > 0 ? ((totalCopies - availableCopies) / totalCopies * 100) : 0;
   
-  const ratedMembers = allUsers.filter((user) => user.adminRating && !user.isAdmin);
+  const ratedMembers = allUsers.filter((user) => user.adminRating);
   const averageRating = ratedMembers.length > 0 
     ? ratedMembers.reduce((sum, user) => sum + (user.adminRating || 0), 0) / ratedMembers.length 
     : 0;
