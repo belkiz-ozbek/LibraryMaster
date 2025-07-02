@@ -16,6 +16,18 @@ import { format } from "date-fns";
 import type { User } from "@shared/schema";
 import { useTranslation } from "react-i18next";
 import { motion } from "framer-motion";
+import {
+  AlertDialog,
+  AlertDialogTrigger,
+  AlertDialogContent,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogAction,
+  AlertDialogCancel,
+} from "@/components/ui/alert-dialog";
+import { Button as UIButton } from "@/components/ui/button";
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -38,6 +50,25 @@ const itemVariants = {
   },
 };
 
+function getFriendlyDeleteUserErrorMessage(error: string) {
+  if (!error) return "Bilinmeyen bir hata oluştu.";
+  if (
+    error.includes("violates foreign key constraint") ||
+    error.includes("borrowings_user_id_users_id_fk")
+  ) {
+    return "Bu üyenin ödünç geçmişi var. Üye silinemez.";
+  }
+  if (
+    error.includes("not found") ||
+    error.includes("User with id") ||
+    error.includes("404")
+  ) {
+    return "Üye bulunamadı veya zaten silinmiş.";
+  }
+  // Diğer tüm durumlar için:
+  return "Üye silinemedi. Lütfen daha sonra tekrar deneyin.";
+}
+
 export default function Members() {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedMember, setSelectedMember] = useState<User | null>(null);
@@ -45,6 +76,8 @@ export default function Members() {
   const { user } = useAuth();
   const { toast } = useToast();
   const { t } = useTranslation();
+  const [deleteDialogOpenMember, setDeleteDialogOpenMember] = useState<User | null>(null);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
 
   const { data: members = [], isLoading } = useQuery<User[]>({
     queryKey: ["/api/users"],
@@ -59,15 +92,18 @@ export default function Members() {
     mutationFn: (id: number) => apiRequest("DELETE", `/api/users/${id}`),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/users"] });
+      setDeleteError(null);
       toast({
-        title: "Member deleted",
-        description: "The member has been successfully deleted.",
+        title: "Üye silindi",
+        description: "Üye başarıyla silindi.",
       });
     },
-    onError: () => {
+    onError: (error: any) => {
+      const msg = getFriendlyDeleteUserErrorMessage(error?.message || "");
+      setDeleteError(msg);
       toast({
-        title: "Error",
-        description: "Failed to delete member.",
+        title: "Silme Hatası",
+        description: msg,
         variant: "destructive",
       });
     },
@@ -78,12 +114,6 @@ export default function Members() {
   const handleEdit = (member: User) => {
     setSelectedMember(member);
     setIsFormOpen(true);
-  };
-
-  const handleDelete = (id: number) => {
-    if (confirm("Are you sure you want to delete this member?")) {
-      deleteMemberMutation.mutate(id);
-    }
   };
 
   const handleFormSuccess = () => {
@@ -183,7 +213,7 @@ export default function Members() {
               <Button
                 variant="ghost"
                 size="sm"
-                onClick={() => handleDelete(row.id)}
+                onClick={e => { e.stopPropagation(); setDeleteDialogOpenMember(row); }}
                 disabled={deleteMemberMutation.isPending || row.id === user?.id}
               >
                 <Trash2 size={16} />
@@ -312,6 +342,44 @@ export default function Members() {
           </CardContent>
         </Card>
       </motion.div>
+
+      <AlertDialog open={!!deleteDialogOpenMember} onOpenChange={open => { setDeleteDialogOpenMember(open ? deleteDialogOpenMember : null); setDeleteError(null); }}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Üye Sil</AlertDialogTitle>
+            <AlertDialogDescription>
+              {deleteDialogOpenMember ? (
+                <span>
+                  <b>{deleteDialogOpenMember.name}</b> adlı üyeyi silmek istediğinizden emin misiniz? Bu işlem geri alınamaz.
+                </span>
+              ) : null}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          {deleteError && (
+            <div className="text-sm text-red-600 text-center font-medium mb-2">{deleteError}</div>
+          )}
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={() => { setDeleteDialogOpenMember(null); setDeleteError(null); }}>İptal</AlertDialogCancel>
+            <UIButton
+              variant="destructive"
+              disabled={deleteMemberMutation.isPending}
+              onClick={async () => {
+                if (deleteDialogOpenMember) {
+                  setDeleteError(null);
+                  try {
+                    await deleteMemberMutation.mutateAsync(deleteDialogOpenMember.id);
+                    setDeleteDialogOpenMember(null);
+                  } catch (err) {
+                    // Hata zaten onError ile state'e yazılıyor, dialog açık kalacak
+                  }
+                }
+              }}
+            >
+              {deleteMemberMutation.isPending ? "Siliniyor..." : "Sil"}
+            </UIButton>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </motion.div>
   );
 }
