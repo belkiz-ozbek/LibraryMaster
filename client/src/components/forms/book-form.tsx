@@ -58,117 +58,126 @@ export function BookForm({ book, onSuccess, onCancel }: BookFormProps) {
   };
 
   return (
-    <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-      <div className="grid grid-cols-2 gap-4">
-        <div>
-          <Label htmlFor="title">{t("books.name")} *</Label>
+    <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6 p-2">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="flex flex-col gap-2">
+          <Label htmlFor="title" className="font-semibold text-gray-800">{t("books.name")} *</Label>
           <Input
             id="title"
             {...form.register("title")}
             placeholder={t("books.name")}
+            className="rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition"
           />
-          {form.formState.errors.title && <p className="text-sm text-destructive mt-1">{form.formState.errors.title.message}</p>}
+          {form.formState.errors.title && <p className="text-xs text-red-500 mt-0.5">{form.formState.errors.title.message}</p>}
         </div>
-        <div>
-          <Label htmlFor="author">{t("books.author")} *</Label>
+        <div className="flex flex-col gap-2">
+          <Label htmlFor="author" className="font-semibold text-gray-800">{t("books.author")} *</Label>
           <Input
             id="author"
             {...form.register("author")}
             placeholder={t("books.author")}
+            className="rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition"
           />
-          {form.formState.errors.author && <p className="text-sm text-destructive mt-1">{form.formState.errors.author.message}</p>}
+          {form.formState.errors.author && <p className="text-xs text-red-500 mt-0.5">{form.formState.errors.author.message}</p>}
         </div>
       </div>
 
-      <div className="grid grid-cols-2 gap-4">
-        <div>
-          <Label htmlFor="isbn">{t("books.isbn")} *</Label>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="flex flex-col gap-2">
+          <Label htmlFor="isbn" className="font-semibold text-gray-800">{t("books.isbn")} *</Label>
           <Input
             id="isbn"
             {...form.register("isbn")}
             placeholder="978-0-123456-78-9"
+            className="rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition"
           />
-          {form.formState.errors.isbn && <p className="text-sm text-destructive mt-1">{form.formState.errors.isbn.message}</p>}
+          {form.formState.errors.isbn && <p className="text-xs text-red-500 mt-0.5">{form.formState.errors.isbn.message}</p>}
         </div>
-        <div>
-          <Label htmlFor="genre">{t("books.genre")} *</Label>
+        <div className="flex flex-col gap-2">
+          <Label htmlFor="genre" className="font-semibold text-gray-800">{t("books.genre")} *</Label>
           <Input
             id="genre"
             {...form.register("genre")}
             placeholder={t("books.genre") + ", Bilim, Tarih vb."}
+            className="rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition"
           />
-          {form.formState.errors.genre && <p className="text-sm text-destructive mt-1">{form.formState.errors.genre.message}</p>}
+          {form.formState.errors.genre && <p className="text-xs text-red-500 mt-0.5">{form.formState.errors.genre.message}</p>}
         </div>
       </div>
 
-      <div className="grid grid-cols-3 gap-4">
-        <div>
-          <Label htmlFor="publishYear">{t("books.publishYear")} *</Label>
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="flex flex-col gap-2">
+          <Label htmlFor="publishYear" className="font-semibold text-gray-800">{t("books.publishYear")} *</Label>
           <Input
             id="publishYear"
             type="number"
             {...form.register("publishYear", { valueAsNumber: true })}
             placeholder={t("books.publishYear")}
+            className="rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition"
           />
-          {form.formState.errors.publishYear && <p className="text-sm text-destructive mt-1">{form.formState.errors.publishYear.message}</p>}
+          {form.formState.errors.publishYear && <p className="text-xs text-red-500 mt-0.5">{form.formState.errors.publishYear.message}</p>}
         </div>
-        <div>
-          <Label htmlFor="pageCount">{t("books.pageCount") || "Sayfa Sayısı"} *</Label>
+        <div className="flex flex-col gap-2">
+          <Label htmlFor="pageCount" className="font-semibold text-gray-800">{t("books.pageCount") || "Sayfa Sayısı"} *</Label>
           <Input
             id="pageCount"
             type="number"
             min="1"
             {...form.register("pageCount", { valueAsNumber: true })}
             placeholder={t("books.pageCount") || "Sayfa Sayısı"}
+            className="rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition"
           />
-          {form.formState.errors.pageCount && <p className="text-sm text-destructive mt-1">{form.formState.errors.pageCount.message}</p>}
+          {form.formState.errors.pageCount && <p className="text-xs text-red-500 mt-0.5">{form.formState.errors.pageCount.message}</p>}
         </div>
-        <div>
-          <Label htmlFor="totalCopies">{t("books.totalCopies")} *</Label>
+        <div className="flex flex-col gap-2">
+          <Label htmlFor="totalCopies" className="font-semibold text-gray-800">{t("books.totalCopies")} *</Label>
           <Input
             id="totalCopies"
             type="number"
             min="1"
             {...form.register("totalCopies", { valueAsNumber: true })}
             placeholder={t("books.totalCopies")}
+            className="rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition"
           />
-          {form.formState.errors.totalCopies && <p className="text-sm text-destructive mt-1">{form.formState.errors.totalCopies.message}</p>}
+          {form.formState.errors.totalCopies && <p className="text-xs text-red-500 mt-0.5">{form.formState.errors.totalCopies.message}</p>}
         </div>
       </div>
 
-      <div>
-        <Label htmlFor="availableCopies">{t("books.availableCopies")} *</Label>
+      <div className="flex flex-col gap-2">
+        <Label htmlFor="availableCopies" className="font-semibold text-gray-800">{t("books.availableCopies")} *</Label>
         <Input
           id="availableCopies"
           type="number"
           min="0"
           {...form.register("availableCopies", { valueAsNumber: true })}
           placeholder={t("books.availableCopies")}
+          className="rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition"
         />
-        {form.formState.errors.availableCopies && <p className="text-sm text-destructive mt-1">{form.formState.errors.availableCopies.message}</p>}
+        {form.formState.errors.availableCopies && <p className="text-xs text-red-500 mt-0.5">{form.formState.errors.availableCopies.message}</p>}
       </div>
 
-      <div>
-        <Label htmlFor="shelfNumber">{t("books.shelfNumber")} *</Label>
+      <div className="flex flex-col gap-2">
+        <Label htmlFor="shelfNumber" className="font-semibold text-gray-800">{t("books.shelfNumber")} *</Label>
         <Input
           id="shelfNumber"
           {...form.register("shelfNumber")}
           placeholder={t("books.shelfNumber") + ", A1, B2, C3 vb."}
+          className="rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition"
         />
-        {form.formState.errors.shelfNumber && <p className="text-sm text-destructive mt-1">{form.formState.errors.shelfNumber.message}</p>}
+        {form.formState.errors.shelfNumber && <p className="text-xs text-red-500 mt-0.5">{form.formState.errors.shelfNumber.message}</p>}
       </div>
 
-      <div className="flex justify-end space-x-3 pt-4">
-        <Button type="button" variant="outline" onClick={onCancel}>
+      <div className="flex justify-end space-x-3 pt-6">
+        <Button type="button" variant="outline" onClick={onCancel} className="rounded-lg px-6 py-2 text-base">
           {t("common.cancel")}
         </Button>
-        <Button type="submit" disabled={mutation.isPending}>
+        <Button type="submit" disabled={mutation.isPending} className="rounded-lg px-6 py-2 text-base">
           {mutation.isPending ? t("common.saving", "Kaydediliyor...") : isEditing ? t("books.editBook") : t("books.addBook")}
         </Button>
       </div>
 
       {mutation.isError && (
-        <p className="text-sm text-destructive mt-2">
+        <p className="text-sm text-red-600 mt-2 text-center font-medium">
           {t("errors.serverError")}
         </p>
       )}
