@@ -93,7 +93,7 @@ export default function Borrowing() {
   const filteredBorrowings = borrowings.filter((borrowing: BorrowingWithDetails) => 
     searchQuery.length === 0 ||
     borrowing.user.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    borrowing.user.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    (borrowing.user.email && borrowing.user.email.toLowerCase().includes(searchQuery.toLowerCase())) ||
     borrowing.book.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
     borrowing.book.author.toLowerCase().includes(searchQuery.toLowerCase()) ||
     borrowing.book.isbn.toLowerCase().includes(searchQuery.toLowerCase())

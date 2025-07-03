@@ -80,7 +80,7 @@ export default function Evaluations() {
   const filteredMembers = searchQuery.length > 2 
     ? members.filter((member: User) => 
         member.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        member.email.toLowerCase().includes(searchQuery.toLowerCase())
+        (member.email && member.email.toLowerCase().includes(searchQuery.toLowerCase()))
       )
     : members;
 
