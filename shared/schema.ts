@@ -6,12 +6,16 @@ import { z } from "zod";
 export const users = pgTable("users", {
   id: serial("id").primaryKey(),
   name: text("name").notNull(),
+  username: text("username").unique().notNull(),
   email: text("email"),
   password: text("password"),
   isAdmin: boolean("is_admin").default(false).notNull(),
   membershipDate: timestamp("membership_date").notNull(),
   adminRating: integer("admin_rating").default(0),
   adminNotes: text("admin_notes"),
+  emailVerified: boolean("email_verified").default(false).notNull(),
+  emailVerificationToken: text("email_verification_token"),
+  emailVerificationExpires: timestamp("email_verification_expires"),
 });
 
 export const books = pgTable("books", {
@@ -67,6 +71,7 @@ export const insertUserSchema = createInsertSchema(users).omit({
     (val) => typeof val === 'string' ? new Date(val) : val,
     z.date()
   ),
+  username: z.string().min(3).max(30).regex(/^[a-zA-Z0-9_]+$/, "Username can only contain letters, numbers, and underscores"),
   email: z.string().email().or(z.literal('')).optional(),
   password: z.string().optional(),
 });

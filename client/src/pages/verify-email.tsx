@@ -1,0 +1,300 @@
+import { useState, useEffect } from "react";
+import { useLocation } from "wouter";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { useToast } from "@/components/ui/use-toast";
+import { CheckCircle, XCircle, Loader2, Mail } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
+import { useRef } from "react";
+// Eğer react-confetti yüklü ise aşağıdaki satırı açabilirsin:
+// import Confetti from "react-confetti";
+
+export default function VerifyEmailPage() {
+  const [isLoading, setIsLoading] = useState(true);
+  const [isVerified, setIsVerified] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [email, setEmail] = useState<string | null>(null);
+  const [token, setToken] = useState<string | null>(null);
+  const [, navigate] = useLocation();
+  const { toast } = useToast();
+  const emailRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    const verifyEmail = async () => {
+      const urlParams = new URLSearchParams(window.location.search);
+      const successParam = urlParams.get('success');
+      const errorParam = urlParams.get('error');
+      const emailParam = urlParams.get('email');
+      
+      if (emailParam) setEmail(emailParam);
+      
+      if (successParam === null) {
+        setIsLoading(false);
+        return;
+      }
+
+      if (successParam === '1') {
+        setIsVerified(true);
+        toast({
+          title: "Email başarıyla doğrulandı!",
+          description: "Artık hesabınıza giriş yapabilirsiniz.",
+        });
+      } else {
+        let errorMessage = "Email doğrulanamadı. Lütfen tekrar deneyin.";
+        if (errorParam === 'invalid_token') {
+          errorMessage = "Geçersiz doğrulama bağlantısı.";
+        } else if (errorParam === 'token_expired') {
+          errorMessage = "Doğrulama bağlantısının süresi dolmuş.";
+        } else if (errorParam === 'server_error') {
+          errorMessage = "Sunucu hatası oluştu. Lütfen daha sonra tekrar deneyin.";
+        }
+        setError(errorMessage);
+      }
+      setIsLoading(false);
+    };
+    verifyEmail();
+  }, [toast]);
+
+  // Başarı durumunda otomatik yönlendirme
+  useEffect(() => {
+    if (isVerified) {
+      const timeout = setTimeout(() => {
+        navigate("/login");
+      }, 3000);
+      return () => clearTimeout(timeout);
+    }
+  }, [isVerified, navigate]);
+
+  const handleGoToLogin = () => {
+    navigate("/login");
+  };
+
+  const handleResendEmail = async () => {
+    if (!email) {
+      toast({
+        title: "E-posta adresi bulunamadı",
+        description: "Lütfen tekrar kayıt olun.",
+        variant: "destructive",
+      });
+      return;
+    }
+    try {
+      const response = await fetch("/api/auth/resend-verification", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email }),
+      });
+      const data = await response.json();
+      if (response.ok) {
+        toast({
+          title: "Doğrulama e-postası tekrar gönderildi!",
+          description: "Lütfen e-posta kutunuzu kontrol edin.",
+        });
+      } else {
+        toast({
+          title: "Tekrar gönderilemedi",
+          description: data.message || "Bir hata oluştu.",
+          variant: "destructive",
+        });
+      }
+    } catch (error) {
+      toast({
+        title: "Tekrar gönderilemedi",
+        description: "Bir hata oluştu.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  return (
+    <div className="min-h-screen flex items-center justify-center p-4 relative overflow-hidden">
+      <div className="fixed inset-0 -z-10 w-full h-full overflow-hidden">
+        <video
+          src="/video.mp4"
+          autoPlay
+          loop
+          muted
+          playsInline
+          className="w-full h-full object-cover"
+        />
+        <div className="absolute inset-0 bg-black/40"></div>
+      </div>
+      
+      <div className="w-full max-w-md mx-auto">
+        <Card className="border-0 shadow-2xl bg-white/95 backdrop-blur-sm">
+          <CardHeader className="space-y-4 pb-6">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.8 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.5, delay: 0.2 }}
+              className="flex flex-col items-center space-y-3"
+            >
+              <motion.div 
+                initial={{ opacity: 0, y: -20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6, delay: 0.3, ease: "easeOut" }}
+                className="flex items-center space-x-4"
+              >
+                <motion.img 
+                  initial={{ opacity: 0, y: -30 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.5, delay: 0.4 }}
+                  src="/ahdevefa-logo.png" 
+                  alt="Ahdevefa Logo" 
+                  className="h-12 w-auto object-contain" 
+                />
+                <motion.div 
+                  initial={{ opacity: 0, scale: 0 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ duration: 0.3, delay: 0.6 }}
+                  className="w-px h-8 bg-gray-300"
+                ></motion.div>
+                <motion.img 
+                  initial={{ opacity: 0, y: -30 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.5, delay: 0.5 }}
+                  src="/yetim-vakfi-logo.png" 
+                  alt="Yetim Vakfi Logo" 
+                  className="h-12 w-auto object-contain" 
+                />
+              </motion.div>
+              <motion.div 
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, delay: 0.7 }}
+                className="text-center space-y-1"
+              >
+                <CardTitle className="text-2xl font-extrabold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent tracking-tight">
+                  Kütüphane Yönetim Sistemi
+                </CardTitle>
+                <motion.div 
+                  initial={{ opacity: 0, scaleX: 0 }}
+                  animate={{ opacity: 1, scaleX: 1 }}
+                  transition={{ duration: 0.4, delay: 0.8 }}
+                  className="h-1 w-16 mx-auto bg-gradient-to-r from-blue-400 to-purple-400 rounded-full mb-1"
+                ></motion.div>
+                <CardDescription className="text-gray-700 text-base font-medium">
+                  E-posta doğrulama işlemini tamamlayın.
+                </CardDescription>
+              </motion.div>
+            </motion.div>
+          </CardHeader>
+          <CardContent className="space-y-6">
+            <AnimatePresence mode="wait">
+              {isLoading ? (
+                <motion.div key="loading" className="flex flex-col items-center space-y-4" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }}>
+                  <Loader2 className="h-14 w-14 animate-spin text-blue-600" />
+                  <p className="text-gray-600 text-center">Email adresiniz doğrulanıyor...</p>
+                </motion.div>
+              ) : isVerified ? (
+                <motion.div key="success" className="flex flex-col items-center space-y-4" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }}>
+                  <CheckCircle className="h-24 w-24 text-green-500 animate-pulse mb-2" />
+                  <div className="text-center space-y-2">
+                    <h3 className="text-2xl font-bold text-green-700">Tebrikler!</h3>
+                    <p className="text-lg text-gray-800 font-semibold">Email adresiniz başarıyla doğrulandı.</p>
+                    <p className="text-gray-600">Artık hesabınıza giriş yapabilirsiniz.</p>
+                    <p className="text-sm text-gray-400">3 saniye içinde giriş sayfasına yönlendirileceksiniz...</p>
+                  </div>
+                  <motion.div whileTap={{ scale: 0.97 }}>
+                    <Button onClick={handleGoToLogin} className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-medium">
+                      Hemen Giriş Yap
+                    </Button>
+                  </motion.div>
+                </motion.div>
+              ) : error ? (
+                <motion.div key="error" className="flex flex-col items-center space-y-4" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }}>
+                  <XCircle className="h-16 w-16 text-red-500 animate-shake" />
+                  <div className="text-center space-y-2">
+                    <h3 className="text-lg font-semibold text-gray-900">Doğrulama Başarısız</h3>
+                    <p className="text-gray-600">{error || "Email doğrulama işlemi başarısız oldu."}</p>
+                  </div>
+                  <div className="flex flex-col space-y-3 w-full">
+                    <motion.div whileTap={{ scale: 0.97 }}>
+                      <Button onClick={handleGoToLogin} variant="outline" className="w-full">
+                        Giriş Sayfasına Dön
+                      </Button>
+                    </motion.div>
+                    <motion.div whileTap={{ scale: 0.97 }}>
+                      <Button onClick={handleResendEmail} variant="ghost" className="w-full">
+                        <Mail className="mr-2 h-4 w-4" />
+                        Doğrulama Emailini Tekrar Gönder
+                      </Button>
+                    </motion.div>
+                  </div>
+                </motion.div>
+              ) : (
+                <motion.div key="info" className="flex flex-col items-center space-y-4" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }}>
+                  <Mail className="h-16 w-16 text-blue-500 animate-bounce" />
+                  <div className="text-center space-y-2">
+                    <h3 className="text-lg font-semibold text-gray-900">Email Doğrulama Gerekli</h3>
+                    <p className="text-gray-600">{email ? `${email} adresine doğrulama emaili gönderdik.` : "Email adresinize doğrulama emaili gönderdik."}</p>
+                    <p className="text-gray-600 text-sm">Lütfen email kutunuzu kontrol edin ve doğrulama linkine tıklayın.</p>
+                  </div>
+                  {/* E-posta input ve label tamamen kaldırıldı */}
+                  <div className="flex flex-col space-y-3 w-full">
+                    <motion.div 
+                      whileHover={{ scale: 1.02, y: -2 }}
+                      whileTap={{ scale: 0.98 }}
+                    >
+                      <Button 
+                        type="button"
+                        onClick={handleResendEmail}
+                        className="w-full h-11 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-medium rounded-lg shadow-lg transition-all duration-300 transform hover:scale-[1.02] active:scale-[0.98] hover:shadow-xl"
+                        disabled={isLoading}
+                      >
+                        {isLoading ? (
+                          <motion.div
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            className="flex items-center"
+                          >
+                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                            Doğrulama e-postası gönderiliyor...
+                          </motion.div>
+                        ) : (
+                          <motion.span
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                          >
+                            Doğrulama E-postasını Tekrar Gönder
+                          </motion.span>
+                        )}
+                      </Button>
+                    </motion.div>
+                  </div>
+                  <div className="text-center">
+                    <motion.p 
+                      className="text-sm text-gray-600" 
+                      initial={{ opacity: 0 }} 
+                      animate={{ opacity: 1 }}
+                      transition={{ delay: 0.5 }}
+                    >
+                      Zaten hesabınız var mı?{" "}
+                      <motion.button
+                        type="button"
+                        whileHover={{ scale: 1.05, y: -1 }}
+                        whileTap={{ scale: 0.97 }}
+                        onClick={() => navigate("/login")}
+                        className="text-blue-600 hover:text-blue-700 font-medium transition-all duration-200 underline underline-offset-2 hover:underline-offset-4"
+                        disabled={isLoading}
+                      >
+                        Giriş yapın
+                      </motion.button>
+                    </motion.p>
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </CardContent>
+        </Card>
+        <div className="mt-8 text-center">
+          <p className="text-xs text-gray-500">
+            © 2024 Kütüphane Yönetim Sistemi. All rights reserved.
+          </p>
+        </div>
+      </div>
+    </div>
+  );
+} 

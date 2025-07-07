@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>E-posta Doğrulandı</title>
+  <style>
+    body {
+      background: #fff;
+      min-height: 100vh;
+      margin: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Inter', Arial, sans-serif;
+    }
+    .container {
+      text-align: center;
+    }
+    .checkmark {
+      width: 100px;
+      height: 100px;
+      display: inline-block;
+      margin-bottom: 24px;
+    }
+    .checkmark__circle {
+      stroke: #22c55e;
+      stroke-width: 6;
+      fill: none;
+      animation: circle 0.6s ease-in-out;
+    }
+    .checkmark__check {
+      stroke: #22c55e;
+      stroke-width: 6;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      fill: none;
+      stroke-dasharray: 48;
+      stroke-dashoffset: 48;
+      animation: check 0.4s 0.6s forwards cubic-bezier(0.65, 0, 0.45, 1);
+    }
+    @keyframes circle {
+      from { stroke-dasharray: 0 314; }
+      to { stroke-dasharray: 314 0; }
+    }
+    @keyframes check {
+      to { stroke-dashoffset: 0; }
+    }
+    .success-message {
+      font-size: 2rem;
+      color: #22c55e;
+      font-weight: bold;
+      margin-bottom: 8px;
+    }
+    .desc {
+      color: #333;
+      font-size: 1.1rem;
+      margin-bottom: 16px;
+    }
+    .redirect {
+      color: #888;
+      font-size: 0.95rem;
+    }
+  </style>
+  <script>
+    setTimeout(function() {
+      window.location.href = 'http://localhost:3000/login';
+    }, 3000);
+  </script>
+</head>
+<body>
+  <div class="container">
+    <svg class="checkmark" viewBox="0 0 52 52">
+      <circle class="checkmark__circle" cx="26" cy="26" r="25"/>
+      <path class="checkmark__check" d="M14 28l7 7 16-16"/>
+    </svg>
+    <div class="success-message">E-posta başarıyla doğrulandı!</div>
+    <div class="desc">Artık hesabınıza giriş yapabilirsiniz.</div>
+    <div class="redirect">3 saniye içinde giriş sayfasına yönlendirileceksiniz...</div>
+  </div>
+</body>
+</html> 

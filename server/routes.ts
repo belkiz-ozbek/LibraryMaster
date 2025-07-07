@@ -9,6 +9,11 @@ import "./types";
 import { and, eq, desc, gt, gte, isNotNull, lte, sql, count } from "drizzle-orm";
 import { db } from "./db";
 import { books, borrowings, users } from "@shared/schema";
+import { sendVerificationEmail, generateVerificationToken } from "./emailService";
+import path from "path";
+import { fileURLToPath } from "url";
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 // Auth middleware
 function requireAuth(req: any, res: any, next: any) {
@@ -48,23 +53,137 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Auth routes
   app.post("/api/auth/login", async (req, res) => {
     try {
-      const { email, password } = req.body;
-      
-      const user = await storage.getUserByEmail(email);
-      if (!user) {
-        return res.status(401).json({ message: "Invalid credentials" });
+      const { identifier, password } = req.body;
+      if (!identifier || !password) {
+        return res.status(400).json({ message: "Kullanıcı adı/e-posta ve şifre zorunlu" });
       }
-      
+      // Kullanıcıyı username veya email ile bul
+      let user = null;
+      if (identifier.includes("@")) {
+        user = await storage.getUserByEmail(identifier);
+      } else {
+        user = await storage.getUserByUsername(identifier);
+      }
+      if (!user) {
+        return res.status(401).json({ message: "Geçersiz kullanıcı adı/e-posta veya şifre" });
+      }
       const validPassword = await bcrypt.compare(password, user.password || '');
       if (!validPassword) {
-        return res.status(401).json({ message: "Invalid credentials" });
+        return res.status(401).json({ message: "Geçersiz kullanıcı adı/e-posta veya şifre" });
       }
-      
+      if (!user.emailVerified) {
+        return res.status(401).json({ 
+          message: "Lütfen e-posta adresinizi doğrulayın. Gelen kutunuzu kontrol edin.",
+          emailNotVerified: true 
+        });
+      }
       req.session.userId = user.id;
       const { password: _, ...userWithoutPassword } = user;
       res.json({ user: userWithoutPassword });
     } catch (error) {
-      res.status(500).json({ message: "Login failed" });
+      res.status(500).json({ message: "Giriş başarısız" });
+    }
+  });
+
+  app.post("/api/auth/signup", async (req, res) => {
+    try {
+      const { name, username, email, password } = req.body;
+      
+      // Validate required fields
+      if (!name || !username || !email || !password) {
+        return res.status(400).json({ message: "Name, username, email, and password are required" });
+      }
+      
+      // Check if email already exists
+      const existingUser = await storage.getUserByEmail(email);
+      if (existingUser) {
+        return res.status(400).json({ message: "Bu e-posta adresi zaten kayıtlı. Lütfen farklı bir e-posta adresi kullanın." });
+      }
+      
+      // Check if username already exists
+      const existingUserByUsername = await storage.getUserByUsername(username);
+      if (existingUserByUsername) {
+        return res.status(400).json({ message: "This username is already taken" });
+      }
+      
+      // Hash password
+      const hashedPassword = await bcrypt.hash(password, 10);
+      
+      // Generate verification token
+      const verificationToken = generateVerificationToken();
+      const verificationExpires = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 saat
+      
+      // Create new user with verification fields
+      const newUser = await storage.createUser({
+        name: name.trim(),
+        username: username.trim(),
+        email: email.toLowerCase().trim(),
+        password: hashedPassword,
+        isAdmin: false, // Default to regular user
+        membershipDate: new Date(),
+        emailVerified: false,
+        emailVerificationToken: verificationToken,
+        emailVerificationExpires: verificationExpires
+      });
+      
+      // Send verification email
+      try {
+        await sendVerificationEmail(email, name.trim(), verificationToken);
+      } catch (emailError) {
+        console.error("Failed to send verification email:", emailError);
+        // Email gönderilemese bile kullanıcıyı oluştur, ama uyarı ver
+        return res.status(201).json({ 
+          message: "Account created but verification email could not be sent. Please contact support.",
+          user: { id: newUser.id, name: newUser.name, email: newUser.email, emailVerified: false }
+        });
+      }
+      
+      const { password: _, ...userWithoutPassword } = newUser;
+      res.status(201).json({ 
+        message: "Account created successfully. Please check your email to verify your account.",
+        user: userWithoutPassword 
+      });
+    } catch (error) {
+      console.error("Signup error:", error);
+      res.status(500).json({ message: "Failed to create account" });
+    }
+  });
+
+  app.get("/api/auth/verify-email", async (req, res) => {
+    try {
+      const { token } = req.query;
+      console.log("[VERIFY-EMAIL] Token from URL:", token);
+      if (!token || typeof token !== 'string') {
+        console.log("[VERIFY-EMAIL] Invalid token format");
+        return res.sendFile(path.join(__dirname, "error.html"));
+      }
+      // Token ile kullanıcıyı bul
+      const [user] = await db.select().from(users).where(eq(users.emailVerificationToken, token));
+      console.log("[VERIFY-EMAIL] User found for token:", user);
+      if (!user) {
+        console.log("[VERIFY-EMAIL] No user found for token");
+        return res.sendFile(path.join(__dirname, "error.html"));
+      }
+      // Token'ın süresi dolmuş mu kontrol et
+      console.log("[VERIFY-EMAIL] Token expires at:", user.emailVerificationExpires, "Current time:", new Date());
+      if (user.emailVerificationExpires && new Date() > user.emailVerificationExpires) {
+        console.log("[VERIFY-EMAIL] Token expired");
+        return res.sendFile(path.join(__dirname, "error.html"));
+      }
+      // Email'i doğrula
+      await db.update(users)
+        .set({ 
+          emailVerified: true, 
+          emailVerificationToken: null, 
+          emailVerificationExpires: null 
+        })
+        .where(eq(users.id, user.id));
+      console.log("[VERIFY-EMAIL] Email verified for user id:", user.id);
+      // Başarılıysa success.html göster
+      return res.sendFile(path.join(__dirname, "success.html"));
+    } catch (error) {
+      console.error("[VERIFY-EMAIL] Email verification error:", error);
+      res.sendFile(path.join(__dirname, "error.html"));
     }
   });
 
@@ -84,6 +203,43 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
     const { password: _, ...userWithoutPassword } = user;
     res.json({ user: userWithoutPassword });
+  });
+
+  app.post("/api/auth/resend-verification", async (req, res) => {
+    try {
+      const { email } = req.body;
+      if (!email) {
+        return res.status(400).json({ message: "Email is required" });
+      }
+      const user = await storage.getUserByEmail(email);
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+      if (user.emailVerified) {
+        return res.status(400).json({ message: "Email is already verified" });
+      }
+      // Generate new token and expiry
+      const verificationToken = generateVerificationToken();
+      const verificationExpires = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 saat
+      // Update user in DB
+      await db.update(users)
+        .set({
+          emailVerificationToken: verificationToken,
+          emailVerificationExpires: verificationExpires
+        })
+        .where(eq(users.id, user.id));
+      // Send email
+      try {
+        await sendVerificationEmail(user.email ?? "", user.name ?? "", verificationToken);
+      } catch (emailError) {
+        console.error("Failed to send verification email:", emailError);
+        return res.status(500).json({ message: "Failed to send verification email" });
+      }
+      res.json({ message: "Verification email sent successfully" });
+    } catch (error) {
+      console.error("Resend verification error:", error);
+      res.status(500).json({ message: "Failed to resend verification email" });
+    }
   });
 
   // User routes

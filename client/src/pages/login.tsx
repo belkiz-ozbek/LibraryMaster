@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef, useEffect, useCallback, useMemo } from "react";
 import { useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -6,215 +6,353 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/components/ui/use-toast";
 import { useAuth } from "@/lib/auth";
-import { Eye, EyeOff, Mail, Lock, Loader2 } from "lucide-react";
-import ahdevefaLogo from "@/assets/ahdevefa-logo.png";
-import yetimVakfiLogo from "@/assets/yetim-vakfi-logo.png";
+import { Eye, EyeOff, Mail, Lock, Loader2, User } from "lucide-react";
+import { motion } from "framer-motion";
+
+// Types
+interface FormErrors {
+  identifier?: string;
+  password?: string;
+}
+
+interface InputFieldProps {
+  id: string;
+  type: string;
+  placeholder: string;
+  value: string;
+  onChange: (value: string) => void;
+  error?: string;
+  disabled: boolean;
+  ref: React.RefObject<HTMLInputElement>;
+  autoComplete: string;
+  icon: React.ReactNode;
+  showPasswordToggle?: boolean;
+  showPassword?: boolean;
+  onTogglePassword?: () => void;
+}
+
+// Extracted Components
+const VideoBackground = () => (
+  <div className="fixed inset-0 -z-10 w-full h-full overflow-hidden">
+    <video
+      src="/video.mp4"
+      autoPlay
+      loop
+      muted
+      playsInline
+      className="w-full h-full object-cover"
+    />
+    <div className="absolute inset-0 bg-black/40"></div>
+  </div>
+);
+
+const LogoSection = () => (
+  <motion.div 
+    initial={{ opacity: 0, y: -20 }}
+    animate={{ opacity: 1, y: 0 }}
+    transition={{ duration: 0.6, delay: 0.3, ease: "easeOut" }}
+    className="flex items-center space-x-4"
+  >
+    <motion.img 
+      initial={{ opacity: 0, y: -30 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5, delay: 0.4 }}
+      src="/ahdevefa-logo.png" 
+      alt="Ahdevefa Logo" 
+      className="h-12 w-auto object-contain"
+      loading="lazy"
+    />
+    <motion.div 
+      initial={{ opacity: 0, scale: 0 }}
+      animate={{ opacity: 1, scale: 1 }}
+      transition={{ duration: 0.3, delay: 0.6 }}
+      className="w-px h-8 bg-gray-300"
+    ></motion.div>
+    <motion.img 
+      initial={{ opacity: 0, y: -30 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5, delay: 0.5 }}
+      src="/yetim-vakfi-logo.png" 
+      alt="Yetim Vakfi Logo" 
+      className="h-12 w-auto object-contain"
+      loading="lazy"
+    />
+  </motion.div>
+);
+
+const TitleSection = () => (
+  <motion.div 
+    initial={{ opacity: 0, y: -10 }}
+    animate={{ opacity: 1, y: 0 }}
+    transition={{ duration: 0.5, delay: 0.7 }}
+    className="text-center space-y-1"
+  >
+    <CardTitle className="text-2xl font-extrabold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent tracking-tight">
+      Kütüphane Yönetim Sistemi
+    </CardTitle>
+    <motion.div 
+      initial={{ opacity: 0, scaleX: 0 }}
+      animate={{ opacity: 1, scaleX: 1 }}
+      transition={{ duration: 0.4, delay: 0.8 }}
+      className="h-1 w-16 mx-auto bg-gradient-to-r from-blue-400 to-purple-400 rounded-full mb-1"
+    ></motion.div>
+    <CardDescription className="text-gray-700 text-base font-medium">
+      Hesabınıza giriş yapın ve kitap dünyasına erişin.
+    </CardDescription>
+  </motion.div>
+);
+
+const InputField = ({ 
+  id, 
+  type, 
+  placeholder, 
+  value, 
+  onChange, 
+  error, 
+  disabled, 
+  ref, 
+  autoComplete, 
+  icon, 
+  showPasswordToggle, 
+  showPassword, 
+  onTogglePassword 
+}: InputFieldProps) => (
+  <motion.div 
+    whileHover={{ scale: 1.02, y: -2 }}
+    whileFocus={{ scale: 1.03, boxShadow: "0 0 0 3px rgba(59, 130, 246, 0.3)" }}
+    className="space-y-2"
+  >
+    <Label htmlFor={id} className="text-xs font-medium text-gray-500">
+      {placeholder}
+    </Label>
+    <div className="relative group">
+      {icon}
+      <Input
+        id={id}
+        type={type}
+        placeholder={placeholder}
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        className={`pl-10 h-10 rounded-lg transition-all duration-300 focus:shadow-lg hover:shadow-md text-sm placeholder:text-gray-400 ${error ? 'border-red-500 focus:border-red-500 ring-2 ring-red-300' : 'focus:border-blue-500 ring-1 ring-blue-100 hover:border-blue-300'}`}
+        disabled={disabled}
+        ref={ref}
+        aria-invalid={!!error}
+        aria-describedby={error ? `${id}-error` : undefined}
+        autoComplete={autoComplete}
+      />
+      {showPasswordToggle && (
+        <motion.button
+          type="button"
+          whileHover={{ scale: 1.1 }}
+          whileTap={{ scale: 0.9 }}
+          onClick={onTogglePassword}
+          className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-blue-600 transition-all duration-200"
+          disabled={disabled}
+          tabIndex={-1}
+          aria-label={showPassword ? "Şifreyi gizle" : "Şifreyi göster"}
+        >
+          {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+          <span className="sr-only">Şifreyi göster/gizle</span>
+        </motion.button>
+      )}
+      {error && (
+        <div className="absolute right-3 top-1/2 transform -translate-y-1/2 text-red-400 h-4 w-4 animate-shake">
+          {type === "password" ? <Lock className="h-4 w-4" /> : <User className="h-4 w-4" />}
+        </div>
+      )}
+    </div>
+    {error && (
+      <motion.p 
+        className="text-red-400 text-xs animate-in slide-in-from-top-1" 
+        id={`${id}-error`} 
+        initial={{ opacity: 0, y: -10 }} 
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.3 }}
+      >
+        {error}
+      </motion.p>
+    )}
+  </motion.div>
+);
+
+const SubmitButton = ({ isLoading, onSubmit }: { isLoading: boolean; onSubmit: (e: React.FormEvent) => void }) => (
+  <motion.div 
+    whileHover={{ scale: 1.02, y: -2 }}
+    whileTap={{ scale: 0.98 }}
+  >
+    <Button 
+      type="submit" 
+      className="w-full h-11 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-medium rounded-lg shadow-lg transition-all duration-300 transform hover:scale-[1.02] active:scale-[0.98] hover:shadow-xl"
+      disabled={isLoading}
+      onClick={onSubmit}
+    >
+      {isLoading ? (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          className="flex items-center"
+        >
+          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+          Giriş yapılıyor...
+        </motion.div>
+      ) : (
+        <motion.span
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+        >
+          Giriş Yap
+        </motion.span>
+      )}
+    </Button>
+  </motion.div>
+);
 
 export default function LoginPage() {
-  const [email, setEmail] = useState("");
+  const [identifier, setIdentifier] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [errors, setErrors] = useState<{ email?: string; password?: string }>({});
+  const [errors, setErrors] = useState<FormErrors>({});
   const [, navigate] = useLocation();
   const { toast } = useToast();
   const { login } = useAuth();
+  const identifierRef = useRef<HTMLInputElement>(null);
+  const passwordRef = useRef<HTMLInputElement>(null);
 
-  const validateForm = () => {
-    const newErrors: { email?: string; password?: string } = {};
+  useEffect(() => {
+    if (errors.identifier && identifierRef.current) identifierRef.current.focus();
+    else if (errors.password && passwordRef.current) passwordRef.current.focus();
+  }, [errors]);
 
-    if (!email) {
-      newErrors.email = "Email is required";
-    } else if (!/\S+@\S+\.\S+/.test(email)) {
-      newErrors.email = "Please enter a valid email address";
+  // Memoized validation function
+  const validateForm = useCallback(() => {
+    const newErrors: FormErrors = {};
+    if (!identifier.trim()) {
+      newErrors.identifier = "Kullanıcı adı veya e-posta zorunlu";
     }
-
     if (!password) {
-      newErrors.password = "Password is required";
-    } else if (password.length < 6) {
-      newErrors.password = "Password must be at least 6 characters";
+      newErrors.password = "Şifre zorunlu";
     }
-
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
-  };
+  }, [identifier, password]);
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  // Memoized submit handler
+  const handleSubmit = useCallback(async (e: React.FormEvent) => {
     e.preventDefault();
-    
-    if (!validateForm()) {
-      return;
-    }
-
+    if (!validateForm()) return;
     setIsLoading(true);
-
     try {
-      await login(email, password);
+      await login(identifier.trim(), password);
+      navigate("/");
+    } catch (error: any) {
       toast({
-        title: "Welcome back!",
-        description: "You have successfully logged in to your account.",
-      });
-      navigate("/dashboard");
-    } catch (error) {
-      toast({
-        title: "Login failed",
-        description: "Please check your email and password and try again.",
+        title: "Giriş başarısız",
+        description: error.message || "Giriş sırasında bir hata oluştu.",
         variant: "destructive",
       });
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [identifier, password, validateForm, login, navigate, toast]);
 
-  const handleInputChange = (field: 'email' | 'password', value: string) => {
-    if (field === 'email') {
-      setEmail(value);
-    } else {
-      setPassword(value);
-    }
-    
-    // Clear error when user starts typing
-    if (errors[field]) {
-      setErrors(prev => ({ ...prev, [field]: undefined }));
-    }
-  };
+  // Memoized input change handler
+  const handleInputChange = useCallback((field: 'identifier' | 'password', value: string) => {
+    if (field === 'identifier') setIdentifier(value);
+    if (field === 'password') setPassword(value);
+    if (errors[field]) setErrors(prev => ({ ...prev, [field]: undefined }));
+  }, [errors]);
+
+  // Memoized password toggle handler
+  const togglePassword = useCallback(() => {
+    setShowPassword(prev => !prev);
+  }, []);
+
+  // Memoized navigation handler
+  const handleSignupClick = useCallback(() => {
+    navigate("/signup");
+  }, [navigate]);
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 via-white to-indigo-50 relative overflow-hidden">
-      {/* Background decoration */}
-      <div className="absolute inset-0 bg-grid-pattern opacity-5"></div>
-      <div className="absolute top-0 left-0 w-72 h-72 bg-blue-200 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob"></div>
-      <div className="absolute top-0 right-0 w-72 h-72 bg-purple-200 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob animation-delay-2000"></div>
-      <div className="absolute bottom-0 left-0 w-72 h-72 bg-pink-200 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob animation-delay-4000"></div>
+    <div className="min-h-screen flex items-center justify-center p-4 relative overflow-hidden">
+      <VideoBackground />
       
-      <div className="relative z-10 w-full max-w-md px-4">
-        <Card className="w-full shadow-2xl border-0 bg-white/80 backdrop-blur-sm">
-          <CardHeader className="space-y-6 pb-8">
-            <div className="flex flex-col items-center space-y-4">
-              {/* Logo section */}
-              <div className="flex items-center space-x-4">
-                <img 
-                  src={ahdevefaLogo} 
-                  alt="Ahdevefa Logo" 
-                  className="h-12 w-auto object-contain"
-                />
-                <div className="w-px h-8 bg-gray-300"></div>
-                <img 
-                  src={yetimVakfiLogo} 
-                  alt="Yetim Vakfi Logo" 
-                  className="h-12 w-auto object-contain"
-                />
-              </div>
-              
-              <div className="text-center space-y-2">
-                <CardTitle className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-                  Library Management System
-                </CardTitle>
-                <CardDescription className="text-gray-600 text-sm">
-                  Sign in to access your library dashboard
-                </CardDescription>
-              </div>
-            </div>
+      <div className="w-full max-w-md mx-auto">
+        <Card className="border-0 shadow-2xl bg-white/95 backdrop-blur-sm">
+          <CardHeader className="space-y-4 pb-6">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.8 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.5, delay: 0.2 }}
+              className="flex flex-col items-center space-y-3"
+            >
+              <LogoSection />
+              <TitleSection />
+            </motion.div>
           </CardHeader>
           
-          <form onSubmit={handleSubmit} className="space-y-6">
-            <CardContent className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="email" className="text-sm font-medium text-gray-700">
-                  Email Address
-                </Label>
-                <div className="relative">
-                  <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
-                  <Input
-                    id="email"
-                    type="email"
-                    placeholder="Enter your email address"
-                    value={email}
-                    onChange={(e) => handleInputChange('email', e.target.value)}
-                    className={`pl-10 h-11 transition-all duration-200 ${
-                      errors.email ? 'border-red-500 focus:border-red-500' : 'focus:border-blue-500'
-                    }`}
-                    disabled={isLoading}
-                  />
-                </div>
-                {errors.email && (
-                  <p className="text-red-500 text-xs mt-1 animate-in slide-in-from-top-1">
-                    {errors.email}
-                  </p>
-                )}
-              </div>
+          <form onSubmit={handleSubmit} className="space-y-6" autoComplete="off">
+            <CardContent className="space-y-5">
+              <InputField
+                id="identifier"
+                type="text"
+                placeholder="Kullanıcı adı veya e-posta"
+                value={identifier}
+                onChange={(value) => handleInputChange('identifier', value)}
+                error={errors.identifier}
+                disabled={isLoading}
+                ref={identifierRef}
+                autoComplete="username"
+                icon={<User className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4 transition-all duration-300 group-focus-within:text-blue-500 group-hover:text-blue-400" />}
+              />
               
-              <div className="space-y-2">
-                <Label htmlFor="password" className="text-sm font-medium text-gray-700">
-                  Password
-                </Label>
-                <div className="relative">
-                  <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
-                  <Input
-                    id="password"
-                    type={showPassword ? "text" : "password"}
-                    placeholder="Enter your password"
-                    value={password}
-                    onChange={(e) => handleInputChange('password', e.target.value)}
-                    className={`pl-10 pr-10 h-11 transition-all duration-200 ${
-                      errors.password ? 'border-red-500 focus:border-red-500' : 'focus:border-blue-500'
-                    }`}
-                    disabled={isLoading}
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
-                    disabled={isLoading}
-                  >
-                    {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                  </button>
-                </div>
-                {errors.password && (
-                  <p className="text-red-500 text-xs mt-1 animate-in slide-in-from-top-1">
-                    {errors.password}
-                  </p>
-                )}
-              </div>
+              <InputField
+                id="password"
+                type={showPassword ? "text" : "password"}
+                placeholder="Şifrenizi girin"
+                value={password}
+                onChange={(value) => handleInputChange('password', value)}
+                error={errors.password}
+                disabled={isLoading}
+                ref={passwordRef}
+                autoComplete="current-password"
+                icon={<Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4 transition-all duration-300 group-focus-within:text-blue-500 group-hover:text-blue-400" />}
+                showPasswordToggle={true}
+                showPassword={showPassword}
+                onTogglePassword={togglePassword}
+              />
             </CardContent>
             
             <CardFooter className="flex flex-col space-y-4 pt-0">
-              <Button 
-                type="submit" 
-                className="w-full h-11 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-medium transition-all duration-200 transform hover:scale-[1.02] active:scale-[0.98]" 
-                disabled={isLoading}
-              >
-                {isLoading ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Signing in...
-                  </>
-                ) : (
-                  "Sign In"
-                )}
-              </Button>
-              
+              <div className="flex flex-col space-y-3 w-full">
+                <SubmitButton isLoading={isLoading} onSubmit={handleSubmit} />
+              </div>
               <div className="text-center">
-                <p className="text-sm text-gray-600">
-                  Don't have an account?{" "}
-                  <button
+                <motion.p 
+                  className="text-sm text-gray-600" 
+                  initial={{ opacity: 0 }} 
+                  animate={{ opacity: 1 }}
+                  transition={{ delay: 0.5 }}
+                >
+                  Hesabınız yok mu?{" "}
+                  <motion.button
                     type="button"
-                    onClick={() => navigate("/signup")}
-                    className="text-blue-600 hover:text-blue-700 font-medium transition-colors duration-200"
+                    whileHover={{ scale: 1.05, y: -1 }}
+                    whileTap={{ scale: 0.97 }}
+                    onClick={handleSignupClick}
+                    className="text-blue-600 hover:text-blue-700 font-medium transition-all duration-200 underline underline-offset-2 hover:underline-offset-4"
                     disabled={isLoading}
                   >
-                    Create one here
-                  </button>
-                </p>
+                    Kayıt olun
+                  </motion.button>
+                </motion.p>
               </div>
             </CardFooter>
           </form>
         </Card>
-        
-        {/* Footer */}
         <div className="mt-8 text-center">
           <p className="text-xs text-gray-500">
-            © 2024 Library Management System. All rights reserved.
+            © 2024 Kütüphane Yönetim Sistemi. All rights reserved.
           </p>
         </div>
       </div>

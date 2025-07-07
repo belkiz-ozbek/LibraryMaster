@@ -5,29 +5,15 @@
     {
       "idx": 0,
       "version": "7",
-      "when": 1750632074916,
-      "tag": "0000_strong_captain_marvel",
+      "when": 1751665278951,
+      "tag": "0000_useful_falcon",
       "breakpoints": true
     },
     {
       "idx": 1,
       "version": "7",
-      "when": 1750632267682,
-      "tag": "0001_broad_dakota_north",
-      "breakpoints": true
-    },
-    {
-      "idx": 2,
-      "version": "7",
-      "when": 1750638841052,
-      "tag": "0002_narrow_vindicator",
-      "breakpoints": true
-    },
-    {
-      "idx": 3,
-      "version": "7",
-      "when": 1751444681439,
-      "tag": "0003_silent_apocalypse",
+      "when": 1751723308396,
+      "tag": "0001_thin_runaways",
       "breakpoints": true
     }
   ]

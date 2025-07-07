@@ -12,6 +12,7 @@ export interface IStorage {
   // User operations
   getUser(id: number): Promise<User | undefined>;
   getUserByEmail(email: string): Promise<User | undefined>;
+  getUserByUsername(username: string): Promise<User | undefined>;
   createUser(user: InsertUser): Promise<User>;
   updateUser(id: number, user: UpdateUser): Promise<User | undefined>;
   deleteUser(id: number): Promise<void>;
@@ -69,6 +70,14 @@ export class DatabaseStorage implements IStorage {
       return undefined;
     }
     const [user] = await db.select().from(users).where(eq(users.email, email));
+    return user || undefined;
+  }
+
+  async getUserByUsername(username: string): Promise<User | undefined> {
+    if (!username || username.trim() === '') {
+      return undefined;
+    }
+    const [user] = await db.select().from(users).where(eq(users.username, username));
     return user || undefined;
   }
 
@@ -518,6 +527,9 @@ export class DatabaseStorage implements IStorage {
       membershipDate: users.membershipDate,
       adminRating: users.adminRating,
       adminNotes: users.adminNotes,
+      emailVerified: users.emailVerified,
+      emailVerificationToken: users.emailVerificationToken,
+      emailVerificationExpires: users.emailVerificationExpires,
       borrowCount: count(borrowings.id),
     })
     .from(users)

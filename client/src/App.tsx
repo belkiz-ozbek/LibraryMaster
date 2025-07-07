@@ -16,12 +16,102 @@ import Statistics from "./pages/statistics";
 import Activities from "./pages/activities";
 import NotFound from "./pages/not-found";
 import LoginPage from "./pages/login";
+import SignupPage from "./pages/signup";
+import VerifyEmailPage from "./pages/verify-email";
 import { Button } from "./components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "./components/ui/card";
 import { Input } from "./components/ui/input";
 import { Label } from "./components/ui/label";
 import { useState, useEffect } from "react";
 import { useToast } from "./hooks/use-toast";
+import { Loader2 } from "lucide-react";
+import { motion } from "framer-motion";
+
+// Loading Screen Component
+function LoadingScreen() {
+  return (
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-purple-50">
+      <motion.div 
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+        className="text-center"
+      >
+        <motion.div 
+          initial={{ scale: 0.8 }}
+          animate={{ scale: 1 }}
+          transition={{ duration: 0.3 }}
+          className="flex flex-col items-center justify-center mb-6"
+        >
+          <motion.div
+            initial={{ y: -100, opacity: 0 }} // Yukarıdan başla
+            animate={{ 
+              y: [0, -10, 0], // Hafif yukarı-aşağı floating
+              opacity: 1,
+              rotate: [-8, 8, -8], // Hafif açısal hareket
+            }}
+            transition={{ 
+              y: { duration: 3, repeat: Infinity, ease: "easeInOut" },
+              rotate: { duration: 4, repeat: Infinity, ease: "easeInOut" },
+              initial: { duration: 1.5, ease: "easeOut" } // İlk iniş animasyonu
+            }}
+            className="mb-0"
+          >
+            <motion.img 
+              initial={{ opacity: 0, scale: 0.5 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.8, delay: 0.2 }}
+              src="/ahdevefa-logo.png" 
+              alt="Ahdevefa Logo" 
+              className="h-32 w-auto object-contain"
+              loading="lazy"
+            />
+          </motion.div>
+        </motion.div>
+        <motion.h1 
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.4 }}
+          className="text-3xl font-bold text-gray-900 mb-2"
+        >
+          LibraryMS
+        </motion.h1>
+        <motion.p 
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.5, delay: 0.6 }}
+          className="text-gray-600 mb-6"
+        >
+          Yükleniyor...
+        </motion.p>
+        <motion.div 
+          initial={{ opacity: 0, scale: 0.8 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.3, delay: 0.8 }}
+          className="flex items-center justify-center space-x-2"
+        >
+          {/* Modern Dot Loading Animation */}
+          {[0, 1, 2].map((index) => (
+            <motion.div
+              key={index}
+              className="w-3 h-3 bg-blue-600 rounded-full"
+              animate={{
+                scale: [1, 1.5, 1],
+                opacity: [0.5, 1, 0.5],
+              }}
+              transition={{
+                duration: 1.5,
+                repeat: Infinity,
+                delay: index * 0.2,
+                ease: "easeInOut"
+              }}
+            />
+          ))}
+        </motion.div>
+      </motion.div>
+    </div>
+  );
+}
 
 function LoginForm() {
   const [email, setEmail] = useState("");
@@ -96,17 +186,27 @@ function LoginForm() {
 }
 
 function Router() {
-  const { user } = useAuth();
+  const { user, isLoading } = useAuth();
   
+  // Only show loading screen if we're actually checking authentication
+  // and we don't have a user yet
+  if (isLoading && !user) {
+    return <LoadingScreen />;
+  }
+  
+  // If not authenticated, show auth pages
   if (!user) {
     return (
       <Switch>
         <Route path="/login" component={LoginPage} />
+        <Route path="/signup" component={SignupPage} />
+        <Route path="/verify-email" component={VerifyEmailPage} />
         <Route component={LoginPage} />
       </Switch>
     );
   }
 
+  // If authenticated, show main app
   return (
     <MainLayout>
       <Switch>
