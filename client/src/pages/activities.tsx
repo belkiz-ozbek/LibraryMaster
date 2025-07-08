@@ -110,13 +110,28 @@ export default function Activities() {
   const handleRefresh = async () => {
     setIsRefreshing(true);
     const prev = JSON.stringify(activities);
-    const { data: newData } = await refetch();
-    setIsRefreshing(false);
-    if (JSON.stringify(newData) === prev) {
+    try {
+      const { data: newData } = await refetch();
+      setIsRefreshing(false);
+      if (JSON.stringify(newData) === prev) {
+        toast({
+          title: "Aktiviteler zaten güncel",
+          description: "Yeni bir aktivite bulunamadı.",
+          variant: "default",
+        });
+      } else {
+        toast({
+          title: "Aktiviteler başarıyla yenilendi",
+          description: "Son aktiviteler güncellendi.",
+          variant: "default",
+        });
+      }
+    } catch (err) {
+      setIsRefreshing(false);
       toast({
-        title: "Aktiviteler zaten güncel",
-        description: "Yeni bir aktivite bulunamadı.",
-        variant: "default",
+        title: "Aktiviteler yenilenemedi",
+        description: "Bir hata oluştu. Lütfen tekrar deneyin.",
+        variant: "destructive",
       });
     }
   };
