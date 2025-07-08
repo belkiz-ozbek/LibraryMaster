@@ -312,6 +312,57 @@ export default function Returns() {
     },
   ];
 
+  // Overdue columns
+  const overdueColumns = [
+    {
+      key: "user.name",
+      title: t("borrowing.member"),
+      render: (value: string, row: BorrowingWithDetails) => (
+        <div className="flex items-center">
+          <div className="w-10 h-10 bg-red-100 rounded-full flex items-center justify-center mr-3">
+            <span className="text-sm font-medium text-red-600">
+              {value.split(' ').map(n => n[0]).join('').toUpperCase()}
+            </span>
+          </div>
+          <div>
+            <Link to={`/members/${row.user.id}`} className="font-medium text-on-surface hover:underline hover:text-red-600 transition-colors">
+              {value}
+            </Link>
+            <p className="text-sm text-text-muted">{row.user.email}</p>
+          </div>
+        </div>
+      ),
+    },
+    {
+      key: "book.title",
+      title: t("borrowing.book"),
+      render: (value: string, row: BorrowingWithDetails) => (
+        <div>
+          <p className="font-medium text-on-surface">{value}</p>
+          <p className="text-sm text-text-muted">{row.book.author}</p>
+        </div>
+      ),
+    },
+    {
+      key: "borrowDate",
+      title: t("borrowing.borrowDate"),
+      render: (value: string) => format(new Date(value), "MMM dd, yyyy"),
+    },
+    {
+      key: "dueDate",
+      title: t("borrowing.dueDate"),
+      render: (value: string) => format(new Date(value), "MMM dd, yyyy"),
+    },
+    {
+      key: "daysOverdue",
+      title: "Gecikme (gün)",
+      render: (_: any, row: BorrowingWithDetails) => {
+        const days = Math.abs(differenceInDays(new Date(row.dueDate), new Date()));
+        return <span className="text-red-600 font-semibold">{days}</span>;
+      },
+    },
+  ];
+
   return (
     <motion.div
       className="space-y-6"
@@ -401,7 +452,6 @@ export default function Returns() {
           </CardContent>
         </Card>
       </motion.div>
-
       {/* Recent Returns */}
       <motion.div variants={itemVariants}>
         <Card>
@@ -414,6 +464,24 @@ export default function Returns() {
               data={recentReturns}
               columns={recentReturnsColumns}
               emptyMessage={t("returns.noRecentReturns")}
+              pageSize={10}
+            />
+          </CardContent>
+        </Card>
+      </motion.div>
+
+      {/* Overdue Borrowings */}
+      <motion.div variants={itemVariants}>
+        <Card className="mt-6">
+          <CardHeader>
+            <CardTitle className="text-red-600">Gecikmiş Kitaplar</CardTitle>
+            <CardDescription>Tüm kullanıcıların gecikmiş kitapları aşağıda listelenir.</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <DataTable
+              data={overdueBorrowings}
+              columns={overdueColumns}
+              emptyMessage="Şu anda gecikmiş kitap yok."
               pageSize={10}
             />
           </CardContent>

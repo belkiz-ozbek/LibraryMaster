@@ -10,7 +10,7 @@ import { Avatar } from "@/components/ui/avatar";
 import { Separator } from "@/components/ui/separator";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
-import { ArrowLeft, BookOpen, Star, Calendar, Award } from "lucide-react";
+import { ArrowLeft, BookOpen, Star, Calendar, Award, BarChart3, CheckCircle2, TimerReset, AlarmClockOff, History } from "lucide-react";
 import { format } from "date-fns";
 import { tr } from "date-fns/locale";
 import { useTranslation } from "react-i18next";
@@ -198,28 +198,28 @@ export default function MemberDetails() {
 
       {/* Member Info Card */}
       <motion.div variants={itemVariants}>
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center space-x-3">
-              <Avatar className="h-12 w-12">
+        <Card className="shadow-xl rounded-2xl border-0 bg-white/90 backdrop-blur-md">
+          <CardHeader className="pb-2">
+            <CardTitle className="flex items-center space-x-4">
+              <Avatar className="h-16 w-16 shadow-md border-2 border-primary/30">
                 <div className="h-full w-full bg-primary/10 rounded-full flex items-center justify-center">
-                  <span className="text-lg font-medium text-primary">
+                  <span className="text-2xl font-bold text-primary">
                     {member.name.split(' ').map((n: string) => n[0]).join('').toUpperCase()}
                   </span>
                 </div>
               </Avatar>
               <div>
-                <h2 className="text-xl font-semibold">{member.name}</h2>
-                <p className="text-sm text-muted-foreground">{member.email}</p>
+                <h2 className="text-2xl font-bold text-gray-900 tracking-tight mb-1">{member.name}</h2>
+                <p className="text-base text-muted-foreground">{member.email}</p>
               </div>
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
               <div className="flex items-center space-x-3">
-                <Calendar className="h-5 w-5 text-muted-foreground" />
+                <Calendar className="h-5 w-5 text-primary/70" />
                 <div>
-                  <p className="text-sm font-medium">{t('members.details.membershipDate')}</p>
+                  <p className="text-sm font-semibold text-gray-700">{t('members.details.membershipDate')}</p>
                   <p className="text-sm text-muted-foreground">
                     {format(new Date(member.membershipDate), "dd MMMM yyyy", { locale: tr })}
                   </p>
@@ -227,31 +227,28 @@ export default function MemberDetails() {
               </div>
               
               <div className="flex items-center space-x-3">
-                <Award className="h-5 w-5 text-muted-foreground" />
+                <Award className="h-5 w-5 text-yellow-500/80" />
                 <div>
-                  <p className="text-sm font-medium">{t('members.details.adminRating')}</p>
-                  <div className="flex items-center">
-                    {renderStars(member.adminRating)}
-                  </div>
+                  <p className="text-sm font-semibold text-gray-700">{t('members.details.adminRating')}</p>
+                  <div className="flex items-center">{renderStars(member.adminRating)}</div>
                 </div>
               </div>
 
               <div className="flex items-center space-x-3">
-                <Award className="h-5 w-5 text-muted-foreground" />
+                <Award className="h-5 w-5 text-blue-500/80" />
                 <div>
-                  <p className="text-sm font-medium">{t('members.details.role')}</p>
-                  <Badge variant={member.isAdmin ? "default" : "secondary"}>
+                  <p className="text-sm font-semibold text-gray-700">{t('members.details.role')}</p>
+                  <Badge className="px-3 py-1 rounded-full text-xs font-semibold shadow" variant={member.isAdmin ? "default" : "secondary"}>
                     {member.isAdmin ? t('members.details.admin') : t('members.details.member')}
                   </Badge>
                 </div>
               </div>
             </div>
-
             {member.adminNotes && (
               <>
-                <Separator className="my-4" />
+                <Separator className="my-6" />
                 <div>
-                  <p className="text-sm font-medium mb-2">{t('members.details.adminNotes')}</p>
+                  <p className="text-sm font-semibold mb-2 text-gray-700">{t('members.details.adminNotes')}</p>
                   <p className="text-sm text-muted-foreground">{member.adminNotes}</p>
                 </div>
               </>
@@ -261,160 +258,173 @@ export default function MemberDetails() {
       </motion.div>
 
       {/* Stats Cards */}
-      <motion.div variants={itemVariants} className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <Card>
-          <CardContent className="p-4">
-            <div className="flex items-center space-x-3">
-              <BookOpen className="h-8 w-8 text-primary" />
-              <div>
-                <p className="text-2xl font-bold">{stats.totalBorrowed}</p>
-                <p className="text-sm text-muted-foreground">{t('members.details.stats.totalBorrowed')}</p>
-              </div>
+      <motion.div variants={itemVariants} className="grid grid-cols-1 md:grid-cols-4 gap-6">
+        <Card className="shadow-lg rounded-xl border-0 bg-gradient-to-br from-primary/10 to-white/80">
+          <CardContent className="p-6 flex items-center space-x-4">
+            <BarChart3 className="h-8 w-8 text-primary" />
+            <div>
+              <p className="text-2xl font-bold text-gray-900">{stats.totalBorrowed}</p>
+              <p className="text-sm text-muted-foreground">{t('members.details.stats.totalBorrowed')}</p>
             </div>
           </CardContent>
         </Card>
-
-        <Card>
-          <CardContent className="p-4">
-            <div className="flex items-center space-x-3">
-              <BookOpen className="h-8 w-8 text-green-500" />
-              <div>
-                <p className="text-2xl font-bold">{stats.returned}</p>
-                <p className="text-sm text-muted-foreground">{t('members.details.stats.returned')}</p>
-              </div>
+        <Card className="shadow-lg rounded-xl border-0 bg-gradient-to-br from-green-100/60 to-white/80">
+          <CardContent className="p-6 flex items-center space-x-4">
+            <CheckCircle2 className="h-8 w-8 text-green-500" />
+            <div>
+              <p className="text-2xl font-bold text-gray-900">{stats.returned}</p>
+              <p className="text-sm text-muted-foreground">{t('members.details.stats.returned')}</p>
             </div>
           </CardContent>
         </Card>
-
-        <Card>
-          <CardContent className="p-4">
-            <div className="flex items-center space-x-3">
-              <BookOpen className="h-8 w-8 text-blue-500" />
-              <div>
-                <p className="text-2xl font-bold">{stats.currentlyBorrowed}</p>
-                <p className="text-sm text-muted-foreground">{t('members.details.stats.currentlyBorrowed')}</p>
-              </div>
+        <Card className="shadow-lg rounded-xl border-0 bg-gradient-to-br from-blue-100/60 to-white/80">
+          <CardContent className="p-6 flex items-center space-x-4">
+            <TimerReset className="h-8 w-8 text-blue-500" />
+            <div>
+              <p className="text-2xl font-bold text-gray-900">{stats.currentlyBorrowed}</p>
+              <p className="text-sm text-muted-foreground">{t('members.details.stats.currentlyBorrowed')}</p>
             </div>
           </CardContent>
         </Card>
-
-        <Card>
-          <CardContent className="p-4">
-            <div className="flex items-center space-x-3">
-              <BookOpen className="h-8 w-8 text-red-500" />
-              <div>
-                <p className="text-2xl font-bold">{stats.overdue}</p>
-                <p className="text-sm text-muted-foreground">{t('members.details.stats.overdue')}</p>
-              </div>
+        <Card className="shadow-lg rounded-xl border-0 bg-gradient-to-br from-red-100/60 to-white/80">
+          <CardContent className="p-6 flex items-center space-x-4">
+            <AlarmClockOff className="h-8 w-8 text-red-500" />
+            <div>
+              <p className="text-2xl font-bold text-gray-900">{stats.overdue}</p>
+              <p className="text-sm text-muted-foreground">{t('members.details.stats.overdue')}</p>
             </div>
           </CardContent>
         </Card>
       </motion.div>
 
       {/* Tabs */}
-      <motion.div variants={itemVariants}>
-        <Tabs defaultValue="borrowings" className="space-y-4">
-          <TabsList>
-            <TabsTrigger value="borrowings">{t('members.details.tabs.borrowings')}</TabsTrigger>
-            <TabsTrigger value="currently-borrowed">{t('members.details.tabs.currentlyBorrowed')}</TabsTrigger>
-            <TabsTrigger value="overdue">{t('members.details.tabs.overdue')}</TabsTrigger>
+      <Tabs defaultValue="borrowings" className="space-y-4">
+        <div className="w-fit mx-auto">
+          <TabsList className="relative flex gap-1 bg-muted/60 shadow rounded-xl p-1 border border-blue-100">
+            <TabsTrigger
+              value="borrowings"
+              className="relative flex items-center gap-2 px-5 py-2 rounded-lg font-semibold text-base transition-all duration-200
+                data-[state=active]:bg-primary data-[state=active]:text-white data-[state=active]:shadow
+                hover:bg-blue-100/60 hover:text-primary focus-visible:ring-2 focus-visible:ring-primary/60"
+            >
+              <History className="w-5 h-5 mr-1" />
+              {t('members.details.tabs.borrowings')}
+            </TabsTrigger>
+            <TabsTrigger
+              value="currently-borrowed"
+              className="relative flex items-center gap-2 px-5 py-2 rounded-lg font-semibold text-base transition-all duration-200
+                data-[state=active]:bg-primary data-[state=active]:text-white data-[state=active]:shadow
+                hover:bg-blue-100/60 hover:text-primary focus-visible:ring-2 focus-visible:ring-primary/60"
+            >
+              <TimerReset className="w-5 h-5 mr-1" />
+              {t('members.details.tabs.currentlyBorrowed')}
+            </TabsTrigger>
+            <TabsTrigger
+              value="overdue"
+              className="relative flex items-center gap-2 px-5 py-2 rounded-lg font-semibold text-base transition-all duration-200
+                data-[state=active]:bg-red-500 data-[state=active]:text-white data-[state=active]:shadow
+                hover:bg-red-100/60 hover:text-red-600 focus-visible:ring-2 focus-visible:ring-red-400/60"
+            >
+              <AlarmClockOff className="w-5 h-5 mr-1" />
+              {t('members.details.tabs.overdue')}
+            </TabsTrigger>
           </TabsList>
+        </div>
+        {/* Tab içerikleri ve tablolar aynı yerde kalacak */}
+        <TabsContent value="borrowings" className="space-y-4">
+          <Card>
+            <CardHeader>
+              <CardTitle>{t('members.details.borrowings.title')}</CardTitle>
+              <CardDescription>
+                {t('members.details.borrowings.description')}
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              {borrowingsLoading ? (
+                <div className="flex items-center justify-center h-32">
+                  <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary"></div>
+                </div>
+              ) : borrowings.length > 0 ? (
+                <DataTable
+                  data={borrowings}
+                  columns={borrowingColumns}
+                />
+              ) : (
+                <div className="text-center py-8">
+                  <BookOpen className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                  <p className="text-muted-foreground">{t('members.details.borrowings.noBorrowings')}</p>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </TabsContent>
 
-          <TabsContent value="borrowings" className="space-y-4">
-            <Card>
-              <CardHeader>
-                <CardTitle>{t('members.details.borrowings.title')}</CardTitle>
-                <CardDescription>
-                  {t('members.details.borrowings.description')}
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                {borrowingsLoading ? (
-                  <div className="flex items-center justify-center h-32">
-                    <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary"></div>
-                  </div>
-                ) : borrowings.length > 0 ? (
-                  <DataTable
-                    data={borrowings}
-                    columns={borrowingColumns}
-                  />
-                ) : (
-                  <div className="text-center py-8">
-                    <BookOpen className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                    <p className="text-muted-foreground">{t('members.details.borrowings.noBorrowings')}</p>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-          </TabsContent>
+        <TabsContent value="currently-borrowed" className="space-y-4">
+          <Card>
+            <CardHeader>
+              <CardTitle>{t('members.details.currentlyBorrowed.title')}</CardTitle>
+              <CardDescription>
+                {t('members.details.currentlyBorrowed.description')}
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              {borrowingsLoading ? (
+                <div className="flex items-center justify-center h-32">
+                  <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary"></div>
+                </div>
+              ) : (
+                (() => {
+                  const currentlyBorrowed = borrowings.filter((b: BorrowingWithDetails) => b.status === "borrowed");
+                  return currentlyBorrowed.length > 0 ? (
+                    <DataTable
+                      data={currentlyBorrowed}
+                      columns={borrowingColumns}
+                    />
+                  ) : (
+                    <div className="text-center py-8">
+                      <BookOpen className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                      <p className="text-muted-foreground">{t('members.details.currentlyBorrowed.noBooks')}</p>
+                    </div>
+                  );
+                })()
+              )}
+            </CardContent>
+          </Card>
+        </TabsContent>
 
-          <TabsContent value="currently-borrowed" className="space-y-4">
-            <Card>
-              <CardHeader>
-                <CardTitle>{t('members.details.currentlyBorrowed.title')}</CardTitle>
-                <CardDescription>
-                  {t('members.details.currentlyBorrowed.description')}
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                {borrowingsLoading ? (
-                  <div className="flex items-center justify-center h-32">
-                    <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary"></div>
-                  </div>
-                ) : (
-                  (() => {
-                    const currentlyBorrowed = borrowings.filter((b: BorrowingWithDetails) => b.status === "borrowed");
-                    return currentlyBorrowed.length > 0 ? (
-                      <DataTable
-                        data={currentlyBorrowed}
-                        columns={borrowingColumns}
-                      />
-                    ) : (
-                      <div className="text-center py-8">
-                        <BookOpen className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                        <p className="text-muted-foreground">{t('members.details.currentlyBorrowed.noBooks')}</p>
-                      </div>
-                    );
-                  })()
-                )}
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          <TabsContent value="overdue" className="space-y-4">
-            <Card>
-              <CardHeader>
-                <CardTitle>{t('members.details.overdue.title')}</CardTitle>
-                <CardDescription>
-                  {t('members.details.overdue.description')}
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                {borrowingsLoading ? (
-                  <div className="flex items-center justify-center h-32">
-                    <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary"></div>
-                  </div>
-                ) : (
-                  (() => {
-                    const overdue = borrowings.filter((b: BorrowingWithDetails) => b.status === "overdue");
-                    return overdue.length > 0 ? (
-                      <DataTable
-                        data={overdue}
-                        columns={borrowingColumns}
-                      />
-                    ) : (
-                      <div className="text-center py-8">
-                        <BookOpen className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                        <p className="text-muted-foreground">{t('members.details.overdue.noBooks')}</p>
-                      </div>
-                    );
-                  })()
-                )}
-              </CardContent>
-            </Card>
-          </TabsContent>
-        </Tabs>
-      </motion.div>
+        <TabsContent value="overdue" className="space-y-4">
+          <Card>
+            <CardHeader>
+              <CardTitle>{t('members.details.overdue.title')}</CardTitle>
+              <CardDescription>
+                {t('members.details.overdue.description')}
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              {borrowingsLoading ? (
+                <div className="flex items-center justify-center h-32">
+                  <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary"></div>
+                </div>
+              ) : (
+                (() => {
+                  const overdue = borrowings.filter((b: BorrowingWithDetails) => b.status === "overdue");
+                  return overdue.length > 0 ? (
+                    <DataTable
+                      data={overdue}
+                      columns={borrowingColumns}
+                    />
+                  ) : (
+                    <div className="text-center py-8">
+                      <BookOpen className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                      <p className="text-muted-foreground">{t('members.details.overdue.noBooks')}</p>
+                    </div>
+                  );
+                })()
+              )}
+            </CardContent>
+          </Card>
+        </TabsContent>
+      </Tabs>
     </motion.div>
   );
 } 
