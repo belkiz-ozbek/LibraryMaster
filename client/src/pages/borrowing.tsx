@@ -10,7 +10,7 @@ import { BorrowForm } from "@/components/forms/borrow-form";
 import { useAuth } from "@/lib/auth";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
-import { Plus, Edit, Trash2, HandHeart, Clock, AlertTriangle } from "lucide-react";
+import { Plus, Edit, Trash2, HandHeart, Clock, AlertTriangle, Filter } from "lucide-react";
 import {
   AlertDialog,
   AlertDialogTrigger,
@@ -30,6 +30,7 @@ import { useSearch } from "wouter";
 import { Link } from "react-router-dom";
 import { capitalizeWords } from "@/lib/utils";
 import LoadingScreen from "@/components/ui/loading-screen";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -58,6 +59,7 @@ export default function Borrowing() {
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [borrowingToDelete, setBorrowingToDelete] = useState<number | null>(null);
+  const [statusFilter, setStatusFilter] = useState<string>("all");
   const { user } = useAuth();
   const { toast } = useToast();
   const { t } = useTranslation();
@@ -114,6 +116,15 @@ export default function Borrowing() {
     borrowing.book.author.toLowerCase().includes(searchQuery.toLowerCase()) ||
     (borrowing.book.isbn?.toLowerCase() ?? "").includes(searchQuery.toLowerCase())
   );
+
+  const statusFilteredBorrowings = statusFilter === "all"
+    ? filteredBorrowings
+    : filteredBorrowings.filter(b => {
+        if (statusFilter === "active") return b.status === "borrowed";
+        if (statusFilter === "overdue") return b.status === "overdue" || (b.status === "borrowed" && new Date(b.dueDate) < new Date() && !b.returnDate);
+        if (statusFilter === "returned") return b.status === "returned";
+        return true;
+      });
 
   const handleEdit = (borrowing: BorrowingWithDetails) => {
     setSelectedBorrowing(borrowing);
@@ -312,7 +323,21 @@ export default function Borrowing() {
       variants={containerVariants}
     >
       {/* Header */}
-      <motion.div variants={itemVariants} className="flex items-center justify-end">
+      <motion.div variants={itemVariants} className="flex items-center justify-between">
+        <div className="flex gap-4 items-center">
+          <Filter className="w-5 h-5 text-muted-foreground" />
+          <Select value={statusFilter} onValueChange={setStatusFilter}>
+            <SelectTrigger className="w-40">
+              <SelectValue placeholder="Durum" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Tüm Durumlar</SelectItem>
+              <SelectItem value="active">Aktif</SelectItem>
+              <SelectItem value="overdue">Gecikmiş</SelectItem>
+              <SelectItem value="returned">İade Edildi</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
         <Dialog open={isFormOpen} onOpenChange={setIsFormOpen}>
           <DialogTrigger asChild>
             <Button onClick={() => setSelectedBorrowing(null)}>
@@ -398,7 +423,7 @@ export default function Borrowing() {
               <div>
                 <CardTitle>{t("borrowing.allBorrowings")}</CardTitle>
                 <CardDescription>
-                  {filteredBorrowings.length} {t("borrowing.borrowingRecords")}
+                  {statusFilteredBorrowings.length} {t("borrowing.borrowingRecords")}
                 </CardDescription>
               </div>
               <div className="w-80">
@@ -411,7 +436,7 @@ export default function Borrowing() {
           </CardHeader>
           <CardContent>
             <DataTable
-              data={filteredBorrowings}
+              data={statusFilteredBorrowings}
               columns={columns}
               loading={isLoading}
               emptyMessage={

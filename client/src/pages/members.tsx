@@ -11,7 +11,7 @@ import { MemberForm } from "@/components/forms/member-form";
 import { useAuth } from "@/lib/auth";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
-import { Plus, Edit, Trash2, Users, Star } from "lucide-react";
+import { Plus, Edit, Trash2, Users, Star, Filter } from "lucide-react";
 import { format } from "date-fns";
 import type { User } from "@shared/schema";
 import { useTranslation } from "react-i18next";
@@ -29,6 +29,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Button as UIButton } from "@/components/ui/button";
 import LoadingScreen from "@/components/ui/loading-screen";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -79,14 +80,19 @@ export default function Members() {
   const { t } = useTranslation();
   const [deleteDialogOpenMember, setDeleteDialogOpenMember] = useState<User | null>(null);
   const [deleteError, setDeleteError] = useState<string | null>(null);
+  const [statusFilter, setStatusFilter] = useState<string>("all");
 
   const { data: members = [], isLoading } = useQuery<User[]>({
     queryKey: ["/api/users"],
   });
 
-  const { data: searchResults = [] } = useQuery<User[]>({
-    queryKey: ["/api/users/search", searchQuery],
-    enabled: searchQuery.length > 2,
+  // Remove searchResults and displayMembers logic
+  const displayMembers = members.filter((member) => {
+    const q = searchQuery.toLowerCase();
+    return (
+      member.name.toLowerCase().includes(q) ||
+      (member.email && member.email.toLowerCase().includes(q))
+    );
   });
 
   const deleteMemberMutation = useMutation({
@@ -110,7 +116,10 @@ export default function Members() {
     },
   });
 
-  const displayMembers = searchQuery.length > 2 ? searchResults : members;
+  // Add status filtering
+  const statusFilteredMembers = statusFilter === "all"
+    ? displayMembers
+    : displayMembers.filter(m => statusFilter === "active" ? !m.isAdmin : m.isAdmin);
 
   const handleEdit = (member: User) => {
     setSelectedMember(member);
@@ -242,7 +251,19 @@ export default function Members() {
     >
       {/* Header */}
       <motion.div variants={itemVariants} className="flex items-center justify-between">
-        <div />
+        <div className="flex gap-4 items-center">
+          <Filter className="w-5 h-5 text-muted-foreground" />
+          <Select value={statusFilter} onValueChange={setStatusFilter}>
+            <SelectTrigger className="w-40">
+              <SelectValue placeholder="Üye Tipi" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Tüm Üyeler</SelectItem>
+              <SelectItem value="active">Normal Üyeler</SelectItem>
+              <SelectItem value="admin">Yöneticiler</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
         <Button onClick={() => { setSelectedMember(null); setIsFormOpen(true); }}>
           <Plus size={16} className="mr-2" />
           {t('members.form.addMember')}
@@ -276,7 +297,7 @@ export default function Members() {
               <div>
                 <CardTitle>{t("members.directory")}</CardTitle>
                 <CardDescription>
-                  {displayMembers.length} {t("members.inSystem")}
+                  {statusFilteredMembers.length} {t("members.inSystem")}
                 </CardDescription>
               </div>
               <div className="w-80">
@@ -289,7 +310,7 @@ export default function Members() {
           </CardHeader>
           <CardContent>
             <DataTable
-              data={displayMembers}
+              data={statusFilteredMembers}
               columns={columns}
               loading={isLoading}
               emptyMessage={

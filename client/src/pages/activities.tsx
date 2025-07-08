@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { 
   Activity, 
   Filter, 
+  LayoutGrid,
   RefreshCw,
   TrendingUp,
   Clock,
@@ -215,7 +216,6 @@ export default function Activities() {
       <motion.div variants={itemVariants} className="flex items-center gap-4">
         <div className="flex items-center gap-2">
           <Filter size={16} className="text-muted-foreground" />
-          <span className="text-sm font-medium">Filtre:</span>
         </div>
         
         <Select value={filter} onValueChange={setFilter}>
@@ -233,7 +233,7 @@ export default function Activities() {
         </Select>
 
         <div className="flex items-center gap-2">
-          <span className="text-sm font-medium">Görünüm:</span>
+          <LayoutGrid className="w-5 h-5 text-muted-foreground" />
         </div>
         
         <Select value={variant} onValueChange={(value: 'default' | 'compact' | 'detailed') => setVariant(value)}>
