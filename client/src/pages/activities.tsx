@@ -36,6 +36,8 @@ export default function Activities() {
   const [filter, setFilter] = useState<string>('all');
   const [variant, setVariant] = useState<'default' | 'compact' | 'detailed'>('default');
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const [page, setPage] = useState(1);
+  const pageSize = 10;
 
   const { data: activities = [], isLoading, refetch } = useQuery<any[]>({
     queryKey: ["/api/activities/feed"],
@@ -59,6 +61,9 @@ export default function Activities() {
   const filteredActivities = filter === 'all' 
     ? transformedActivities 
     : transformedActivities.filter(activity => activity.type === filter);
+
+  const totalPages = Math.ceil(filteredActivities.length / pageSize);
+  const paginatedActivities = filteredActivities.slice((page - 1) * pageSize, page * pageSize);
 
   // İstatistikler
   const stats: ActivityStats = {
@@ -266,13 +271,38 @@ export default function Activities() {
               </div>
             ) : (
               <ActivityTimeline 
-                activities={filteredActivities}
+                activities={paginatedActivities}
                 showAvatars={true}
                 variant={variant}
               />
             )}
           </CardContent>
         </Card>
+        <div className="flex justify-center mt-6 gap-2">
+          <button
+            className="px-3 py-1 rounded bg-muted text-sm font-medium disabled:opacity-50"
+            onClick={() => setPage((p) => Math.max(1, p - 1))}
+            disabled={page === 1}
+          >
+            Önceki
+          </button>
+          {Array.from({ length: totalPages }, (_, i) => (
+            <button
+              key={i + 1}
+              className={`px-3 py-1 rounded text-sm font-medium ${page === i + 1 ? 'bg-primary text-white' : 'bg-muted'}`}
+              onClick={() => setPage(i + 1)}
+            >
+              {i + 1}
+            </button>
+          ))}
+          <button
+            className="px-3 py-1 rounded bg-muted text-sm font-medium disabled:opacity-50"
+            onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+            disabled={page === totalPages}
+          >
+            Sonraki
+          </button>
+        </div>
       </motion.div>
     </div>
   );
