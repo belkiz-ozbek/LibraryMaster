@@ -490,7 +490,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.log("Book creation request body:", req.body);
       const bookData = insertBookSchema.parse(req.body);
       console.log("Parsed book data:", bookData);
-      const book = await storage.createBook(bookData);
+      let normalizedBookData = { ...bookData };
+      if (typeof normalizedBookData.isbn === 'string' && normalizedBookData.isbn.trim() === "") {
+        normalizedBookData.isbn = null;
+      }
+      const book = await storage.createBook(normalizedBookData);
       console.log("Created book:", book);
       res.status(201).json(book);
     } catch (error) {
@@ -500,10 +504,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "Invalid book data", errors: error.errors });
       }
       // Duplicate ISBN için özel hata mesajı
-      if (error && typeof error === 'object' && 'code' in error && error.code === '23505') {
-        return res.status(400).json({ message: "Bu ISBN ile zaten bir kitap mevcut. Lütfen farklı bir ISBN girin." });
+      if (
+        error &&
+        typeof error === 'object' &&
+        'code' in error &&
+        error.code === '23505' &&
+        req.body.isbn && req.body.isbn.trim() !== ""
+      ) {
+        return res.status(400).json({ message: "Bu ISBN ile zaten bir kitap mevcut. Lütfen farklı bir ISBN girin veya ISBN alanını boş bırakın." });
       }
-      res.status(500).json({ message: "Failed to create book" });
+      res.status(500).json({ message: "Kitap kaydedilirken beklenmeyen bir hata oluştu. Lütfen tekrar deneyin veya yöneticinize başvurun." });
     }
   });
 
