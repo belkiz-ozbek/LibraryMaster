@@ -43,6 +43,17 @@ const VideoBackground = () => (
       className="w-full h-full object-cover"
     />
     <div className="absolute inset-0 bg-black/40"></div>
+    <motion.div 
+      className="absolute inset-0 bg-gradient-to-br from-blue-600/20 to-purple-600/20"
+      animate={{ 
+        background: [
+          "linear-gradient(135deg, rgba(59, 130, 246, 0.2) 0%, rgba(147, 51, 234, 0.2) 100%)",
+          "linear-gradient(135deg, rgba(147, 51, 234, 0.2) 0%, rgba(59, 130, 246, 0.2) 100%)",
+          "linear-gradient(135deg, rgba(59, 130, 246, 0.2) 0%, rgba(147, 51, 234, 0.2) 100%)"
+        ]
+      }}
+      transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
+    />
   </div>
 );
 
@@ -121,19 +132,28 @@ const InputField = ({
     whileHover={{ scale: 1.02, y: -2 }}
     whileFocus={{ scale: 1.03, boxShadow: "0 0 0 3px rgba(59, 130, 246, 0.3)" }}
     className="space-y-2"
+    initial={{ opacity: 0, y: 20 }}
+    animate={{ opacity: 1, y: 0 }}
+    transition={{ duration: 0.5, delay: 0.1 }}
   >
     <Label htmlFor={id} className="text-xs font-medium text-gray-500">
       {placeholder}
     </Label>
     <div className="relative group">
-      {icon}
+      <motion.div
+        initial={{ opacity: 0, scale: 0.8 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ duration: 0.3, delay: 0.2 }}
+      >
+        {icon}
+      </motion.div>
       <Input
         id={id}
         type={type}
         placeholder={placeholder}
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        className={`pl-10 h-10 rounded-lg transition-all duration-300 focus:shadow-lg hover:shadow-md text-sm placeholder:text-gray-400 ${error ? 'border-red-500 focus:border-red-500 ring-2 ring-red-300' : 'focus:border-blue-500 ring-1 ring-blue-100 hover:border-blue-300'}`}
+        className={`pl-10 h-10 rounded-lg transition-all duration-300 focus:shadow-lg hover:shadow-md text-sm placeholder:text-gray-400 border-2 ${error ? 'border-red-500 focus:border-red-500 ring-2 ring-red-300' : 'focus:border-blue-500 ring-1 ring-blue-100 hover:border-blue-300 border-gray-200'}`}
         disabled={disabled}
         ref={ref}
         aria-invalid={!!error}
@@ -156,9 +176,14 @@ const InputField = ({
         </motion.button>
       )}
       {error && (
-        <div className="absolute right-3 top-1/2 transform -translate-y-1/2 text-red-400 h-4 w-4 animate-shake">
+        <motion.div 
+          className="absolute right-3 top-1/2 transform -translate-y-1/2 text-red-400 h-4 w-4"
+          initial={{ opacity: 0, scale: 0 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.3 }}
+        >
           {type === "password" ? <Lock className="h-4 w-4" /> : <User className="h-4 w-4" />}
-        </div>
+        </motion.div>
       )}
     </div>
     {error && (
@@ -179,18 +204,27 @@ const SubmitButton = ({ isLoading, onSubmit }: { isLoading: boolean; onSubmit: (
   <motion.div 
     whileHover={{ scale: 1.02, y: -2 }}
     whileTap={{ scale: 0.98 }}
+    initial={{ opacity: 0, y: 20 }}
+    animate={{ opacity: 1, y: 0 }}
+    transition={{ duration: 0.5, delay: 0.3 }}
   >
     <Button 
       type="submit" 
-      className="w-full h-11 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-medium rounded-lg shadow-lg transition-all duration-300 transform hover:scale-[1.02] active:scale-[0.98] hover:shadow-xl"
+      className="w-full h-11 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-medium rounded-lg shadow-lg transition-all duration-300 transform hover:scale-[1.02] active:scale-[0.98] hover:shadow-xl relative overflow-hidden group"
       disabled={isLoading}
       onClick={onSubmit}
     >
+      <motion.div
+        className="absolute inset-0 bg-gradient-to-r from-white/20 to-transparent"
+        initial={{ x: "-100%" }}
+        whileHover={{ x: "100%" }}
+        transition={{ duration: 0.6 }}
+      />
       {isLoading ? (
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          className="flex items-center"
+          className="flex items-center relative z-10"
         >
           <Loader2 className="mr-2 h-4 w-4 animate-spin" />
           Giriş yapılıyor...
@@ -199,6 +233,7 @@ const SubmitButton = ({ isLoading, onSubmit }: { isLoading: boolean; onSubmit: (
         <motion.span
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
+          className="relative z-10"
         >
           Giriş Yap
         </motion.span>
@@ -278,7 +313,7 @@ export default function LoginPage() {
       <VideoBackground />
       
       <div className="w-full max-w-md mx-auto">
-        <Card className="border-0 shadow-2xl bg-white/95 backdrop-blur-sm">
+        <Card className="border-0 shadow-2xl bg-white">
           <CardHeader className="space-y-4 pb-6">
             <motion.div
               initial={{ opacity: 0, scale: 0.8 }}
@@ -293,41 +328,58 @@ export default function LoginPage() {
           
           <form onSubmit={handleSubmit} className="space-y-6" autoComplete="off">
             <CardContent className="space-y-5">
-              <InputField
-                id="identifier"
-                type="text"
-                placeholder="Kullanıcı adı veya e-posta"
-                value={identifier}
-                onChange={(value) => handleInputChange('identifier', value)}
-                error={errors.identifier}
-                disabled={isLoading}
-                ref={identifierRef}
-                autoComplete="username"
-                icon={<User className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4 transition-all duration-300 group-focus-within:text-blue-500 group-hover:text-blue-400" />}
-              />
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, delay: 0.1 }}
+              >
+                <InputField
+                  id="identifier"
+                  type="text"
+                  placeholder="Kullanıcı adı veya e-posta"
+                  value={identifier}
+                  onChange={(value) => handleInputChange('identifier', value)}
+                  error={errors.identifier}
+                  disabled={isLoading}
+                  ref={identifierRef}
+                  autoComplete="username"
+                  icon={<User className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4 transition-all duration-300 group-focus-within:text-blue-500 group-hover:text-blue-400" />}
+                />
+              </motion.div>
               
-              <InputField
-                id="password"
-                type={showPassword ? "text" : "password"}
-                placeholder="Şifrenizi girin"
-                value={password}
-                onChange={(value) => handleInputChange('password', value)}
-                error={errors.password}
-                disabled={isLoading}
-                ref={passwordRef}
-                autoComplete="current-password"
-                icon={<Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4 transition-all duration-300 group-focus-within:text-blue-500 group-hover:text-blue-400" />}
-                showPasswordToggle={true}
-                showPassword={showPassword}
-                onTogglePassword={togglePassword}
-              />
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, delay: 0.2 }}
+              >
+                <InputField
+                  id="password"
+                  type={showPassword ? "text" : "password"}
+                  placeholder="Şifrenizi girin"
+                  value={password}
+                  onChange={(value) => handleInputChange('password', value)}
+                  error={errors.password}
+                  disabled={isLoading}
+                  ref={passwordRef}
+                  autoComplete="current-password"
+                  icon={<Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4 transition-all duration-300 group-focus-within:text-blue-500 group-hover:text-blue-400" />}
+                  showPasswordToggle={true}
+                  showPassword={showPassword}
+                  onTogglePassword={togglePassword}
+                />
+              </motion.div>
             </CardContent>
             
             <CardFooter className="flex flex-col space-y-4 pt-0">
               <div className="flex flex-col space-y-3 w-full">
                 <SubmitButton isLoading={isLoading} onSubmit={handleSubmit} />
               </div>
-              <div className="text-center">
+              <motion.div 
+                className="text-center"
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, delay: 0.4 }}
+              >
                 <motion.p 
                   className="text-sm text-gray-600" 
                   initial={{ opacity: 0 }} 
@@ -346,7 +398,7 @@ export default function LoginPage() {
                     Kayıt olun
                   </motion.button>
                 </motion.p>
-              </div>
+              </motion.div>
             </CardFooter>
           </form>
         </Card>

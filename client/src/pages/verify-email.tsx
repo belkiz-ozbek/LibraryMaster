@@ -120,10 +120,21 @@ export default function VerifyEmailPage() {
           className="w-full h-full object-cover"
         />
         <div className="absolute inset-0 bg-black/40"></div>
+        <motion.div 
+          className="absolute inset-0 bg-gradient-to-br from-blue-600/20 to-purple-600/20"
+          animate={{ 
+            background: [
+              "linear-gradient(135deg, rgba(59, 130, 246, 0.2) 0%, rgba(147, 51, 234, 0.2) 100%)",
+              "linear-gradient(135deg, rgba(147, 51, 234, 0.2) 0%, rgba(59, 130, 246, 0.2) 100%)",
+              "linear-gradient(135deg, rgba(59, 130, 246, 0.2) 0%, rgba(147, 51, 234, 0.2) 100%)"
+            ]
+          }}
+          transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
+        />
       </div>
       
       <div className="w-full max-w-md mx-auto">
-        <Card className="border-0 shadow-2xl bg-white/95 backdrop-blur-sm">
+        <Card className="border-0 shadow-2xl bg-white">
           <CardHeader className="space-y-4 pb-6">
             <motion.div
               initial={{ opacity: 0, scale: 0.8 }}
@@ -185,38 +196,105 @@ export default function VerifyEmailPage() {
             <AnimatePresence mode="wait">
               {isLoading ? (
                 <motion.div key="loading" className="flex flex-col items-center space-y-4" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }}>
-                  <Loader2 className="h-14 w-14 animate-spin text-blue-600" />
-                  <p className="text-gray-600 text-center">Email adresiniz doğrulanıyor...</p>
+                  <motion.div
+                    animate={{ rotate: 360 }}
+                    transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+                  >
+                    <Loader2 className="h-14 w-14 text-blue-600" />
+                  </motion.div>
+                  <motion.p 
+                    className="text-gray-600 text-center"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ delay: 0.3 }}
+                  >
+                    Email adresiniz doğrulanıyor...
+                  </motion.p>
                 </motion.div>
               ) : isVerified ? (
                 <motion.div key="success" className="flex flex-col items-center space-y-4" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }}>
-                  <CheckCircle className="h-24 w-24 text-green-500 animate-pulse mb-2" />
-                  <div className="text-center space-y-2">
+                  <motion.div
+                    initial={{ scale: 0, rotate: -180 }}
+                    animate={{ scale: 1, rotate: 0 }}
+                    transition={{ duration: 0.6, type: "spring", stiffness: 200 }}
+                  >
+                    <CheckCircle className="h-24 w-24 text-green-500" />
+                  </motion.div>
+                  <motion.div 
+                    className="text-center space-y-2"
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.2 }}
+                  >
                     <h3 className="text-2xl font-bold text-green-700">Tebrikler!</h3>
                     <p className="text-lg text-gray-800 font-semibold">Email adresiniz başarıyla doğrulandı.</p>
                     <p className="text-gray-600">Artık hesabınıza giriş yapabilirsiniz.</p>
-                    <p className="text-sm text-gray-400">3 saniye içinde giriş sayfasına yönlendirileceksiniz...</p>
-                  </div>
-                  <motion.div whileTap={{ scale: 0.97 }}>
-                    <Button onClick={handleGoToLogin} className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-medium">
-                      Hemen Giriş Yap
+                    <motion.p 
+                      className="text-sm text-gray-400"
+                      animate={{ opacity: [0.5, 1, 0.5] }}
+                      transition={{ duration: 2, repeat: Infinity }}
+                    >
+                      3 saniye içinde giriş sayfasına yönlendirileceksiniz...
+                    </motion.p>
+                  </motion.div>
+                  <motion.div 
+                    whileHover={{ scale: 1.02, y: -2 }}
+                    whileTap={{ scale: 0.97 }}
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.4 }}
+                  >
+                    <Button 
+                      onClick={handleGoToLogin} 
+                      className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-medium relative overflow-hidden group"
+                    >
+                      <motion.div
+                        className="absolute inset-0 bg-gradient-to-r from-white/20 to-transparent"
+                        initial={{ x: "-100%" }}
+                        whileHover={{ x: "100%" }}
+                        transition={{ duration: 0.6 }}
+                      />
+                      <span className="relative z-10">Hemen Giriş Yap</span>
                     </Button>
                   </motion.div>
                 </motion.div>
               ) : error ? (
                 <motion.div key="error" className="flex flex-col items-center space-y-4" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }}>
-                  <XCircle className="h-16 w-16 text-red-500 animate-shake" />
-                  <div className="text-center space-y-2">
+                  <motion.div
+                    initial={{ scale: 0, rotate: 180 }}
+                    animate={{ scale: 1, rotate: 0 }}
+                    transition={{ duration: 0.6, type: "spring", stiffness: 200 }}
+                  >
+                    <XCircle className="h-16 w-16 text-red-500" />
+                  </motion.div>
+                  <motion.div 
+                    className="text-center space-y-2"
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.2 }}
+                  >
                     <h3 className="text-lg font-semibold text-gray-900">Doğrulama Başarısız</h3>
                     <p className="text-gray-600">{error || "Email doğrulama işlemi başarısız oldu."}</p>
-                  </div>
+                  </motion.div>
                   <div className="flex flex-col space-y-3 w-full">
-                    <motion.div whileTap={{ scale: 0.97 }}>
+                    <motion.div 
+                      whileHover={{ scale: 1.02, y: -2 }}
+                      whileTap={{ scale: 0.97 }}
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: 0.3 }}
+                    >
                       <Button onClick={handleGoToLogin} variant="outline" className="w-full">
                         Giriş Sayfasına Dön
                       </Button>
                     </motion.div>
-                    <motion.div whileTap={{ scale: 0.97 }}>
+                    <motion.div 
+                      whileHover={{ scale: 1.02, y: -2 }}
+                      whileTap={{ scale: 0.97 }}
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: 0.4 }}
+                    >
                       <Button onClick={handleResendEmail} variant="ghost" className="w-full">
                         <Mail className="mr-2 h-4 w-4" />
                         Doğrulama Emailini Tekrar Gönder
@@ -226,29 +304,47 @@ export default function VerifyEmailPage() {
                 </motion.div>
               ) : (
                 <motion.div key="info" className="flex flex-col items-center space-y-4" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }}>
-                  <Mail className="h-16 w-16 text-blue-500 animate-bounce" />
-                  <div className="text-center space-y-2">
+                  <motion.div
+                    animate={{ y: [0, -5, 0] }}
+                    transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+                  >
+                    <Mail className="h-16 w-16 text-blue-500" />
+                  </motion.div>
+                  <motion.div 
+                    className="text-center space-y-2"
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.2 }}
+                  >
                     <h3 className="text-lg font-semibold text-gray-900">Email Doğrulama Gerekli</h3>
                     <p className="text-gray-600">{email ? `${email} adresine doğrulama emaili gönderdik.` : "Email adresinize doğrulama emaili gönderdik."}</p>
                     <p className="text-gray-600 text-sm">Lütfen email kutunuzu kontrol edin ve doğrulama linkine tıklayın.</p>
-                  </div>
-                  {/* E-posta input ve label tamamen kaldırıldı */}
+                  </motion.div>
                   <div className="flex flex-col space-y-3 w-full">
                     <motion.div 
                       whileHover={{ scale: 1.02, y: -2 }}
                       whileTap={{ scale: 0.98 }}
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: 0.3 }}
                     >
                       <Button 
                         type="button"
                         onClick={handleResendEmail}
-                        className="w-full h-11 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-medium rounded-lg shadow-lg transition-all duration-300 transform hover:scale-[1.02] active:scale-[0.98] hover:shadow-xl"
+                        className="w-full h-11 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-medium rounded-lg shadow-lg transition-all duration-300 transform hover:scale-[1.02] active:scale-[0.98] hover:shadow-xl relative overflow-hidden group"
                         disabled={isLoading}
                       >
+                        <motion.div
+                          className="absolute inset-0 bg-gradient-to-r from-white/20 to-transparent"
+                          initial={{ x: "-100%" }}
+                          whileHover={{ x: "100%" }}
+                          transition={{ duration: 0.6 }}
+                        />
                         {isLoading ? (
                           <motion.div
                             initial={{ opacity: 0 }}
                             animate={{ opacity: 1 }}
-                            className="flex items-center"
+                            className="flex items-center relative z-10"
                           >
                             <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                             Doğrulama e-postası gönderiliyor...
@@ -257,6 +353,7 @@ export default function VerifyEmailPage() {
                           <motion.span
                             initial={{ opacity: 0 }}
                             animate={{ opacity: 1 }}
+                            className="relative z-10"
                           >
                             Doğrulama E-postasını Tekrar Gönder
                           </motion.span>
@@ -264,7 +361,12 @@ export default function VerifyEmailPage() {
                       </Button>
                     </motion.div>
                   </div>
-                  <div className="text-center">
+                  <motion.div 
+                    className="text-center"
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.4 }}
+                  >
                     <motion.p 
                       className="text-sm text-gray-600" 
                       initial={{ opacity: 0 }} 
@@ -283,7 +385,7 @@ export default function VerifyEmailPage() {
                         Giriş yapın
                       </motion.button>
                     </motion.p>
-                  </div>
+                  </motion.div>
                 </motion.div>
               )}
             </AnimatePresence>

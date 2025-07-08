@@ -130,10 +130,21 @@ export default function SignupPage() {
           className="w-full h-full object-cover"
         />
         <div className="absolute inset-0 bg-black/40"></div>
+        <motion.div 
+          className="absolute inset-0 bg-gradient-to-br from-blue-600/20 to-purple-600/20"
+          animate={{ 
+            background: [
+              "linear-gradient(135deg, rgba(59, 130, 246, 0.2) 0%, rgba(147, 51, 234, 0.2) 100%)",
+              "linear-gradient(135deg, rgba(147, 51, 234, 0.2) 0%, rgba(59, 130, 246, 0.2) 100%)",
+              "linear-gradient(135deg, rgba(59, 130, 246, 0.2) 0%, rgba(147, 51, 234, 0.2) 100%)"
+            ]
+          }}
+          transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
+        />
       </div>
       
       <div className="w-full max-w-md mx-auto">
-        <Card className="border-0 shadow-2xl bg-white/95 backdrop-blur-sm">
+        <Card className="border-0 shadow-2xl bg-white">
           <CardHeader className="space-y-4 pb-6">
             <motion.div
               initial={{ opacity: 0, scale: 0.8 }}
@@ -199,19 +210,28 @@ export default function SignupPage() {
                   whileHover={{ scale: 1.02, y: -2 }}
                   whileFocus={{ scale: 1.03, boxShadow: "0 0 0 3px rgba(59, 130, 246, 0.3)" }}
                   className="space-y-1.5"
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.5, delay: 0.1 }}
                 >
                   <Label htmlFor="firstName" className="text-xs font-medium text-gray-500">
                     İsim
                   </Label>
                   <div className="relative group">
-                    <User className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4 transition-all duration-300 group-focus-within:text-blue-500 group-hover:text-blue-400" />
+                    <motion.div
+                      initial={{ opacity: 0, scale: 0.8 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      transition={{ duration: 0.3, delay: 0.2 }}
+                    >
+                      <User className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4 transition-all duration-300 group-focus-within:text-blue-500 group-hover:text-blue-400" />
+                    </motion.div>
                     <Input
                       id="firstName"
                       type="text"
                       placeholder="İsminizi girin"
                       value={firstName}
                       onChange={(e) => handleInputChange('firstName', e.target.value)}
-                      className={`pl-10 h-10 rounded-lg transition-all duration-300 focus:shadow-lg hover:shadow-md text-sm placeholder:text-gray-400 ${errors.firstName ? 'border-red-500 focus:border-red-500 ring-2 ring-red-300' : 'focus:border-blue-500 ring-1 ring-blue-100 hover:border-blue-300'}`}
+                      className={`pl-10 h-10 rounded-lg transition-all duration-300 focus:shadow-lg hover:shadow-md text-sm placeholder:text-gray-400 border-2 ${errors.firstName ? 'border-red-500 focus:border-red-500 ring-2 ring-red-300' : 'focus:border-blue-500 ring-1 ring-blue-100 hover:border-blue-300 border-gray-200'}`}
                       disabled={isLoading}
                       ref={firstNameRef}
                       aria-invalid={!!errors.firstName}
@@ -219,7 +239,14 @@ export default function SignupPage() {
                       autoComplete="given-name"
                     />
                     {errors.firstName && (
-                      <User className="absolute right-3 top-1/2 transform -translate-y-1/2 text-red-400 h-4 w-4 animate-shake" />
+                      <motion.div 
+                        className="absolute right-3 top-1/2 transform -translate-y-1/2 text-red-400 h-4 w-4"
+                        initial={{ opacity: 0, scale: 0 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        transition={{ duration: 0.3 }}
+                      >
+                        <User className="h-4 w-4" />
+                      </motion.div>
                     )}
                   </div>
                   {errors.firstName && (
@@ -238,19 +265,28 @@ export default function SignupPage() {
                   whileHover={{ scale: 1.02, y: -2 }}
                   whileFocus={{ scale: 1.03, boxShadow: "0 0 0 3px rgba(59, 130, 246, 0.3)" }}
                   className="space-y-1.5"
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.5, delay: 0.15 }}
                 >
                   <Label htmlFor="lastName" className="text-xs font-medium text-gray-500">
                     Soyad
                   </Label>
                   <div className="relative group">
-                    <User className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4 transition-all duration-300 group-focus-within:text-blue-500 group-hover:text-blue-400" />
+                    <motion.div
+                      initial={{ opacity: 0, scale: 0.8 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      transition={{ duration: 0.3, delay: 0.25 }}
+                    >
+                      <User className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4 transition-all duration-300 group-focus-within:text-blue-500 group-hover:text-blue-400" />
+                    </motion.div>
                     <Input
                       id="lastName"
                       type="text"
                       placeholder="Soyadınızı girin"
                       value={lastName}
                       onChange={(e) => handleInputChange('lastName', e.target.value)}
-                      className={`pl-10 h-10 rounded-lg transition-all duration-300 focus:shadow-lg hover:shadow-md text-sm placeholder:text-gray-400 ${errors.lastName ? 'border-red-500 focus:border-red-500 ring-2 ring-red-300' : 'focus:border-blue-500 ring-1 ring-blue-100 hover:border-blue-300'}`}
+                      className={`pl-10 h-10 rounded-lg transition-all duration-300 focus:shadow-lg hover:shadow-md text-sm placeholder:text-gray-400 border-2 ${errors.lastName ? 'border-red-500 focus:border-red-500 ring-2 ring-red-300' : 'focus:border-blue-500 ring-1 ring-blue-100 hover:border-blue-300 border-gray-200'}`}
                       disabled={isLoading}
                       ref={lastNameRef}
                       aria-invalid={!!errors.lastName}
@@ -258,7 +294,14 @@ export default function SignupPage() {
                       autoComplete="family-name"
                     />
                     {errors.lastName && (
-                      <User className="absolute right-3 top-1/2 transform -translate-y-1/2 text-red-400 h-4 w-4 animate-shake" />
+                      <motion.div 
+                        className="absolute right-3 top-1/2 transform -translate-y-1/2 text-red-400 h-4 w-4"
+                        initial={{ opacity: 0, scale: 0 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        transition={{ duration: 0.3 }}
+                      >
+                        <User className="h-4 w-4" />
+                      </motion.div>
                     )}
                   </div>
                   {errors.lastName && (
@@ -280,19 +323,28 @@ export default function SignupPage() {
                 whileHover={{ scale: 1.02, y: -2 }}
                 whileFocus={{ scale: 1.03, boxShadow: "0 0 0 3px rgba(59, 130, 246, 0.3)" }}
                 className="space-y-1.5"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, delay: 0.2 }}
               >
                 <Label htmlFor="username" className="text-xs font-medium text-gray-500">
                   Kullanıcı Adı
                 </Label>
                 <div className="relative group">
-                  <User className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4 transition-all duration-300 group-focus-within:text-blue-500 group-hover:text-blue-400" />
+                  <motion.div
+                    initial={{ opacity: 0, scale: 0.8 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ duration: 0.3, delay: 0.3 }}
+                  >
+                    <User className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4 transition-all duration-300 group-focus-within:text-blue-500 group-hover:text-blue-400" />
+                  </motion.div>
                   <Input
                     id="username"
                     type="text"
                     placeholder="Kullanıcı adınızı girin"
                     value={username}
                     onChange={(e) => handleInputChange('username', e.target.value)}
-                    className={`pl-10 h-10 rounded-lg transition-all duration-300 focus:shadow-lg hover:shadow-md text-sm placeholder:text-gray-400 ${errors.username ? 'border-red-500 focus:border-red-500 ring-2 ring-red-300' : 'focus:border-blue-500 ring-1 ring-blue-100 hover:border-blue-300'}`}
+                    className={`pl-10 h-10 rounded-lg transition-all duration-300 focus:shadow-lg hover:shadow-md text-sm placeholder:text-gray-400 border-2 ${errors.username ? 'border-red-500 focus:border-red-500 ring-2 ring-red-300' : 'focus:border-blue-500 ring-1 ring-blue-100 hover:border-blue-300 border-gray-200'}`}
                     disabled={isLoading}
                     ref={usernameRef}
                     aria-invalid={!!errors.username}
@@ -300,7 +352,14 @@ export default function SignupPage() {
                     autoComplete="username"
                   />
                   {errors.username && (
-                    <User className="absolute right-3 top-1/2 transform -translate-y-1/2 text-red-400 h-4 w-4 animate-shake" />
+                    <motion.div 
+                      className="absolute right-3 top-1/2 transform -translate-y-1/2 text-red-400 h-4 w-4"
+                      initial={{ opacity: 0, scale: 0 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      transition={{ duration: 0.3 }}
+                    >
+                      <User className="h-4 w-4" />
+                    </motion.div>
                   )}
                 </div>
                 {errors.username && (
@@ -321,19 +380,28 @@ export default function SignupPage() {
                 whileHover={{ scale: 1.02, y: -2 }}
                 whileFocus={{ scale: 1.03, boxShadow: "0 0 0 3px rgba(59, 130, 246, 0.3)" }}
                 className="space-y-1.5"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, delay: 0.25 }}
               >
                 <Label htmlFor="email" className="text-xs font-medium text-gray-500">
                   E-posta
                 </Label>
                 <div className="relative group">
-                  <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4 transition-all duration-300 group-focus-within:text-blue-500 group-hover:text-blue-400" />
+                  <motion.div
+                    initial={{ opacity: 0, scale: 0.8 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ duration: 0.3, delay: 0.35 }}
+                  >
+                    <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4 transition-all duration-300 group-focus-within:text-blue-500 group-hover:text-blue-400" />
+                  </motion.div>
                   <Input
                     id="email"
                     type="email"
                     placeholder="E-posta adresinizi girin"
                     value={email}
                     onChange={(e) => handleInputChange('email', e.target.value)}
-                    className={`pl-10 h-10 rounded-lg transition-all duration-300 focus:shadow-lg hover:shadow-md text-sm placeholder:text-gray-400 ${errors.email ? 'border-red-500 focus:border-red-500 ring-2 ring-red-300' : 'focus:border-blue-500 ring-1 ring-blue-100 hover:border-blue-300'}`}
+                    className={`pl-10 h-10 rounded-lg transition-all duration-300 focus:shadow-lg hover:shadow-md text-sm placeholder:text-gray-400 border-2 ${errors.email ? 'border-red-500 focus:border-red-500 ring-2 ring-red-300' : 'focus:border-blue-500 ring-1 ring-blue-100 hover:border-blue-300 border-gray-200'}`}
                     disabled={isLoading}
                     ref={emailRef}
                     aria-invalid={!!errors.email}
@@ -341,7 +409,14 @@ export default function SignupPage() {
                     autoComplete="email"
                   />
                   {errors.email && (
-                    <Mail className="absolute right-3 top-1/2 transform -translate-y-1/2 text-red-400 h-4 w-4 animate-shake" />
+                    <motion.div 
+                      className="absolute right-3 top-1/2 transform -translate-y-1/2 text-red-400 h-4 w-4"
+                      initial={{ opacity: 0, scale: 0 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      transition={{ duration: 0.3 }}
+                    >
+                      <Mail className="h-4 w-4" />
+                    </motion.div>
                   )}
                 </div>
                 {errors.email && (
@@ -363,19 +438,28 @@ export default function SignupPage() {
                   whileHover={{ scale: 1.02, y: -2 }}
                   whileFocus={{ scale: 1.03, boxShadow: "0 0 0 3px rgba(59, 130, 246, 0.3)" }}
                   className="space-y-1.5"
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.5, delay: 0.3 }}
                 >
                   <Label htmlFor="password" className="text-xs font-medium text-gray-500">
                     Şifre
                   </Label>
                   <div className="relative group">
-                    <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4 transition-all duration-300 group-focus-within:text-blue-500 group-hover:text-blue-400" />
+                    <motion.div
+                      initial={{ opacity: 0, scale: 0.8 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      transition={{ duration: 0.3, delay: 0.4 }}
+                    >
+                      <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4 transition-all duration-300 group-focus-within:text-blue-500 group-hover:text-blue-400" />
+                    </motion.div>
                     <Input
                       id="password"
                       type={showPassword ? "text" : "password"}
                       placeholder="Şifrenizi girin"
                       value={password}
                       onChange={(e) => handleInputChange('password', e.target.value)}
-                      className={`pl-10 pr-10 h-10 rounded-lg transition-all duration-300 focus:shadow-lg hover:shadow-md text-sm placeholder:text-gray-400 ${errors.password ? 'border-red-500 focus:border-red-500 ring-2 ring-red-300' : 'focus:border-blue-500 ring-1 ring-blue-100 hover:border-blue-300'}`}
+                      className={`pl-10 pr-10 h-10 rounded-lg transition-all duration-300 focus:shadow-lg hover:shadow-md text-sm placeholder:text-gray-400 border-2 ${errors.password ? 'border-red-500 focus:border-red-500 ring-2 ring-red-300' : 'focus:border-blue-500 ring-1 ring-blue-100 hover:border-blue-300 border-gray-200'}`}
                       disabled={isLoading}
                       ref={passwordRef}
                       aria-invalid={!!errors.password}
@@ -396,25 +480,16 @@ export default function SignupPage() {
                       <span className="sr-only">Şifreyi göster/gizle</span>
                     </motion.button>
                     {errors.password && (
-                      <Lock className="absolute right-10 top-1/2 transform -translate-y-1/2 text-red-400 h-4 w-4 animate-shake" />
+                      <motion.div 
+                        className="absolute right-10 top-1/2 transform -translate-y-1/2 text-red-400 h-4 w-4"
+                        initial={{ opacity: 0, scale: 0 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        transition={{ duration: 0.3 }}
+                      >
+                        <Lock className="h-4 w-4" />
+                      </motion.div>
                     )}
                   </div>
-                  {/* Password strength bar */}
-                  {password && (
-                    <motion.div 
-                      className="w-full h-1.5 rounded bg-gray-200 overflow-hidden"
-                      initial={{ opacity: 0, scaleX: 0 }}
-                      animate={{ opacity: 1, scaleX: 1 }}
-                      transition={{ duration: 0.3 }}
-                    >
-                      <motion.div 
-                        className={`h-full rounded transition-all duration-500 ${passwordStrength === 'Güçlü' ? 'bg-green-500 w-full' : passwordStrength === 'Orta' ? 'bg-yellow-400 w-2/3' : 'bg-red-400 w-1/3'}`}
-                        initial={{ width: 0 }}
-                        animate={{ width: passwordStrength === 'Güçlü' ? '100%' : passwordStrength === 'Orta' ? '66.67%' : '33.33%' }}
-                        transition={{ duration: 0.5, delay: 0.1 }}
-                      ></motion.div>
-                    </motion.div>
-                  )}
                   {errors.password && (
                     <motion.p 
                       className="text-red-400 text-xs animate-in slide-in-from-top-1" 
@@ -425,6 +500,19 @@ export default function SignupPage() {
                     >
                       {errors.password}
                     </motion.p>
+                  )}
+                  {password && (
+                    <motion.div 
+                      className="flex items-center space-x-2 text-xs"
+                      initial={{ opacity: 0, y: 5 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ duration: 0.3 }}
+                    >
+                      <span className="text-gray-500">Güçlük:</span>
+                      <span className={`font-medium ${passwordStrengthColor}`}>
+                        {passwordStrength}
+                      </span>
+                    </motion.div>
                   )}
                 </motion.div>
 
