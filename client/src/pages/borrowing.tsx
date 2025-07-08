@@ -11,6 +11,17 @@ import { useAuth } from "@/lib/auth";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { Plus, Edit, Trash2, HandHeart, Clock, AlertTriangle } from "lucide-react";
+import {
+  AlertDialog,
+  AlertDialogTrigger,
+  AlertDialogContent,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogCancel,
+  AlertDialogAction,
+} from "@/components/ui/alert-dialog";
 import { format, differenceInDays } from "date-fns";
 import type { BorrowingWithDetails } from "@shared/schema";
 import { useTranslation } from "react-i18next";
@@ -44,6 +55,8 @@ export default function Borrowing() {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedBorrowing, setSelectedBorrowing] = useState<BorrowingWithDetails | null>(null);
   const [isFormOpen, setIsFormOpen] = useState(false);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [borrowingToDelete, setBorrowingToDelete] = useState<number | null>(null);
   const { user } = useAuth();
   const { toast } = useToast();
   const { t } = useTranslation();
@@ -106,9 +119,19 @@ export default function Borrowing() {
   };
 
   const handleDelete = (id: number) => {
-    if (confirm("Are you sure you want to delete this borrowing record?")) {
-      deleteBorrowingMutation.mutate(id);
+    setBorrowingToDelete(id);
+    setDeleteDialogOpen(true);
+  };
+  const confirmDelete = () => {
+    if (borrowingToDelete !== null) {
+      deleteBorrowingMutation.mutate(borrowingToDelete);
+      setDeleteDialogOpen(false);
+      setBorrowingToDelete(null);
     }
+  };
+  const cancelDelete = () => {
+    setDeleteDialogOpen(false);
+    setBorrowingToDelete(null);
   };
 
   const handleFormSuccess = () => {
@@ -241,14 +264,34 @@ export default function Borrowing() {
             <Edit size={16} />
           </Button>
           {user?.isAdmin && (
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => handleDelete(row.id)}
-              disabled={deleteBorrowingMutation.isPending}
-            >
-              <Trash2 size={16} />
-            </Button>
+            <AlertDialog open={deleteDialogOpen && borrowingToDelete === row.id} onOpenChange={(open) => {
+              if (!open) cancelDelete();
+            }}>
+              <AlertDialogTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => handleDelete(row.id)}
+                  disabled={deleteBorrowingMutation.isPending}
+                >
+                  <Trash2 size={16} />
+                </Button>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>{t("borrowing.deleteTitle", "Ödünç Alma Kaydını Sil")}</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    {t("borrowing.deleteDescription", "Bu ödünç alma kaydını silmek istediğinize emin misiniz? Bu işlem geri alınamaz.")}
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel onClick={cancelDelete}>{t("common.cancel", "İptal")}</AlertDialogCancel>
+                  <AlertDialogAction onClick={confirmDelete} disabled={deleteBorrowingMutation.isPending}>
+                    {t("borrowing.deleteConfirm", "Sil")}
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
           )}
         </div>
       ),
