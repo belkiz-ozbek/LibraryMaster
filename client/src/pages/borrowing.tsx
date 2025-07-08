@@ -90,6 +90,7 @@ export default function Borrowing() {
       queryClient.invalidateQueries({ queryKey: ["/api/borrowings/active"] });
       queryClient.invalidateQueries({ queryKey: ["/api/borrowings/overdue"] });
       queryClient.invalidateQueries({ queryKey: ["/api/stats"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/books"] });
       toast({
         title: "Borrowing deleted",
         description: "The borrowing record has been successfully deleted.",

@@ -265,6 +265,17 @@ export class DatabaseStorage implements IStorage {
   }
 
   async deleteBorrowing(id: number): Promise<void> {
+    // Find the borrowing before deleting
+    const borrowing = await this.getBorrowing(id);
+    if (!borrowing) {
+      throw new Error(`Borrowing with id ${id} not found`);
+    }
+    // If the borrowing was active, increment the book's availableCopies
+    if (borrowing.status === 'borrowed') {
+      await db.update(books)
+        .set({ availableCopies: sql`${books.availableCopies} + 1` })
+        .where(eq(books.id, borrowing.bookId));
+    }
     const result = await db.delete(borrowings).where(eq(borrowings.id, id));
     if (result.rowCount === 0) {
       throw new Error(`Borrowing with id ${id} not found`);
