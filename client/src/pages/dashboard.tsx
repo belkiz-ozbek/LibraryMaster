@@ -25,6 +25,7 @@ import { Bar, BarChart, CartesianGrid, Legend, Pie, PieChart, ResponsiveContaine
 import { motion } from "framer-motion";
 import { tr, enUS } from "date-fns/locale";
 import { Progress } from "@/components/ui/progress";
+import { capitalizeWords } from "@/lib/utils";
 
 interface Stats {
   totalBooks: number;
@@ -469,8 +470,8 @@ export default function Dashboard() {
                         <span className="text-sm font-bold text-blue-600 dark:text-blue-400">{index + 1}</span>
                       </div>
                       <div className="flex-1 min-w-0">
-                        <p className="font-medium text-foreground truncate">{book.title}</p>
-                        <p className="text-sm text-muted-foreground">{book.author}</p>
+                        <p className="font-medium text-foreground truncate">{capitalizeWords(book.title)}</p>
+                        <p className="text-sm text-muted-foreground">{capitalizeWords(book.author)}</p>
                       </div>
                       <div className="w-28 text-right ml-4">
                         <span className="text-sm font-semibold text-foreground mr-2">

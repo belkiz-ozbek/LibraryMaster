@@ -522,6 +522,7 @@ export class DatabaseStorage implements IStorage {
       id: users.id,
       name: users.name,
       email: users.email,
+      username: users.username,
       password: users.password,
       isAdmin: users.isAdmin,
       membershipDate: users.membershipDate,

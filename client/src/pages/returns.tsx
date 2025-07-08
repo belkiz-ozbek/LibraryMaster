@@ -120,7 +120,7 @@ export default function Returns() {
         (borrowing.user.email && borrowing.user.email.toLowerCase().includes(searchQuery.toLowerCase())) ||
         borrowing.book.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
         borrowing.book.author.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        borrowing.book.isbn.toLowerCase().includes(searchQuery.toLowerCase())
+        (borrowing.book.isbn?.toLowerCase() ?? "").includes(searchQuery.toLowerCase())
       )
     : activeBorrowings;
 

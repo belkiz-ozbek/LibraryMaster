@@ -23,6 +23,7 @@ import { useEffect, useRef, useState } from "react";
 import Confetti from 'react-dom-confetti';
 import Player from 'lottie-react';
 import { Link } from "react-router-dom";
+import { capitalizeWords } from "@/lib/utils";
 
 interface Stats {
   totalBooks: number;
@@ -132,8 +133,8 @@ export default function Statistics() {
       sortable: true,
       render: (value: string, row: PopularBook) => (
         <div>
-          <p className="font-medium text-on-surface">{value}</p>
-          <p className="text-sm text-text-muted">{row.author}</p>
+          <p className="font-medium text-on-surface">{capitalizeWords(value)}</p>
+          <p className="text-sm text-text-muted">{capitalizeWords(row.author)}</p>
         </div>
       ),
     },
@@ -198,7 +199,7 @@ export default function Statistics() {
           </div>
           <div>
             <Link to={`/members/${row.id}`} className="font-medium text-on-surface hover:underline hover:text-primary transition-colors">
-              {value}
+              {capitalizeWords(value)}
             </Link>
             <p className="text-sm text-text-muted">{row.email}</p>
           </div>

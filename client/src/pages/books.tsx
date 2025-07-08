@@ -15,6 +15,7 @@ import { Plus, Edit, Trash2, Book as BookIcon } from "lucide-react";
 import type { Book } from "@shared/schema";
 import { useTranslation } from "react-i18next";
 import { motion } from "framer-motion";
+import { capitalizeWords } from "@/lib/utils";
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -154,8 +155,8 @@ export default function Books() {
       sortable: true,
       render: (value: string, row: Book) => (
         <div>
-          <p className="font-medium text-on-surface">{value}</p>
-          <p className="text-sm text-text-muted">{row.author}</p>
+          <p className="font-medium text-on-surface">{capitalizeWords(value)}</p>
+          <p className="text-sm text-text-muted">{capitalizeWords(row.author)}</p>
         </div>
       ),
     },

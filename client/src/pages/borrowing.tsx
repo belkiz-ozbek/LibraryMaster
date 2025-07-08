@@ -17,6 +17,7 @@ import { useTranslation } from "react-i18next";
 import { motion } from "framer-motion";
 import { useSearch } from "wouter";
 import { Link } from "react-router-dom";
+import { capitalizeWords } from "@/lib/utils";
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -96,7 +97,7 @@ export default function Borrowing() {
     (borrowing.user.email && borrowing.user.email.toLowerCase().includes(searchQuery.toLowerCase())) ||
     borrowing.book.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
     borrowing.book.author.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    borrowing.book.isbn.toLowerCase().includes(searchQuery.toLowerCase())
+    (borrowing.book.isbn?.toLowerCase() ?? "").includes(searchQuery.toLowerCase())
   );
 
   const handleEdit = (borrowing: BorrowingWithDetails) => {
@@ -184,7 +185,7 @@ export default function Borrowing() {
           </div>
           <div>
             <Link to={`/members/${row.user.id}`} className="font-medium text-on-surface hover:underline hover:text-primary transition-colors">
-              {value}
+              {capitalizeWords(value)}
             </Link>
             <p className="text-sm text-text-muted">{row.user.email}</p>
           </div>
@@ -197,9 +198,9 @@ export default function Borrowing() {
       sortable: true,
       render: (value: string, row: BorrowingWithDetails) => (
         <div>
-          <p className="font-medium text-on-surface">{value}</p>
-          <p className="text-sm text-text-muted">{row.book.author}</p>
-          <p className="text-xs text-text-muted font-mono">{row.book.isbn}</p>
+          <p className="font-medium text-on-surface">{capitalizeWords(value)}</p>
+          <p className="text-sm text-text-muted">{capitalizeWords(row.book.author)}</p>
+          <p className="text-xs text-text-muted font-mono">{row.book.isbn ?? "-"}</p>
         </div>
       ),
     },
