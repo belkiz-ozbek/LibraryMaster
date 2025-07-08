@@ -22,7 +22,7 @@ export const books = pgTable("books", {
   id: serial("id").primaryKey(),
   title: text("title").notNull(),
   author: text("author").notNull(),
-  isbn: text("isbn").notNull().unique(),
+  isbn: text("isbn").unique(),
   genre: text("genre").notNull(),
   publishYear: integer("publish_year").notNull(),
   shelfNumber: text("shelf_number"),

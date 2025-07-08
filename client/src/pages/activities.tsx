@@ -18,6 +18,7 @@ import { motion } from "framer-motion";
 import { useTranslation } from "react-i18next";
 import { useState } from "react";
 import { toast } from "@/components/ui/use-toast";
+import { useAuth } from "@/lib/auth";
 
 interface ActivityStats {
   total: number;
@@ -30,6 +31,7 @@ interface ActivityStats {
 
 export default function Activities() {
   const { t } = useTranslation();
+  const { user } = useAuth();
   const [filter, setFilter] = useState<string>('all');
   const [variant, setVariant] = useState<'default' | 'compact' | 'detailed'>('default');
   const [isRefreshing, setIsRefreshing] = useState(false);
@@ -231,7 +233,9 @@ export default function Activities() {
           <SelectContent>
             <SelectItem value="default">Varsayılan</SelectItem>
             <SelectItem value="compact">Kompakt</SelectItem>
-            <SelectItem value="detailed">Detaylı</SelectItem>
+            {user?.isAdmin && (
+              <SelectItem value="detailed">Detaylı</SelectItem>
+            )}
           </SelectContent>
         </Select>
 

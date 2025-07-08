@@ -84,14 +84,13 @@ export function BookForm({ book, onSuccess, onCancel }: BookFormProps) {
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div className="flex flex-col gap-2">
-          <Label htmlFor="isbn" className="font-semibold text-gray-800">{t("books.isbn")} *</Label>
+          <Label htmlFor="isbn" className="font-semibold text-gray-800">{t("books.isbn")}</Label>
           <Input
             id="isbn"
             {...form.register("isbn")}
             placeholder="978-0-123456-78-9"
             className="rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition"
           />
-          {form.formState.errors.isbn && <p className="text-xs text-red-500 mt-0.5">{form.formState.errors.isbn.message}</p>}
         </div>
         <div className="flex flex-col gap-2">
           <Label htmlFor="genre" className="font-semibold text-gray-800">{t("books.genre")} *</Label>

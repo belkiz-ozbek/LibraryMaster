@@ -489,9 +489,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       console.log("Book creation request body:", req.body);
       const bookData = insertBookSchema.parse(req.body);
-      if (!bookData.isbn || bookData.isbn.trim() === "") {
-        return res.status(400).json({ message: "ISBN alanı boş olamaz ve benzersiz olmalıdır." });
-      }
       console.log("Parsed book data:", bookData);
       const book = await storage.createBook(bookData);
       console.log("Created book:", book);
