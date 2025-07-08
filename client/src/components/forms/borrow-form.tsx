@@ -272,7 +272,20 @@ export function BorrowForm({ borrowing, onSuccess, onCancel }: BorrowFormProps) 
 
       {mutation.isError && (
         <p className="text-sm text-red-600 mt-2 text-center font-medium">
-          {mutation.error?.message || t(isEditing ? 'borrowing.failed' : 'borrowing.failed')}
+          {(() => {
+            const msg = mutation.error?.message || "";
+            // Teknik hata veya İngilizce/karmaşık mesajlar için kontrol
+            if (
+              !msg ||
+              msg.toLowerCase().includes("error") ||
+              msg.toLowerCase().includes("exception") ||
+              msg.length > 100 ||
+              /[{}\[\]<>]/.test(msg) // JSON, stack trace, vs içeriyorsa
+            ) {
+              return t(isEditing ? 'borrowing.failed' : 'borrowing.failed') || "İşlem sırasında bir hata oluştu. Lütfen tekrar deneyin.";
+            }
+            return msg;
+          })()}
         </p>
       )}
       {formError && (
