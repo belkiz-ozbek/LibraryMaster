@@ -21,6 +21,7 @@ import { motion } from "framer-motion";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { Link } from "react-router-dom";
 import LoadingScreen from "@/components/ui/loading-screen";
+import { capitalizeWords } from "@/lib/utils";
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -239,7 +240,7 @@ export default function Returns() {
       sortable: true,
       render: (value: string, row: BorrowingWithDetails) => (
         <div>
-          <p className="font-medium text-on-surface">{value}</p>
+          <p className="font-medium text-on-surface">{capitalizeWords(value)}</p>
           <p className="text-sm text-text-muted">{row.book.author}</p>
           <p className="text-xs text-text-muted font-mono">{row.book.isbn}</p>
         </div>
@@ -302,7 +303,7 @@ export default function Returns() {
       title: t("borrowing.book"),
       render: (value: string, row: BorrowingWithDetails) => (
         <div>
-          <p className="font-medium text-on-surface">{value}</p>
+          <p className="font-medium text-on-surface">{capitalizeWords(value)}</p>
           <p className="text-sm text-text-muted">{row.book.author}</p>
         </div>
       ),

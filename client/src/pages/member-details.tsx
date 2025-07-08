@@ -17,6 +17,7 @@ import { useTranslation } from "react-i18next";
 import { motion } from "framer-motion";
 import type { User, BorrowingWithDetails } from "@shared/schema";
 import LoadingScreen from "@/components/ui/loading-screen";
+import { capitalizeWords } from "@/lib/utils";
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -124,7 +125,7 @@ export default function MemberDetails() {
         <div className="flex items-center">
           <BookOpen className="h-4 w-4 mr-2 text-primary" />
           <div>
-            <p className="font-medium">{row.book.title}</p>
+            <p className="font-medium">{capitalizeWords(row.book.title)}</p>
             <p className="text-sm text-muted-foreground">{row.book.author}</p>
           </div>
         </div>
