@@ -245,9 +245,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // User routes
   app.get("/api/users", requireAuth, async (req, res) => {
     try {
-      const users = await storage.getAllUsers();
-      const usersWithoutPasswords = users.map(({ password, ...user }) => user);
-      res.json(usersWithoutPasswords);
+      const { page, limit } = req.query;
+      
+      if (page || limit) {
+        // Paginated response
+        const paginationParams = {
+          page: page ? parseInt(page as string) : 1,
+          limit: limit ? parseInt(limit as string) : 10,
+        };
+        
+        const result = await storage.getAllUsersPaginated(paginationParams);
+        res.json(result);
+      } else {
+        // Non-paginated response (backward compatibility)
+        const users = await storage.getAllUsers();
+        const usersWithoutPasswords = users.map(({ password, ...user }) => user);
+        res.json(usersWithoutPasswords);
+      }
     } catch (error) {
       res.status(500).json({ message: "Failed to fetch users" });
     }
@@ -255,14 +269,30 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get("/api/users/search", requireAuth, async (req, res) => {
     try {
-      const { q } = req.query;
+      const { q, page, limit } = req.query;
       if (!q || typeof q !== 'string') {
         return res.status(400).json({ message: "Search query required" });
       }
       
-      const users = await storage.searchUsers(q);
-      const usersWithoutPasswords = users.map(({ password, ...user }) => user);
-      res.json(usersWithoutPasswords);
+      if (page || limit) {
+        // Paginated response
+        const paginationParams = {
+          page: page ? parseInt(page as string) : 1,
+          limit: limit ? parseInt(limit as string) : 10,
+        };
+        
+        const result = await storage.searchUsersPaginated(q, paginationParams);
+        const usersWithoutPasswords = {
+          ...result,
+          data: result.data.map(({ password, ...user }) => user)
+        };
+        res.json(usersWithoutPasswords);
+      } else {
+        // Non-paginated response (backward compatibility)
+        const users = await storage.searchUsers(q);
+        const usersWithoutPasswords = users.map(({ password, ...user }) => user);
+        res.json(usersWithoutPasswords);
+      }
     } catch (error) {
       res.status(500).json({ message: "Search failed" });
     }
@@ -286,42 +316,56 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/users/:id/borrowings", requireAuth, async (req, res) => {
     try {
       const id = parseInt(req.params.id);
-      const userBorrowings = await db
-        .select({
-          id: borrowings.id,
-          bookId: borrowings.bookId,
-          userId: borrowings.userId,
-          borrowDate: borrowings.borrowDate,
-          dueDate: borrowings.dueDate,
-          returnDate: borrowings.returnDate,
-          status: borrowings.status,
-          extensionRequested: borrowings.extensionRequested,
-          notes: borrowings.notes,
-          book: {
-            id: books.id,
-            title: books.title,
-            author: books.author,
-            isbn: books.isbn,
-            genre: books.genre,
-            publishYear: books.publishYear,
-            shelfNumber: books.shelfNumber,
-            availableCopies: books.availableCopies,
-            totalCopies: books.totalCopies,
-            pageCount: books.pageCount,
-            createdAt: books.createdAt,
-          },
-          user: {
-            id: sql`${id}`,
-            name: sql`(SELECT name FROM users WHERE id = ${id})`,
-            email: sql`(SELECT email FROM users WHERE id = ${id})`,
-          },
-        })
-        .from(borrowings)
-        .innerJoin(books, eq(borrowings.bookId, books.id))
-        .where(eq(borrowings.userId, id))
-        .orderBy(desc(borrowings.borrowDate));
+      const { page, limit } = req.query;
       
-      res.json(userBorrowings);
+      if (page || limit) {
+        // Paginated response
+        const paginationParams = {
+          page: page ? parseInt(page as string) : 1,
+          limit: limit ? parseInt(limit as string) : 10,
+        };
+        
+        const result = await storage.getUserBorrowingsPaginated(id, paginationParams);
+        res.json(result);
+      } else {
+        // Non-paginated response (backward compatibility)
+        const userBorrowings = await db
+          .select({
+            id: borrowings.id,
+            bookId: borrowings.bookId,
+            userId: borrowings.userId,
+            borrowDate: borrowings.borrowDate,
+            dueDate: borrowings.dueDate,
+            returnDate: borrowings.returnDate,
+            status: borrowings.status,
+            extensionRequested: borrowings.extensionRequested,
+            notes: borrowings.notes,
+            book: {
+              id: books.id,
+              title: books.title,
+              author: books.author,
+              isbn: books.isbn,
+              genre: books.genre,
+              publishYear: books.publishYear,
+              shelfNumber: books.shelfNumber,
+              availableCopies: books.availableCopies,
+              totalCopies: books.totalCopies,
+              pageCount: books.pageCount,
+              createdAt: books.createdAt,
+            },
+            user: {
+              id: sql`${id}`,
+              name: sql`(SELECT name FROM users WHERE id = ${id})`,
+              email: sql`(SELECT email FROM users WHERE id = ${id})`,
+            },
+          })
+          .from(borrowings)
+          .innerJoin(books, eq(borrowings.bookId, books.id))
+          .where(eq(borrowings.userId, id))
+          .orderBy(desc(borrowings.borrowDate));
+        
+        res.json(userBorrowings);
+      }
     } catch (error) {
       res.status(500).json({ message: "Failed to fetch user borrowings" });
     }
@@ -432,8 +476,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get("/api/activities/recent", requireAuth, async (req, res) => {
     try {
-      const activities = await storage.getRecentActivities();
-      res.json(activities);
+      const { page, limit } = req.query;
+      
+      if (page || limit) {
+        // Paginated response
+        const paginationParams = {
+          page: page ? parseInt(page as string) : 1,
+          limit: limit ? parseInt(limit as string) : 10,
+        };
+        
+        const result = await storage.getRecentActivitiesPaginated(paginationParams);
+        res.json(result);
+      } else {
+        // Non-paginated response (backward compatibility)
+        const activities = await storage.getRecentActivities();
+        res.json(activities);
+      }
     } catch (error) {
       res.status(500).json({ message: "Failed to fetch recent activities" });
     }
@@ -451,8 +509,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Book routes
   app.get("/api/books", requireAuth, async (req, res) => {
     try {
-      const books = await storage.getAllBooks();
-      res.json(books);
+      const { page, limit } = req.query;
+      
+      if (page || limit) {
+        // Paginated response
+        const paginationParams = {
+          page: page ? parseInt(page as string) : 1,
+          limit: limit ? parseInt(limit as string) : 10,
+        };
+        
+        const result = await storage.getAllBooksPaginated(paginationParams);
+        res.json(result);
+      } else {
+        // Non-paginated response (backward compatibility)
+        const books = await storage.getAllBooks();
+        res.json(books);
+      }
     } catch (error) {
       res.status(500).json({ message: "Failed to fetch books" });
     }
@@ -460,13 +532,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get("/api/books/search", requireAuth, async (req, res) => {
     try {
-      const { q } = req.query;
+      const { q, page, limit } = req.query;
       if (!q || typeof q !== 'string') {
         return res.status(400).json({ message: "Search query required" });
       }
       
-      const books = await storage.searchBooks(q);
-      res.json(books);
+      if (page || limit) {
+        // Paginated response
+        const paginationParams = {
+          page: page ? parseInt(page as string) : 1,
+          limit: limit ? parseInt(limit as string) : 10,
+        };
+        
+        const result = await storage.searchBooksPaginated(q, paginationParams);
+        res.json(result);
+      } else {
+        // Non-paginated response (backward compatibility)
+        const books = await storage.searchBooks(q);
+        res.json(books);
+      }
     } catch (error) {
       res.status(500).json({ message: "Search failed" });
     }
@@ -557,8 +641,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get("/api/borrowings", requireAuth, async (req, res) => {
     try {
-      const borrowings = await storage.getAllBorrowings();
-      res.json(borrowings);
+      const { page, limit } = req.query;
+      
+      if (page || limit) {
+        // Paginated response
+        const paginationParams = {
+          page: page ? parseInt(page as string) : 1,
+          limit: limit ? parseInt(limit as string) : 10,
+        };
+        
+        const result = await storage.getAllBorrowingsPaginated(paginationParams);
+        res.json(result);
+      } else {
+        // Non-paginated response (backward compatibility)
+        const borrowings = await storage.getAllBorrowings();
+        res.json(borrowings);
+      }
     } catch (error) {
       res.status(500).json({ message: "Failed to fetch borrowings" });
     }
@@ -566,8 +664,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get("/api/borrowings/active", requireAuth, async (req, res) => {
     try {
-      const borrowings = await storage.getActiveBorrowings();
-      res.json(borrowings);
+      const { page, limit } = req.query;
+      
+      if (page || limit) {
+        // Paginated response
+        const paginationParams = {
+          page: page ? parseInt(page as string) : 1,
+          limit: limit ? parseInt(limit as string) : 10,
+        };
+        
+        const result = await storage.getActiveBorrowingsPaginated(paginationParams);
+        res.json(result);
+      } else {
+        // Non-paginated response (backward compatibility)
+        const borrowings = await storage.getActiveBorrowings();
+        res.json(borrowings);
+      }
     } catch (error) {
       res.status(500).json({ message: "Failed to fetch active borrowings" });
     }
@@ -575,10 +687,47 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get("/api/borrowings/overdue", requireAuth, async (req, res) => {
     try {
-      const overdueBorrowings = await storage.getOverdueBorrowings();
-      res.json(overdueBorrowings);
+      const { page, limit } = req.query;
+      console.log("Overdue borrowings request - page:", page, "limit:", limit);
+      
+      if (page || limit) {
+        // Paginated response
+        const paginationParams = {
+          page: page ? parseInt(page as string) : 1,
+          limit: limit ? parseInt(limit as string) : 10,
+        };
+        
+        console.log("Getting overdue borrowings with pagination:", paginationParams);
+        const result = await storage.getOverdueBorrowingsPaginated(paginationParams);
+        console.log("Overdue borrowings result:", result);
+        res.json(result);
+      } else {
+        // Non-paginated response (backward compatibility)
+        const overdueBorrowings = await storage.getOverdueBorrowings();
+        res.json(overdueBorrowings);
+      }
     } catch (error) {
+      console.error("Error fetching overdue borrowings:", error);
       res.status(500).json({ message: "Failed to fetch overdue borrowings" });
+    }
+  });
+
+  app.get("/api/borrowings/returned", requireAuth, async (req, res) => {
+    try {
+      const { page, limit } = req.query;
+      if (page || limit) {
+        const paginationParams = {
+          page: page ? parseInt(page as string) : 1,
+          limit: limit ? parseInt(limit as string) : 10,
+        };
+        const result = await storage.getReturnedBorrowingsPaginated(paginationParams);
+        res.json(result);
+      } else {
+        const borrowings = await storage.getReturnedBorrowings();
+        res.json(borrowings);
+      }
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch returned borrowings" });
     }
   });
 
@@ -642,8 +791,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get("/api/stats/popular-books", requireAuth, async (req, res) => {
     try {
-      const books = await storage.getMostBorrowedBooks();
-      res.json(books);
+      const { page, limit } = req.query;
+      
+      if (page || limit) {
+        // Paginated response
+        const paginationParams = {
+          page: page ? parseInt(page as string) : 1,
+          limit: limit ? parseInt(limit as string) : 10,
+        };
+        
+        const result = await storage.getMostBorrowedBooksPaginated(paginationParams);
+        res.json(result);
+      } else {
+        // Non-paginated response (backward compatibility)
+        const books = await storage.getMostBorrowedBooks();
+        res.json(books);
+      }
     } catch (error) {
       res.status(500).json({ message: "Failed to fetch popular books" });
     }
@@ -651,9 +814,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get("/api/stats/active-users", requireAuth, async (req, res) => {
     try {
-      const users = await storage.getMostActiveUsers();
-      const usersWithoutPasswords = users.map(({ password, ...user }) => user);
-      res.json(usersWithoutPasswords);
+      const { page, limit } = req.query;
+      
+      if (page || limit) {
+        // Paginated response
+        const paginationParams = {
+          page: page ? parseInt(page as string) : 1,
+          limit: limit ? parseInt(limit as string) : 10,
+        };
+        
+        const result = await storage.getMostActiveUsersPaginated(paginationParams);
+        const usersWithoutPasswords = {
+          ...result,
+          data: result.data.map(({ password, ...user }) => user)
+        };
+        res.json(usersWithoutPasswords);
+      } else {
+        // Non-paginated response (backward compatibility)
+        const users = await storage.getMostActiveUsers();
+        const usersWithoutPasswords = users.map(({ password, ...user }) => user);
+        res.json(usersWithoutPasswords);
+      }
     } catch (error) {
       res.status(500).json({ message: "Failed to fetch active users" });
     }
@@ -709,8 +890,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Gelişmiş aktivite feed endpoint'i
   app.get("/api/activities/feed", requireAuth, async (req, res) => {
     try {
-      const activities = await storage.getActivityFeed();
-      res.json(activities);
+      const { page, limit } = req.query;
+      
+      if (page || limit) {
+        // Paginated response
+        const paginationParams = {
+          page: page ? parseInt(page as string) : 1,
+          limit: limit ? parseInt(limit as string) : 10,
+        };
+        
+        const result = await storage.getActivityFeedPaginated(paginationParams);
+        res.json(result);
+      } else {
+        // Non-paginated response (backward compatibility)
+        const activities = await storage.getActivityFeed();
+        res.json(activities);
+      }
     } catch (error) {
       res.status(500).json({ message: "Failed to fetch activity feed" });
     }

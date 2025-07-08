@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { DataTable } from "@/components/ui/data-table";
+import { DataTable, ServerDataTable, type PaginatedResponse } from "@/components/ui/data-table";
 import { SearchInput } from "@/components/ui/search-input";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
@@ -26,7 +26,7 @@ import { format, differenceInDays } from "date-fns";
 import type { BorrowingWithDetails } from "@shared/schema";
 import { useTranslation } from "react-i18next";
 import { motion } from "framer-motion";
-import { useSearch } from "wouter";
+import { useSearch, useLocation } from "wouter";
 import { Link } from "react-router-dom";
 import { capitalizeWords } from "@/lib/utils";
 import LoadingScreen from "@/components/ui/loading-screen";
@@ -60,31 +60,129 @@ export default function Borrowing() {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [borrowingToDelete, setBorrowingToDelete] = useState<number | null>(null);
   const [statusFilter, setStatusFilter] = useState<string>("all");
+  const [currentPage, setCurrentPage] = useState(1);
   const { user } = useAuth();
   const { toast } = useToast();
   const { t } = useTranslation();
   const search = useSearch();
+  const [location, setLocation] = useLocation();
 
   const urlParams = new URLSearchParams(search);
   const filter = urlParams.get("filter");
 
-  const { data: allBorrowings = [], isLoading: isLoadingAll } = useQuery<BorrowingWithDetails[]>({
-    queryKey: ["/api/borrowings"],
+  // Server-side pagination queries
+  const { data: allBorrowingsData, isLoading: isLoadingAll } = useQuery<PaginatedResponse<BorrowingWithDetails>>({
+    queryKey: ["/api/borrowings", { page: currentPage, limit: 10 }],
     enabled: !filter,
+    queryFn: async () => {
+      const response = await apiRequest("GET", `/api/borrowings?page=${currentPage}&limit=10`);
+      const data = await response.json();
+      if (Array.isArray(data)) {
+        return {
+          data,
+          pagination: {
+            page: 1,
+            limit: data.length,
+            total: data.length,
+            totalPages: 1,
+            hasNext: false,
+            hasPrev: false,
+          }
+        };
+      }
+      return data;
+    }
   });
 
-  const { data: activeBorrowings = [], isLoading: isLoadingActive } = useQuery<BorrowingWithDetails[]>({
-    queryKey: ["/api/borrowings/active"],
+  const { data: activeBorrowingsData, isLoading: isLoadingActive } = useQuery<PaginatedResponse<BorrowingWithDetails>>({
+    queryKey: ["/api/borrowings/active", { page: currentPage, limit: 10 }],
     enabled: filter === "active",
+    queryFn: async () => {
+      const response = await apiRequest("GET", `/api/borrowings/active?page=${currentPage}&limit=10`);
+      const data = await response.json();
+      if (Array.isArray(data)) {
+        return {
+          data,
+          pagination: {
+            page: 1,
+            limit: data.length,
+            total: data.length,
+            totalPages: 1,
+            hasNext: false,
+            hasPrev: false,
+          }
+        };
+      }
+      return data;
+    }
   });
 
-  const { data: overdueBorrowings = [], isLoading: isLoadingOverdue } = useQuery<BorrowingWithDetails[]>({
-    queryKey: ["/api/borrowings/overdue"],
+  const { data: overdueBorrowingsData, isLoading: isLoadingOverdue } = useQuery<PaginatedResponse<BorrowingWithDetails>>({
+    queryKey: ["/api/borrowings/overdue", { page: currentPage, limit: 10 }],
     enabled: filter === "overdue",
+    queryFn: async () => {
+      const response = await apiRequest("GET", `/api/borrowings/overdue?page=${currentPage}&limit=10`);
+      const data = await response.json();
+      if (Array.isArray(data)) {
+        return {
+          data,
+          pagination: {
+            page: 1,
+            limit: data.length,
+            total: data.length,
+            totalPages: 1,
+            hasNext: false,
+            hasPrev: false,
+          }
+        };
+      }
+      return data;
+    }
   });
 
+  const { data: returnedBorrowingsData, isLoading: isLoadingReturned } = useQuery<PaginatedResponse<BorrowingWithDetails>>({
+    queryKey: ["/api/borrowings/returned", { page: currentPage, limit: 10 }],
+    enabled: filter === "returned",
+    queryFn: async () => {
+      const response = await apiRequest("GET", `/api/borrowings/returned?page=${currentPage}&limit=10`);
+      const data = await response.json();
+      if (Array.isArray(data)) {
+        return {
+          data,
+          pagination: {
+            page: 1,
+            limit: data.length,
+            total: data.length,
+            totalPages: 1,
+            hasNext: false,
+            hasPrev: false,
+          }
+        };
+      }
+      return data;
+    }
+  });
+
+  // Fallback to non-paginated data for backward compatibility
+  const { data: allBorrowings = [], isLoading: isLoadingAllLegacy } = useQuery<BorrowingWithDetails[]>({
+    queryKey: ["/api/borrowings"],
+    enabled: !filter && !allBorrowingsData,
+  });
+
+  const { data: activeBorrowings = [], isLoading: isLoadingActiveLegacy } = useQuery<BorrowingWithDetails[]>({
+    queryKey: ["/api/borrowings/active"],
+    enabled: filter === "active" && !activeBorrowingsData,
+  });
+
+  const { data: overdueBorrowings = [], isLoading: isLoadingOverdueLegacy } = useQuery<BorrowingWithDetails[]>({
+    queryKey: ["/api/borrowings/overdue"],
+    enabled: filter === "overdue" && !overdueBorrowingsData,
+  });
+
+  // borrowingsData seçiminde statusFilter === 'returned' ise returnedBorrowingsData kullan
+  const borrowingsData = filter === "overdue" ? overdueBorrowingsData : (filter === "active" ? activeBorrowingsData : (filter === "returned" ? returnedBorrowingsData : allBorrowingsData));
   const borrowings = filter === "overdue" ? overdueBorrowings : (filter === "active" ? activeBorrowings : allBorrowings);
-  const isLoading = isLoadingAll || isLoadingActive || isLoadingOverdue;
+  const isLoading = isLoadingAll || isLoadingActive || isLoadingOverdue || isLoadingAllLegacy || isLoadingActiveLegacy || isLoadingOverdueLegacy;
 
   const deleteBorrowingMutation = useMutation({
     mutationFn: (id: number) => apiRequest("DELETE", `/api/borrowings/${id}`),
@@ -311,6 +409,20 @@ export default function Borrowing() {
     },
   ];
 
+  // statusFilter değiştiğinde hem currentPage'i 1 yap hem de URL'deki filter parametresini güncelle
+  const handleStatusFilterChange = (value: string) => {
+    setStatusFilter(value);
+    setCurrentPage(1);
+    // URL'deki filter parametresini güncelle
+    const params = new URLSearchParams(search);
+    if (value === "all") {
+      params.delete("filter");
+    } else {
+      params.set("filter", value);
+    }
+    setLocation(`/borrowing${params.toString() ? `?${params.toString()}` : ""}`);
+  };
+
   if (isLoading) {
     return <LoadingScreen />;
   }
@@ -326,7 +438,7 @@ export default function Borrowing() {
       <motion.div variants={itemVariants} className="flex items-center justify-between">
         <div className="flex gap-4 items-center">
           <Filter className="w-5 h-5 text-muted-foreground" />
-          <Select value={statusFilter} onValueChange={setStatusFilter}>
+          <Select value={statusFilter} onValueChange={handleStatusFilterChange}>
             <SelectTrigger className="w-40">
               <SelectValue placeholder="Durum" />
             </SelectTrigger>
@@ -435,17 +547,31 @@ export default function Borrowing() {
             </div>
           </CardHeader>
           <CardContent>
-            <DataTable
-              data={statusFilteredBorrowings}
-              columns={columns}
-              loading={isLoading}
-              emptyMessage={
-                searchQuery.length > 2 
-                  ? t("borrowing.noBorrowingsFound")
-                  : t("borrowing.noBorrowingsYet")
-              }
-              pageSize={10}
-            />
+            {borrowingsData ? (
+              <ServerDataTable
+                data={borrowingsData}
+                columns={columns}
+                loading={isLoading}
+                emptyMessage={
+                  searchQuery.length > 2 
+                    ? t("borrowing.noBorrowingsFound")
+                    : t("borrowing.noBorrowingsYet")
+                }
+                onPageChange={setCurrentPage}
+              />
+            ) : (
+              <DataTable
+                data={statusFilteredBorrowings}
+                columns={columns}
+                loading={isLoading}
+                emptyMessage={
+                  searchQuery.length > 2 
+                    ? t("borrowing.noBorrowingsFound")
+                    : t("borrowing.noBorrowingsYet")
+                }
+                pageSize={10}
+              />
+            )}
           </CardContent>
         </Card>
       </motion.div>

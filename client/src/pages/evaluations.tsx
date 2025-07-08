@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { DataTable } from "@/components/ui/data-table";
+import { ServerDataTable } from "@/components/ui/data-table";
 import { SearchInput } from "@/components/ui/search-input";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -19,6 +19,7 @@ import { useTranslation } from "react-i18next";
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 import LoadingScreen from "@/components/ui/loading-screen";
+import type { PaginatedResponse } from "@/components/ui/data-table";
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -47,13 +48,22 @@ export default function Evaluations() {
   const [isEvaluationDialogOpen, setIsEvaluationDialogOpen] = useState(false);
   const [newRating, setNewRating] = useState<number>(5);
   const [newNotes, setNewNotes] = useState("");
+  const [page, setPage] = useState(1);
+  const pageSize = 10;
   const { user } = useAuth();
   const { toast } = useToast();
   const { t } = useTranslation();
 
-  const { data: members = [], isLoading } = useQuery<User[]>({
-    queryKey: ["/api/users"],
+  const { data: membersResponse, isLoading } = useQuery<PaginatedResponse<User>>({
+    queryKey: ["/api/users", page, pageSize],
+    queryFn: async () => {
+      const response = await apiRequest("GET", `/api/users?page=${page}&limit=${pageSize}`);
+      return response.json();
+    },
   });
+
+  const members = membersResponse?.data || [];
+  const pagination = membersResponse?.pagination;
 
   const updateMemberMutation = useMutation({
     mutationFn: ({ id, data }: { id: number; data: any }) => 
@@ -324,8 +334,8 @@ export default function Evaluations() {
             </div>
           </CardHeader>
           <CardContent>
-            <DataTable
-              data={evaluableMembers}
+            <ServerDataTable
+              data={membersResponse || { data: [], pagination: { page: 1, limit: 10, total: 0, totalPages: 1, hasNext: false, hasPrev: false } }}
               columns={columns}
               loading={isLoading}
               emptyMessage={
@@ -333,7 +343,7 @@ export default function Evaluations() {
                   ? t("evaluations.noMembersFound")
                   : t("evaluations.noMembersToEvaluate")
               }
-              pageSize={10}
+              onPageChange={setPage}
             />
           </CardContent>
         </Card>

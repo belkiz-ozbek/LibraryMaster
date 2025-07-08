@@ -3,7 +3,7 @@ import { useQuery, useMutation } from "@tanstack/react-query";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { DataTable } from "@/components/ui/data-table";
+import { DataTable, ServerDataTable, type PaginatedResponse } from "@/components/ui/data-table";
 import { SearchInput } from "@/components/ui/search-input";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
@@ -81,19 +81,31 @@ export default function Members() {
   const [deleteDialogOpenMember, setDeleteDialogOpenMember] = useState<User | null>(null);
   const [deleteError, setDeleteError] = useState<string | null>(null);
   const [statusFilter, setStatusFilter] = useState<string>("all");
+  const [currentPage, setCurrentPage] = useState(1);
 
-  const { data: members = [], isLoading } = useQuery<User[]>({
-    queryKey: ["/api/users"],
+  // Server-side pagination
+  const { data: paginatedMembers, isLoading } = useQuery<PaginatedResponse<User>>({
+    queryKey: ["/api/users", { page: currentPage, limit: 10 }],
+    queryFn: async () => {
+      const res = await fetch(`/api/users?page=${currentPage}&limit=10`, { credentials: "include" });
+      if (!res.ok) throw new Error("Üyeler yüklenemedi");
+      return res.json();
+    },
   });
 
-  // Remove searchResults and displayMembers logic
-  const displayMembers = members.filter((member) => {
+  // Client-side search (opsiyonel, istersen kaldırabilirsin)
+  const displayMembers: User[] = paginatedMembers?.data?.filter((member: User) => {
     const q = searchQuery.toLowerCase();
     return (
       member.name.toLowerCase().includes(q) ||
       (member.email && member.email.toLowerCase().includes(q))
     );
-  });
+  }) ?? [];
+
+  // Status filter
+  const statusFilteredMembers: User[] = statusFilter === "all"
+    ? displayMembers
+    : displayMembers.filter((m: User) => statusFilter === "active" ? !m.isAdmin : m.isAdmin);
 
   const deleteMemberMutation = useMutation({
     mutationFn: (id: number) => apiRequest("DELETE", `/api/users/${id}`),
@@ -115,11 +127,6 @@ export default function Members() {
       });
     },
   });
-
-  // Add status filtering
-  const statusFilteredMembers = statusFilter === "all"
-    ? displayMembers
-    : displayMembers.filter(m => statusFilter === "active" ? !m.isAdmin : m.isAdmin);
 
   const handleEdit = (member: User) => {
     setSelectedMember(member);
@@ -235,9 +242,6 @@ export default function Members() {
     },
   ], [t, user, deleteMemberMutation.isPending]);
 
-  const activeMembers = members.filter(member => !member.isAdmin);
-  const adminMembers = members.filter(member => member.isAdmin);
-
   if (isLoading) {
     return <LoadingScreen />;
   }
@@ -295,9 +299,9 @@ export default function Members() {
           <CardHeader>
             <div className="flex items-center justify-between">
               <div>
-                <CardTitle>{t("members.directory")}</CardTitle>
+                <CardTitle>{t("members.title")}</CardTitle>
                 <CardDescription>
-                  {statusFilteredMembers.length} {t("members.inSystem")}
+                  {paginatedMembers?.pagination?.total ?? 0} {t("members.totalMembers")}
                 </CardDescription>
               </div>
               <div className="w-80">
@@ -309,16 +313,12 @@ export default function Members() {
             </div>
           </CardHeader>
           <CardContent>
-            <DataTable
-              data={statusFilteredMembers}
+            <ServerDataTable
+              data={paginatedMembers!}
               columns={columns}
               loading={isLoading}
-              emptyMessage={
-                searchQuery.length > 2 
-                  ? t("members.noMembersFound")
-                  : t("members.noMembersYet")
-              }
-              pageSize={10}
+              emptyMessage={t("members.noMembersYet")}
+              onPageChange={setCurrentPage}
             />
           </CardContent>
         </Card>
@@ -332,7 +332,7 @@ export default function Members() {
               <Users className="h-8 w-8 text-primary mr-3" />
               <div>
                 <p className="text-2xl font-bold text-on-surface">
-                  {activeMembers.length}
+                  {displayMembers.filter(member => !member.isAdmin).length}
                 </p>
                 <p className="text-sm text-text-muted">{t("members.activeMembers")}</p>
               </div>
@@ -346,7 +346,7 @@ export default function Members() {
               <Users className="h-8 w-8 text-secondary mr-3" />
               <div>
                 <p className="text-2xl font-bold text-on-surface">
-                  {adminMembers.length}
+                  {displayMembers.filter(member => member.isAdmin).length}
                 </p>
                 <p className="text-sm text-text-muted">{t("members.administrators")}</p>
               </div>
@@ -360,7 +360,7 @@ export default function Members() {
               <Star className="h-8 w-8 text-accent mr-3" />
               <div>
                 <p className="text-2xl font-bold text-on-surface">
-                  {members.filter(member => member.adminRating && member.adminRating >= 4).length}
+                  {displayMembers.filter(member => member.adminRating && member.adminRating >= 4).length}
                 </p>
                 <p className="text-sm text-text-muted">{t("members.highlyRated")}</p>
               </div>

@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { DataTable } from "@/components/ui/data-table";
+import { DataTable, ServerDataTable, type PaginatedResponse } from "@/components/ui/data-table";
 import { Avatar } from "@/components/ui/avatar";
 import { Separator } from "@/components/ui/separator";
 import { apiRequest } from "@/lib/queryClient";
@@ -45,6 +45,7 @@ export default function MemberDetails() {
   const { toast } = useToast();
   const { t } = useTranslation();
   const id = params?.id;
+  const [currentPage, setCurrentPage] = useState(1);
 
   const { data: member, isLoading: memberLoading } = useQuery<User>({
     queryKey: ["/api/users", id],
@@ -55,10 +56,11 @@ export default function MemberDetails() {
     enabled: !!id,
   });
 
-  const { data: borrowings = [], isLoading: borrowingsLoading } = useQuery<BorrowingWithDetails[]>({
-    queryKey: ["/api/users", id, "borrowings"],
+  // Server-side pagination for borrowings
+  const { data: paginatedBorrowings, isLoading: borrowingsLoading } = useQuery<PaginatedResponse<BorrowingWithDetails>>({
+    queryKey: ["/api/users", id, "borrowings", { page: currentPage, limit: 10 }],
     queryFn: async () => {
-      const response = await apiRequest("GET", `/api/users/${id}/borrowings`);
+      const response = await apiRequest("GET", `/api/users/${id}/borrowings?page=${currentPage}&limit=10`);
       return response.json();
     },
     enabled: !!id,
@@ -152,10 +154,10 @@ export default function MemberDetails() {
   ];
 
   const calculateStats = () => {
-    const totalBorrowed = borrowings.length;
-    const returned = borrowings.filter((b: BorrowingWithDetails) => b.status === "returned").length;
-    const overdue = borrowings.filter((b: BorrowingWithDetails) => b.status === "overdue").length;
-    const currentlyBorrowed = borrowings.filter((b: BorrowingWithDetails) => b.status === "borrowed").length;
+    const totalBorrowed = paginatedBorrowings?.pagination?.total ?? 0;
+    const returned = paginatedBorrowings?.data.filter((b: BorrowingWithDetails) => b.status === "returned").length ?? 0;
+    const overdue = paginatedBorrowings?.data.filter((b: BorrowingWithDetails) => b.status === "overdue").length ?? 0;
+    const currentlyBorrowed = paginatedBorrowings?.data.filter((b: BorrowingWithDetails) => b.status === "borrowed").length ?? 0;
     
     return { totalBorrowed, returned, overdue, currentlyBorrowed };
   };
@@ -339,25 +341,17 @@ export default function MemberDetails() {
             <CardHeader>
               <CardTitle>{t('members.details.borrowings.title')}</CardTitle>
               <CardDescription>
-                {t('members.details.borrowings.description')}
+                {paginatedBorrowings?.pagination?.total ?? 0} {t('members.details.borrowings.records')}
               </CardDescription>
             </CardHeader>
             <CardContent>
-              {borrowingsLoading ? (
-                <div className="flex items-center justify-center h-32">
-                  <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary"></div>
-                </div>
-              ) : borrowings.length > 0 ? (
-                <DataTable
-                  data={borrowings}
-                  columns={borrowingColumns}
-                />
-              ) : (
-                <div className="text-center py-8">
-                  <BookOpen className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                  <p className="text-muted-foreground">{t('members.details.borrowings.noBorrowings')}</p>
-                </div>
-              )}
+              <ServerDataTable
+                data={paginatedBorrowings!}
+                columns={borrowingColumns}
+                loading={borrowingsLoading}
+                emptyMessage={t('members.details.borrowings.noBorrowings')}
+                onPageChange={setCurrentPage}
+              />
             </CardContent>
           </Card>
         </TabsContent>
@@ -377,7 +371,7 @@ export default function MemberDetails() {
                 </div>
               ) : (
                 (() => {
-                  const currentlyBorrowed = borrowings.filter((b: BorrowingWithDetails) => b.status === "borrowed");
+                  const currentlyBorrowed = paginatedBorrowings?.data.filter((b: BorrowingWithDetails) => b.status === "borrowed") ?? [];
                   return currentlyBorrowed.length > 0 ? (
                     <DataTable
                       data={currentlyBorrowed}
@@ -411,11 +405,15 @@ export default function MemberDetails() {
               ) : (
                 (() => {
                   const today = new Date();
-                  const overdue = borrowings.filter((b: BorrowingWithDetails) => {
+                  const overdue = paginatedBorrowings?.data.filter((b: BorrowingWithDetails) => {
                     const due = new Date(b.dueDate);
                     // Only show books that are overdue, not returned, and status is 'borrowed' or 'overdue'
-                    return due < today && (b.status === "borrowed" || b.status === "overdue") && !b.returnDate;
-                  });
+                    return (
+                      (b.status === "borrowed" || b.status === "overdue") &&
+                      !b.returnDate &&
+                      due < today
+                    );
+                  }) ?? [];
                   return overdue.length > 0 ? (
                     <DataTable
                       data={overdue}

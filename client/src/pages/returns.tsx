@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { DataTable } from "@/components/ui/data-table";
+import { DataTable, ServerDataTable, type PaginatedResponse } from "@/components/ui/data-table";
 import { SearchInput } from "@/components/ui/search-input";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -55,13 +55,24 @@ export default function Returns() {
   const [extendDialogOpen, setExtendDialogOpen] = useState(false);
   const [borrowingToExtend, setBorrowingToExtend] = useState<BorrowingWithDetails | null>(null);
   const [newDueDate, setNewDueDate] = useState<string>("");
+  const [currentPage, setCurrentPage] = useState(1);
 
-  const { data: activeBorrowings = [], isLoading } = useQuery<BorrowingWithDetails[]>({
-    queryKey: ["/api/borrowings/active"],
+  // Server-side pagination
+  const { data: paginatedActiveBorrowings, isLoading: isLoadingActive } = useQuery<PaginatedResponse<BorrowingWithDetails>>({
+    queryKey: ["/api/borrowings/active", { page: currentPage, limit: 10 }],
+    queryFn: async () => {
+      const res = await fetch(`/api/borrowings/active?page=${currentPage}&limit=10`, { credentials: "include" });
+      if (!res.ok) throw new Error("Aktif iadeler yüklenemedi");
+      return res.json();
+    },
   });
-
-  const { data: overdueBorrowings = [] } = useQuery<BorrowingWithDetails[]>({
-    queryKey: ["/api/borrowings/overdue"],
+  const { data: paginatedOverdueBorrowings, isLoading: isLoadingOverdue } = useQuery<PaginatedResponse<BorrowingWithDetails>>({
+    queryKey: ["/api/borrowings/overdue", { page: currentPage, limit: 10 }],
+    queryFn: async () => {
+      const res = await fetch(`/api/borrowings/overdue?page=${currentPage}&limit=10`, { credentials: "include" });
+      if (!res.ok) throw new Error("Gecikmiş iadeler yüklenemedi");
+      return res.json();
+    },
   });
 
   const { data: allBorrowings = [] } = useQuery<BorrowingWithDetails[]>({
@@ -115,16 +126,18 @@ export default function Returns() {
     },
   });
 
-  const filteredBorrowings = searchQuery.length > 2 
-    ? activeBorrowings.filter((borrowing: BorrowingWithDetails) => 
+  // Arama ve filtreleme için paginatedActiveBorrowings.data kullanılacak
+  const filteredBorrowings = searchQuery.length > 2 && paginatedActiveBorrowings?.data
+    ? paginatedActiveBorrowings.data.filter((borrowing: BorrowingWithDetails) => 
         borrowing.user.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
         (borrowing.user.email && borrowing.user.email.toLowerCase().includes(searchQuery.toLowerCase())) ||
         borrowing.book.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
         borrowing.book.author.toLowerCase().includes(searchQuery.toLowerCase()) ||
         (borrowing.book.isbn?.toLowerCase() ?? "").includes(searchQuery.toLowerCase())
       )
-    : activeBorrowings;
+    : paginatedActiveBorrowings?.data ?? [];
 
+  // Recent returns için paginatedActiveBorrowings.data kullanılabilir veya allBorrowings ile devam edilebilir
   const recentReturns = allBorrowings
     .filter((b: BorrowingWithDetails) => b.status === "returned")
     .sort((a: BorrowingWithDetails, b: BorrowingWithDetails) => new Date(b.returnDate!).getTime() - new Date(a.returnDate!).getTime());
@@ -313,7 +326,7 @@ export default function Returns() {
     },
   ];
 
-  if (isLoading) {
+  if (isLoadingActive) {
     return <LoadingScreen />;
   }
 
@@ -337,7 +350,7 @@ export default function Returns() {
               <Clock className="h-8 w-8 text-primary mr-3" />
               <div>
                 <p className="text-2xl font-bold text-on-surface">
-                  {activeBorrowings.length}
+                  {paginatedActiveBorrowings?.pagination?.total ?? 0}
                 </p>
                 <p className="text-sm text-text-muted">{t("returns.activeBorrowings")}</p>
               </div>
@@ -350,7 +363,7 @@ export default function Returns() {
               <AlertTriangle className="h-8 w-8 text-destructive mr-3" />
               <div>
                 <p className="text-2xl font-bold text-on-surface">
-                  {overdueBorrowings.length}
+                  {paginatedOverdueBorrowings?.pagination?.total ?? 0}
                 </p>
                 <p className="text-sm text-text-muted">{t("returns.overdueItems")}</p>
               </div>
@@ -380,7 +393,7 @@ export default function Returns() {
               <div>
                 <CardTitle>{t("returns.activeBorrowingsTitle")}</CardTitle>
                 <CardDescription>
-                  {t("returns.activeBorrowingsDesc")}
+                  {paginatedActiveBorrowings?.pagination?.total ?? 0} {t("returns.activeBorrowingsDesc")}
                 </CardDescription>
               </div>
               <div className="w-80">
@@ -392,16 +405,12 @@ export default function Returns() {
             </div>
           </CardHeader>
           <CardContent>
-            <DataTable
-              data={filteredBorrowings}
+            <ServerDataTable
+              data={paginatedActiveBorrowings!}
               columns={activeColumns}
-              loading={isLoading}
-              emptyMessage={
-                searchQuery.length > 2 
-                  ? t("returns.noActiveBorrowingsFound")
-                  : t("returns.noActiveBorrowingsYet")
-              }
-              pageSize={10}
+              loading={isLoadingActive}
+              emptyMessage={t("returns.noActiveBorrowingsYet")}
+              onPageChange={setCurrentPage}
             />
           </CardContent>
         </Card>

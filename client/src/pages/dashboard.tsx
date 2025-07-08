@@ -1,11 +1,14 @@
 import { useQuery } from "@tanstack/react-query";
+import { useState } from "react";
 import { StatsCard } from "@/components/ui/stats-card";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { DataTable } from "@/components/ui/data-table";
+import { ServerDataTable } from "@/components/ui/data-table";
 import { ActivityTimeline, ActivityItem } from "@/components/ui/activity-timeline";
 import { Link } from "wouter";
+import { apiRequest } from "@/lib/queryClient";
+import type { PaginatedResponse } from "@/components/ui/data-table";
 import { 
   Book, 
   Users, 
@@ -54,9 +57,32 @@ interface ActiveUser {
 
 interface OverdueBorrowing {
   id: number;
-  user: { name: string; email: string };
-  book: { title: string; isbn: string };
+  bookId: number;
+  userId: number;
+  borrowDate: string;
   dueDate: string;
+  returnDate: string | null;
+  status: string;
+  extensionRequested: boolean;
+  notes: string | null;
+  book: {
+    id: number;
+    title: string;
+    author: string;
+    isbn: string;
+    genre: string;
+    publishYear: number;
+    shelfNumber: string;
+    availableCopies: number;
+    totalCopies: number;
+    pageCount: number;
+    createdAt: string;
+  };
+  user: {
+    id: number;
+    name: string;
+    email: string;
+  };
 }
 
 interface RecentActivity {
@@ -131,9 +157,40 @@ export default function Dashboard() {
     queryKey: ["/api/stats/active-users"],
   });
 
-  const { data: overdueBorrowings } = useQuery<OverdueBorrowing[]>({
-    queryKey: ["/api/borrowings/overdue"],
+  const [overduePage, setOverduePage] = useState(1);
+  const overduePageSize = 5;
+
+  const { data: overdueBorrowingsResponse } = useQuery<PaginatedResponse<OverdueBorrowing>>({
+    queryKey: ["/api/borrowings/overdue", overduePage, overduePageSize],
+    queryFn: async () => {
+      const response = await apiRequest("GET", `/api/borrowings/overdue?page=${overduePage}&limit=${overduePageSize}`);
+      const data = await response.json();
+      if (Array.isArray(data)) {
+        return {
+          data,
+          pagination: {
+            page: 1,
+            limit: data.length,
+            total: data.length,
+            totalPages: 1,
+            hasNext: false,
+            hasPrev: false,
+          }
+        };
+      }
+      return data;
+    },
   });
+
+  // Debug log
+  console.log('overduePage', overduePage, 'overdueBorrowingsResponse', overdueBorrowingsResponse);
+  console.log('overdueBorrowingsResponse.data', overdueBorrowingsResponse?.data);
+
+  const overdueBorrowings = overdueBorrowingsResponse?.data || [];
+  const overduePagination = overdueBorrowingsResponse?.pagination;
+
+  // Tabloya doğrudan overdueBorrowingsResponse ver
+  const normalizedOverdueData = overdueBorrowingsResponse;
 
   const { data: recentActivities } = useQuery<RecentActivity[]>({
     queryKey: ["/api/activities/recent"],
@@ -494,8 +551,8 @@ export default function Dashboard() {
               <div className="flex items-center gap-2">
                 <TriangleAlert className="h-5 w-5 text-destructive" />
                 <CardTitle>{t("dashboard.overdueItemsAttention")}</CardTitle>
-                {overdueBorrowings && overdueBorrowings.length > 0 && (
-                  <Badge variant="destructive">{t("dashboard.itemCount", { count: overdueBorrowings.length })}</Badge>
+                {overdueBorrowingsResponse && overdueBorrowingsResponse.data && overdueBorrowingsResponse.data.length > 0 && (
+                  <Badge variant="destructive">{t("dashboard.itemCount", { count: overdueBorrowingsResponse.data.length })}</Badge>
                 )}
               </div>
               <Button variant="link" size="sm" asChild>
@@ -503,12 +560,12 @@ export default function Dashboard() {
               </Button>
             </CardHeader>
             <CardContent>
-              {overdueBorrowings && overdueBorrowings.length > 0 ? (
-                <DataTable
+              {overdueBorrowingsResponse && overdueBorrowingsResponse.data && overdueBorrowingsResponse.data.length > 0 ? (
+                <ServerDataTable
                   columns={overdueColumns}
-                  data={overdueBorrowings}
-                  pageSize={5}
+                  data={normalizedOverdueData || { data: [], pagination: { page: 1, limit: 5, total: 0, totalPages: 1, hasNext: false, hasPrev: false } }}
                   emptyMessage={t("dashboard.noOverdueItems")}
+                  onPageChange={setOverduePage}
                 />
               ) : (
                 <div className="text-center py-10">

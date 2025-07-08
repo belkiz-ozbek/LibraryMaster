@@ -8,6 +8,24 @@ import {
 import { db } from "./db";
 import { eq, desc, asc, like, or, and, count, sql, lt, gte, ilike, isNotNull, lte } from "drizzle-orm";
 
+// Pagination interfaces
+export interface PaginationParams {
+  page?: number;
+  limit?: number;
+}
+
+export interface PaginatedResponse<T> {
+  data: T[];
+  pagination: {
+    page: number;
+    limit: number;
+    total: number;
+    totalPages: number;
+    hasNext: boolean;
+    hasPrev: boolean;
+  };
+}
+
 export interface IStorage {
   // User operations
   getUser(id: number): Promise<User | undefined>;
@@ -17,7 +35,9 @@ export interface IStorage {
   updateUser(id: number, user: UpdateUser): Promise<User | undefined>;
   deleteUser(id: number): Promise<void>;
   searchUsers(query: string): Promise<User[]>;
+  searchUsersPaginated(query: string, params: PaginationParams): Promise<PaginatedResponse<User>>;
   getAllUsers(): Promise<User[]>;
+  getAllUsersPaginated(params: PaginationParams): Promise<PaginatedResponse<User>>;
   getUserWithBorrowings(id: number): Promise<UserWithBorrowings | undefined>;
 
   // Book operations
@@ -27,7 +47,9 @@ export interface IStorage {
   updateBook(id: number, book: UpdateBook): Promise<Book | undefined>;
   deleteBook(id: number): Promise<void>;
   searchBooks(query: string): Promise<Book[]>;
+  searchBooksPaginated(query: string, params: PaginationParams): Promise<PaginatedResponse<Book>>;
   getAllBooks(): Promise<Book[]>;
+  getAllBooksPaginated(params: PaginationParams): Promise<PaginatedResponse<Book>>;
   getBookWithBorrowings(id: number): Promise<BookWithBorrowings | undefined>;
 
   // Borrowing operations
@@ -36,10 +58,16 @@ export interface IStorage {
   updateBorrowing(id: number, borrowing: UpdateBorrowing): Promise<Borrowing | undefined>;
   deleteBorrowing(id: number): Promise<void>;
   getAllBorrowings(): Promise<BorrowingWithDetails[]>;
+  getAllBorrowingsPaginated(params: PaginationParams): Promise<PaginatedResponse<BorrowingWithDetails>>;
   getActiveBorrowings(): Promise<BorrowingWithDetails[]>;
+  getActiveBorrowingsPaginated(params: PaginationParams): Promise<PaginatedResponse<BorrowingWithDetails>>;
   getOverdueBorrowings(): Promise<BorrowingWithDetails[]>;
+  getOverdueBorrowingsPaginated(params: PaginationParams): Promise<PaginatedResponse<BorrowingWithDetails>>;
   getUserBorrowings(userId: number): Promise<BorrowingWithDetails[]>;
+  getUserBorrowingsPaginated(userId: number, params: PaginationParams): Promise<PaginatedResponse<BorrowingWithDetails>>;
   getBookBorrowings(bookId: number): Promise<BorrowingWithDetails[]>;
+  getReturnedBorrowings(): Promise<BorrowingWithDetails[]>;
+  getReturnedBorrowingsPaginated(params: PaginationParams): Promise<PaginatedResponse<BorrowingWithDetails>>;
   
   // Statistics
   getStats(): Promise<{
@@ -52,10 +80,14 @@ export interface IStorage {
     avgBorrowDays: number;
   }>;
   getMostBorrowedBooks(): Promise<Array<Book & { borrowCount: number }>>;
+  getMostBorrowedBooksPaginated(params: PaginationParams): Promise<PaginatedResponse<Book & { borrowCount: number }>>;
   getMostActiveUsers(): Promise<Array<User & { borrowCount: number }>>;
+  getMostActiveUsersPaginated(params: PaginationParams): Promise<PaginatedResponse<User & { borrowCount: number }>>;
   getTopReadersMonth(): Promise<Array<{ userId: number; name: string; email: string | null; totalPagesRead: number }>>;
   getRecentActivities(limit: number): Promise<any[]>;
+  getRecentActivitiesPaginated(params: PaginationParams): Promise<PaginatedResponse<any>>;
   getActivityFeed(limit?: number): Promise<any[]>;
+  getActivityFeedPaginated(params: PaginationParams): Promise<PaginatedResponse<any>>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -118,8 +150,73 @@ export class DatabaseStorage implements IStorage {
     );
   }
 
+  async searchUsersPaginated(query: string, params: PaginationParams): Promise<PaginatedResponse<User>> {
+    const { page = 1, limit = 10 } = params;
+    const offset = (page - 1) * limit;
+
+    // Total count
+    const [{ totalCount }] = await db
+      .select({ totalCount: count() })
+      .from(users)
+      .where(
+        or(
+          sql`LOWER(${users.name}) LIKE LOWER(${query} || '%')`,
+          ilike(users.email, `%${query}%`)
+        )
+      );
+
+    // Paginated results
+    const results = await db
+      .select()
+      .from(users)
+      .where(
+        or(
+          sql`LOWER(${users.name}) LIKE LOWER(${query} || '%')`,
+          ilike(users.email, `%${query}%`)
+        )
+      )
+      .limit(limit)
+      .offset(offset);
+
+    const total = Number(totalCount);
+    const totalPages = Math.ceil(total / limit);
+
+    return {
+      data: results,
+      pagination: {
+        page,
+        limit,
+        total,
+        totalPages,
+        hasNext: page < totalPages,
+        hasPrev: page > 1,
+      },
+    };
+  }
+
   async getAllUsers(): Promise<User[]> {
     return await db.select().from(users).orderBy(asc(users.name));
+  }
+
+  async getAllUsersPaginated(params: PaginationParams): Promise<PaginatedResponse<User>> {
+    const page = params.page || 1;
+    const limit = params.limit || 10;
+    const offset = (page - 1) * limit;
+
+    const [totalCount] = await db.select({ count: count() }).from(users);
+    const data = await db.select().from(users).orderBy(asc(users.name)).limit(limit).offset(offset);
+
+    return {
+      data,
+      pagination: {
+        page,
+        limit,
+        total: totalCount.count,
+        totalPages: Math.ceil(totalCount.count / limit),
+        hasNext: page < Math.ceil(totalCount.count / limit),
+        hasPrev: page > 1,
+      },
+    };
   }
 
   async getUserWithBorrowings(id: number): Promise<UserWithBorrowings | undefined> {
@@ -202,8 +299,84 @@ export class DatabaseStorage implements IStorage {
     return results;
   }
 
+  async searchBooksPaginated(query: string, params: PaginationParams): Promise<PaginatedResponse<Book>> {
+    const { page = 1, limit = 10 } = params;
+    const offset = (page - 1) * limit;
+
+    // Boş sorgu durumunda tüm kitapları döndür
+    if (!query || query.trim() === '') {
+      return await this.getAllBooksPaginated(params);
+    }
+    
+    const q = `%${query.toLowerCase()}%`;
+
+    // Total count
+    const [{ totalCount }] = await db
+      .select({ totalCount: count() })
+      .from(books)
+      .where(
+        or(
+          sql`LOWER(${books.title}) LIKE ${q}`,
+          sql`LOWER(${books.author}) LIKE ${q}`,
+          sql`LOWER(${books.isbn}) LIKE ${q}`,
+          sql`LOWER(${books.genre}) LIKE ${q}`
+        )
+      );
+
+    // Paginated results
+    const results = await db
+      .select()
+      .from(books)
+      .where(
+        or(
+          sql`LOWER(${books.title}) LIKE ${q}`,
+          sql`LOWER(${books.author}) LIKE ${q}`,
+          sql`LOWER(${books.isbn}) LIKE ${q}`,
+          sql`LOWER(${books.genre}) LIKE ${q}`
+        )
+      )
+      .limit(limit)
+      .offset(offset);
+
+    const total = Number(totalCount);
+    const totalPages = Math.ceil(total / limit);
+
+    return {
+      data: results,
+      pagination: {
+        page,
+        limit,
+        total,
+        totalPages,
+        hasNext: page < totalPages,
+        hasPrev: page > 1,
+      },
+    };
+  }
+
   async getAllBooks(): Promise<Book[]> {
     return await db.select().from(books).orderBy(asc(books.title));
+  }
+
+  async getAllBooksPaginated(params: PaginationParams): Promise<PaginatedResponse<Book>> {
+    const page = params.page || 1;
+    const limit = params.limit || 10;
+    const offset = (page - 1) * limit;
+
+    const [totalCount] = await db.select({ count: count() }).from(books);
+    const data = await db.select().from(books).orderBy(asc(books.title)).limit(limit).offset(offset);
+
+    return {
+      data,
+      pagination: {
+        page,
+        limit,
+        total: totalCount.count,
+        totalPages: Math.ceil(totalCount.count / limit),
+        hasNext: page < Math.ceil(totalCount.count / limit),
+        hasPrev: page > 1,
+      },
+    };
   }
 
   async getBookWithBorrowings(id: number): Promise<BookWithBorrowings | undefined> {
@@ -245,9 +418,21 @@ export class DatabaseStorage implements IStorage {
       // Tam tarih ve saat bilgisini kaydet
       updateBorrowing.returnDate = new Date();
     }
+
+    // Date alanlarını string'e çevir
+    const updateData: any = { ...updateBorrowing };
+    if (updateData.borrowDate instanceof Date) {
+      updateData.borrowDate = updateData.borrowDate.toISOString();
+    }
+    if (updateData.dueDate instanceof Date) {
+      updateData.dueDate = updateData.dueDate.toISOString();
+    }
+    if (updateData.returnDate instanceof Date) {
+      updateData.returnDate = updateData.returnDate.toISOString();
+    }
     
     const [borrowing] = await db.update(borrowings)
-      .set(updateBorrowing)
+      .set(updateData)
       .where(eq(borrowings.id, id))
       .returning();
     
@@ -306,6 +491,49 @@ export class DatabaseStorage implements IStorage {
     .orderBy(desc(borrowings.borrowDate));
   }
 
+  async getAllBorrowingsPaginated(params: PaginationParams): Promise<PaginatedResponse<BorrowingWithDetails>> {
+    const page = params.page || 1;
+    const limit = params.limit || 10;
+    const offset = (page - 1) * limit;
+
+    const [totalCount] = await db.select({ count: count() }).from(borrowings);
+    const data = await db.select({
+      id: borrowings.id,
+      bookId: borrowings.bookId,
+      userId: borrowings.userId,
+      borrowDate: borrowings.borrowDate,
+      dueDate: borrowings.dueDate,
+      returnDate: borrowings.returnDate,
+      status: borrowings.status,
+      extensionRequested: borrowings.extensionRequested,
+      notes: borrowings.notes,
+      book: books,
+      user: {
+        id: users.id,
+        name: users.name,
+        email: users.email,
+      }
+    })
+    .from(borrowings)
+    .innerJoin(books, eq(borrowings.bookId, books.id))
+    .innerJoin(users, eq(borrowings.userId, users.id))
+    .orderBy(desc(borrowings.borrowDate))
+    .limit(limit)
+    .offset(offset);
+
+    return {
+      data,
+      pagination: {
+        page,
+        limit,
+        total: totalCount.count,
+        totalPages: Math.ceil(totalCount.count / limit),
+        hasNext: page < Math.ceil(totalCount.count / limit),
+        hasPrev: page > 1,
+      },
+    };
+  }
+
   async getActiveBorrowings(): Promise<BorrowingWithDetails[]> {
     return await db.select({
       id: borrowings.id,
@@ -329,6 +557,50 @@ export class DatabaseStorage implements IStorage {
     .innerJoin(users, eq(borrowings.userId, users.id))
     .where(eq(borrowings.status, 'borrowed'))
     .orderBy(desc(borrowings.borrowDate));
+  }
+
+  async getActiveBorrowingsPaginated(params: PaginationParams): Promise<PaginatedResponse<BorrowingWithDetails>> {
+    const page = params.page || 1;
+    const limit = params.limit || 10;
+    const offset = (page - 1) * limit;
+
+    const [totalCount] = await db.select({ count: count() }).from(borrowings).where(eq(borrowings.status, 'borrowed'));
+    const data = await db.select({
+      id: borrowings.id,
+      bookId: borrowings.bookId,
+      userId: borrowings.userId,
+      borrowDate: borrowings.borrowDate,
+      dueDate: borrowings.dueDate,
+      returnDate: borrowings.returnDate,
+      status: borrowings.status,
+      extensionRequested: borrowings.extensionRequested,
+      notes: borrowings.notes,
+      book: books,
+      user: {
+        id: users.id,
+        name: users.name,
+        email: users.email,
+      }
+    })
+    .from(borrowings)
+    .innerJoin(books, eq(borrowings.bookId, books.id))
+    .innerJoin(users, eq(borrowings.userId, users.id))
+    .where(eq(borrowings.status, 'borrowed'))
+    .orderBy(desc(borrowings.borrowDate))
+    .limit(limit)
+    .offset(offset);
+
+    return {
+      data,
+      pagination: {
+        page,
+        limit,
+        total: totalCount.count,
+        totalPages: Math.ceil(totalCount.count / limit),
+        hasNext: page < Math.ceil(totalCount.count / limit),
+        hasPrev: page > 1,
+      },
+    };
   }
 
   async getOverdueBorrowings(): Promise<BorrowingWithDetails[]> {
@@ -363,6 +635,73 @@ export class DatabaseStorage implements IStorage {
     .orderBy(asc(borrowings.dueDate));
   }
 
+  async getOverdueBorrowingsPaginated(params: PaginationParams): Promise<PaginatedResponse<BorrowingWithDetails>> {
+    const page = params.page || 1;
+    const limit = params.limit || 10;
+    const offset = (page - 1) * limit;
+    // today'i saat/dakika/saniye olmadan UTC 00:00:00 olarak ayarla
+    const todayObj = new Date();
+    todayObj.setUTCHours(0, 0, 0, 0);
+    const today = todayObj.toISOString().split('T')[0];
+    
+    console.log("getOverdueBorrowingsPaginated - today:", today, "params:", params);
+
+    const [totalCount] = await db.select({ count: count() }).from(borrowings).where(and(
+      lt(borrowings.dueDate, today),
+      or(
+        eq(borrowings.status, "borrowed"),
+        eq(borrowings.status, "overdue")
+      )
+    ));
+    
+    console.log("Total overdue count:", totalCount.count);
+    const data = await db.select({
+      id: borrowings.id,
+      bookId: borrowings.bookId,
+      userId: borrowings.userId,
+      borrowDate: borrowings.borrowDate,
+      dueDate: borrowings.dueDate,
+      returnDate: borrowings.returnDate,
+      status: borrowings.status,
+      extensionRequested: borrowings.extensionRequested,
+      notes: borrowings.notes,
+      book: books,
+      user: {
+        id: users.id,
+        name: users.name,
+        email: users.email,
+      }
+    })
+    .from(borrowings)
+    .innerJoin(books, eq(borrowings.bookId, books.id))
+    .innerJoin(users, eq(borrowings.userId, users.id))
+    .where(and(
+      lt(borrowings.dueDate, today),
+      or(
+        eq(borrowings.status, "borrowed"),
+        eq(borrowings.status, "overdue")
+      )
+    ))
+    .orderBy(asc(borrowings.dueDate))
+    .limit(limit)
+    .offset(offset);
+
+    console.log("Overdue data:", data);
+    console.log("Overdue data length:", data.length);
+
+    return {
+      data,
+      pagination: {
+        page,
+        limit,
+        total: totalCount.count,
+        totalPages: Math.ceil(totalCount.count / limit),
+        hasNext: page < Math.ceil(totalCount.count / limit),
+        hasPrev: page > 1,
+      },
+    };
+  }
+
   async getUserBorrowings(userId: number): Promise<BorrowingWithDetails[]> {
     return await db.select({
       id: borrowings.id,
@@ -388,6 +727,50 @@ export class DatabaseStorage implements IStorage {
     .orderBy(desc(borrowings.borrowDate));
   }
 
+  async getUserBorrowingsPaginated(userId: number, params: PaginationParams): Promise<PaginatedResponse<BorrowingWithDetails>> {
+    const page = params.page || 1;
+    const limit = params.limit || 10;
+    const offset = (page - 1) * limit;
+
+    const [totalCount] = await db.select({ count: count() }).from(borrowings).where(eq(borrowings.userId, userId));
+    const data = await db.select({
+      id: borrowings.id,
+      bookId: borrowings.bookId,
+      userId: borrowings.userId,
+      borrowDate: borrowings.borrowDate,
+      dueDate: borrowings.dueDate,
+      returnDate: borrowings.returnDate,
+      status: borrowings.status,
+      extensionRequested: borrowings.extensionRequested,
+      notes: borrowings.notes,
+      book: books,
+      user: {
+        id: users.id,
+        name: users.name,
+        email: users.email,
+      }
+    })
+    .from(borrowings)
+    .innerJoin(books, eq(borrowings.bookId, books.id))
+    .innerJoin(users, eq(borrowings.userId, users.id))
+    .where(eq(borrowings.userId, userId))
+    .orderBy(desc(borrowings.borrowDate))
+    .limit(limit)
+    .offset(offset);
+
+    return {
+      data,
+      pagination: {
+        page,
+        limit,
+        total: totalCount.count,
+        totalPages: Math.ceil(totalCount.count / limit),
+        hasNext: page < Math.ceil(totalCount.count / limit),
+        hasPrev: page > 1,
+      },
+    };
+  }
+
   async getBookBorrowings(bookId: number): Promise<BorrowingWithDetails[]> {
     return await db.select({
       id: borrowings.id,
@@ -411,6 +794,74 @@ export class DatabaseStorage implements IStorage {
     .innerJoin(users, eq(borrowings.userId, users.id))
     .where(eq(borrowings.bookId, bookId))
     .orderBy(desc(borrowings.borrowDate));
+  }
+
+  async getReturnedBorrowings(): Promise<BorrowingWithDetails[]> {
+    return await db.select({
+      id: borrowings.id,
+      bookId: borrowings.bookId,
+      userId: borrowings.userId,
+      borrowDate: borrowings.borrowDate,
+      dueDate: borrowings.dueDate,
+      returnDate: borrowings.returnDate,
+      status: borrowings.status,
+      extensionRequested: borrowings.extensionRequested,
+      notes: borrowings.notes,
+      book: books,
+      user: {
+        id: users.id,
+        name: users.name,
+        email: users.email,
+      }
+    })
+    .from(borrowings)
+    .innerJoin(books, eq(borrowings.bookId, books.id))
+    .innerJoin(users, eq(borrowings.userId, users.id))
+    .where(eq(borrowings.status, 'returned'))
+    .orderBy(desc(borrowings.returnDate));
+  }
+
+  async getReturnedBorrowingsPaginated(params: PaginationParams): Promise<PaginatedResponse<BorrowingWithDetails>> {
+    const page = params.page || 1;
+    const limit = params.limit || 10;
+    const offset = (page - 1) * limit;
+    const [totalCount] = await db.select({ count: count() }).from(borrowings).where(eq(borrowings.status, 'returned'));
+    const data = await db.select({
+      id: borrowings.id,
+      bookId: borrowings.bookId,
+      userId: borrowings.userId,
+      borrowDate: borrowings.borrowDate,
+      dueDate: borrowings.dueDate,
+      returnDate: borrowings.returnDate,
+      status: borrowings.status,
+      extensionRequested: borrowings.extensionRequested,
+      notes: borrowings.notes,
+      book: books,
+      user: {
+        id: users.id,
+        name: users.name,
+        email: users.email,
+      }
+    })
+    .from(borrowings)
+    .innerJoin(books, eq(borrowings.bookId, books.id))
+    .innerJoin(users, eq(borrowings.userId, users.id))
+    .where(eq(borrowings.status, 'returned'))
+    .orderBy(desc(borrowings.returnDate))
+    .limit(limit)
+    .offset(offset);
+
+    return {
+      data,
+      pagination: {
+        page,
+        limit,
+        total: totalCount.count,
+        totalPages: Math.ceil(totalCount.count / limit),
+        hasNext: page < Math.ceil(totalCount.count / limit),
+        hasPrev: page > 1,
+      },
+    };
   }
 
   // Statistics
@@ -528,6 +979,53 @@ export class DatabaseStorage implements IStorage {
     .limit(10);
   }
 
+  async getMostBorrowedBooksPaginated(params: PaginationParams): Promise<PaginatedResponse<Book & { borrowCount: number }>> {
+    const { page = 1, limit = 10 } = params;
+    const offset = (page - 1) * limit;
+
+    // Total count
+    const [{ totalCount }] = await db
+      .select({ totalCount: count() })
+      .from(books);
+
+    // Paginated results
+    const results = await db.select({
+      id: books.id,
+      title: books.title,
+      author: books.author,
+      isbn: books.isbn,
+      genre: books.genre,
+      publishYear: books.publishYear,
+      shelfNumber: books.shelfNumber,
+      availableCopies: books.availableCopies,
+      totalCopies: books.totalCopies,
+      pageCount: books.pageCount,
+      createdAt: books.createdAt,
+      borrowCount: sql<number>`count(${borrowings.bookId})`.as("borrow_count"),
+    })
+    .from(books)
+    .leftJoin(borrowings, eq(books.id, borrowings.bookId))
+    .groupBy(books.id)
+    .orderBy(desc(sql`borrow_count`))
+    .limit(limit)
+    .offset(offset);
+
+    const total = Number(totalCount);
+    const totalPages = Math.ceil(total / limit);
+
+    return {
+      data: results,
+      pagination: {
+        page,
+        limit,
+        total,
+        totalPages,
+        hasNext: page < totalPages,
+        hasPrev: page > 1,
+      },
+    };
+  }
+
   async getMostActiveUsers(): Promise<Array<User & { borrowCount: number }>> {
     return await db.select({
       id: users.id,
@@ -549,6 +1047,54 @@ export class DatabaseStorage implements IStorage {
     .groupBy(users.id)
     .orderBy(desc(count(borrowings.id)))
     .limit(10);
+  }
+
+  async getMostActiveUsersPaginated(params: PaginationParams): Promise<PaginatedResponse<User & { borrowCount: number }>> {
+    const { page = 1, limit = 10 } = params;
+    const offset = (page - 1) * limit;
+
+    // Total count
+    const [{ totalCount }] = await db
+      .select({ totalCount: count() })
+      .from(users);
+
+    // Paginated results
+    const results = await db.select({
+      id: users.id,
+      name: users.name,
+      email: users.email,
+      username: users.username,
+      password: users.password,
+      isAdmin: users.isAdmin,
+      membershipDate: users.membershipDate,
+      adminRating: users.adminRating,
+      adminNotes: users.adminNotes,
+      emailVerified: users.emailVerified,
+      emailVerificationToken: users.emailVerificationToken,
+      emailVerificationExpires: users.emailVerificationExpires,
+      borrowCount: count(borrowings.id),
+    })
+    .from(users)
+    .leftJoin(borrowings, eq(users.id, borrowings.userId))
+    .groupBy(users.id)
+    .orderBy(desc(count(borrowings.id)))
+    .limit(limit)
+    .offset(offset);
+
+    const total = Number(totalCount);
+    const totalPages = Math.ceil(total / limit);
+
+    return {
+      data: results,
+      pagination: {
+        page,
+        limit,
+        total,
+        totalPages,
+        hasNext: page < totalPages,
+        hasPrev: page > 1,
+      },
+    };
   }
 
   async getTopReadersMonth(): Promise<Array<{ userId: number; name: string; email: string | null; totalPagesRead: number }>> {
@@ -729,6 +1275,60 @@ export class DatabaseStorage implements IStorage {
 
     // Eğer limit belirtilmişse uygula, yoksa tümünü döndür
     return limit ? allActivities.slice(0, limit) : allActivities;
+  }
+
+  async getRecentActivitiesPaginated(params: PaginationParams): Promise<PaginatedResponse<any>> {
+    const { page = 1, limit = 10 } = params;
+    const offset = (page - 1) * limit;
+
+    // Tüm aktiviteleri al
+    const allActivities = await this.getRecentActivities(1000); // Büyük limit ile tümünü al
+
+    // Toplam sayı
+    const total = allActivities.length;
+    const totalPages = Math.ceil(total / limit);
+
+    // Sayfalama uygula
+    const paginatedActivities = allActivities.slice(offset, offset + limit);
+
+    return {
+      data: paginatedActivities,
+      pagination: {
+        page,
+        limit,
+        total,
+        totalPages,
+        hasNext: page < totalPages,
+        hasPrev: page > 1,
+      },
+    };
+  }
+
+  async getActivityFeedPaginated(params: PaginationParams): Promise<PaginatedResponse<any>> {
+    const { page = 1, limit = 10 } = params;
+    const offset = (page - 1) * limit;
+
+    // Tüm aktiviteleri al
+    const allActivities = await this.getActivityFeed();
+
+    // Toplam sayı
+    const total = allActivities.length;
+    const totalPages = Math.ceil(total / limit);
+
+    // Sayfalama uygula
+    const paginatedActivities = allActivities.slice(offset, offset + limit);
+
+    return {
+      data: paginatedActivities,
+      pagination: {
+        page,
+        limit,
+        total,
+        totalPages,
+        hasNext: page < totalPages,
+        hasPrev: page > 1,
+      },
+    };
   }
 }
 

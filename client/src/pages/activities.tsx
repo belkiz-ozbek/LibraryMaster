@@ -21,6 +21,8 @@ import { useState } from "react";
 import { toast } from "@/components/ui/use-toast";
 import { useAuth } from "@/lib/auth";
 import LoadingScreen from "@/components/ui/loading-screen";
+import { apiRequest } from "@/lib/queryClient";
+import type { PaginatedResponse } from "@/components/ui/data-table";
 
 interface ActivityStats {
   total: number;
@@ -40,10 +42,17 @@ export default function Activities() {
   const [page, setPage] = useState(1);
   const pageSize = 10;
 
-  const { data: activities = [], isLoading, refetch } = useQuery<any[]>({
-    queryKey: ["/api/activities/feed"],
+  const { data: activitiesResponse, isLoading, refetch } = useQuery<PaginatedResponse<any>>({
+    queryKey: ["/api/activities/feed", page, pageSize],
+    queryFn: async () => {
+      const response = await apiRequest("GET", `/api/activities/feed?page=${page}&limit=${pageSize}`);
+      return response.json();
+    },
     refetchOnWindowFocus: true,
   });
+
+  const activities = activitiesResponse?.data || [];
+  const pagination = activitiesResponse?.pagination;
 
   // Aktivite verilerini dönüştür
   const transformedActivities: ActivityItem[] = activities.map((activity) => ({
@@ -63,8 +72,9 @@ export default function Activities() {
     ? transformedActivities 
     : transformedActivities.filter(activity => activity.type === filter);
 
-  const totalPages = Math.ceil(filteredActivities.length / pageSize);
-  const paginatedActivities = filteredActivities.slice((page - 1) * pageSize, page * pageSize);
+  // Server-side pagination kullanıldığı için client-side pagination kaldırıldı
+  const paginatedActivities = filteredActivities;
+  const totalPages = pagination?.totalPages || 1;
 
   // İstatistikler
   const stats: ActivityStats = {
@@ -109,6 +119,10 @@ export default function Activities() {
         variant: "default",
       });
     }
+  };
+
+  const handlePageChange = (newPage: number) => {
+    setPage(newPage);
   };
 
   if (isLoading) {
@@ -278,31 +292,33 @@ export default function Activities() {
             )}
           </CardContent>
         </Card>
-        <div className="flex justify-center mt-6 gap-2">
-          <button
-            className="px-3 py-1 rounded bg-muted text-sm font-medium disabled:opacity-50"
-            onClick={() => setPage((p) => Math.max(1, p - 1))}
-            disabled={page === 1}
-          >
-            Önceki
-          </button>
-          {Array.from({ length: totalPages }, (_, i) => (
+        {pagination && pagination.totalPages > 1 && (
+          <div className="flex justify-center mt-6 gap-2">
             <button
-              key={i + 1}
-              className={`px-3 py-1 rounded text-sm font-medium ${page === i + 1 ? 'bg-primary text-white' : 'bg-muted'}`}
-              onClick={() => setPage(i + 1)}
+              className="px-3 py-1 rounded bg-muted text-sm font-medium disabled:opacity-50"
+              onClick={() => handlePageChange(page - 1)}
+              disabled={!pagination.hasPrev}
             >
-              {i + 1}
+              Önceki
             </button>
-          ))}
-          <button
-            className="px-3 py-1 rounded bg-muted text-sm font-medium disabled:opacity-50"
-            onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
-            disabled={page === totalPages}
-          >
-            Sonraki
-          </button>
-        </div>
+            {Array.from({ length: pagination.totalPages }, (_, i) => (
+              <button
+                key={i + 1}
+                className={`px-3 py-1 rounded text-sm font-medium ${page === i + 1 ? 'bg-primary text-white' : 'bg-muted'}`}
+                onClick={() => handlePageChange(i + 1)}
+              >
+                {i + 1}
+              </button>
+            ))}
+            <button
+              className="px-3 py-1 rounded bg-muted text-sm font-medium disabled:opacity-50"
+              onClick={() => handlePageChange(page + 1)}
+              disabled={!pagination.hasNext}
+            >
+              Sonraki
+            </button>
+          </div>
+        )}
       </motion.div>
     </div>
   );

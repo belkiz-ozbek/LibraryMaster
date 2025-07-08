@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { DataTable } from "@/components/ui/data-table";
+import { DataTable, ServerDataTable, type PaginatedResponse } from "@/components/ui/data-table";
 import { SearchInput } from "@/components/ui/search-input";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
@@ -74,21 +74,28 @@ export default function Books() {
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [bookToDelete, setBookToDelete] = useState<Book | null>(null);
   const [deleteError, setDeleteError] = useState<string | null>(null);
+  const [currentPage, setCurrentPage] = useState(1);
   const { user } = useAuth();
   const { toast } = useToast();
   const { t } = useTranslation();
 
-  const { data: books = [], isLoading } = useQuery<Book[]>({
-    queryKey: ["/api/books"],
+  // Server-side pagination
+  const { data: paginatedBooks, isLoading } = useQuery<PaginatedResponse<Book>>({
+    queryKey: ["/api/books", { page: currentPage, limit: 10 }],
+    queryFn: async () => {
+      const res = await fetch(`/api/books?page=${currentPage}&limit=10`, { credentials: "include" });
+      if (!res.ok) throw new Error("Kitaplar yüklenemedi");
+      return res.json();
+    },
   });
 
+  // Arama yapılıyorsa eski client-side arama ile devam
   const { data: searchResults = [] } = useQuery<Book[]>({
     queryKey: [`/api/books/search?q=${encodeURIComponent(searchQuery)}`],
-    enabled: searchQuery.length > 0, // 1 karakter yeterli
+    enabled: searchQuery.length > 0,
   });
 
-  // Arama yapılıyorsa arama sonuçlarını, yapılmıyorsa tüm kitapları göster
-  const displayBooks: Book[] = searchQuery.length > 0 ? searchResults : books;
+  const displayBooks: Book[] = searchQuery.length > 0 ? searchResults : paginatedBooks?.data ?? [];
 
   // Debug için console.log
   console.log('Search Query:', searchQuery);
@@ -288,9 +295,9 @@ export default function Books() {
               <BookIcon className="h-8 w-8 text-primary mr-3" />
               <div>
                 <p className="text-2xl font-bold text-on-surface">
-                  {books.reduce((sum, book) => sum + book.totalCopies, 0)}
+                  {paginatedBooks?.pagination?.total ?? 0}
                 </p>
-                <p className="text-sm text-text-muted">{t("books.totalCopies")}</p>
+                <p className="text-sm text-text-muted">{t("books.totalBooks")}</p>
               </div>
             </div>
           </CardContent>
@@ -302,7 +309,7 @@ export default function Books() {
               <BookIcon className="h-8 w-8 text-secondary mr-3" />
               <div>
                 <p className="text-2xl font-bold text-on-surface">
-                  {books.reduce((sum, book) => sum + book.availableCopies, 0)}
+                  {paginatedBooks?.data?.reduce((sum, book) => sum + (book.availableCopies || 0), 0) ?? 0}
                 </p>
                 <p className="text-sm text-text-muted">{t("books.availableCopiesTotal")}</p>
               </div>
@@ -316,7 +323,7 @@ export default function Books() {
               <BookIcon className="h-8 w-8 text-accent mr-3" />
               <div>
                 <p className="text-2xl font-bold text-on-surface">
-                  {new Set(books.flatMap(book => book.genre.split(',').map(g => g.trim()))).size}
+                  {paginatedBooks?.data ? new Set(paginatedBooks.data.flatMap(book => book.genre.split(',').map(g => g.trim()))).size : 0}
                 </p>
                 <p className="text-sm text-text-muted">{t("books.uniqueGenres")}</p>
               </div>
@@ -333,7 +340,7 @@ export default function Books() {
               <div>
                 <CardTitle>{t("books.catalog")}</CardTitle>
                 <CardDescription>
-                  {displayBooks.length} {t("books.inCollection")}
+                  {paginatedBooks?.pagination?.total ?? 0} {t("books.totalBooks")}
                 </CardDescription>
               </div>
               <div className="w-80">
@@ -345,17 +352,27 @@ export default function Books() {
             </div>
           </CardHeader>
           <CardContent>
-            <DataTable
-              data={displayBooks}
-              columns={columns}
-              loading={isLoading}
-              emptyMessage={
-                searchQuery.length > 0 
-                  ? t("books.noBooksFound")
-                  : t("books.noBooksYet")
-              }
-              pageSize={10}
-            />
+            {searchQuery.length > 0 ? (
+              <DataTable
+                data={displayBooks}
+                columns={columns}
+                loading={isLoading}
+                emptyMessage={
+                  searchQuery.length > 0 
+                    ? t("books.noBooksFound")
+                    : t("books.noBooksYet")
+                }
+                pageSize={10}
+              />
+            ) : (
+              <ServerDataTable
+                data={paginatedBooks!}
+                columns={columns}
+                loading={isLoading}
+                emptyMessage={t("books.noBooksYet")}
+                onPageChange={setCurrentPage}
+              />
+            )}
           </CardContent>
         </Card>
       </motion.div>
