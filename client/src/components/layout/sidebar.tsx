@@ -111,9 +111,12 @@ const NavigationButton = ({ item, isActive, isCollapsed }: NavigationButtonProps
 };
 
 const SidebarHeader = ({ isCollapsed, t }: { isCollapsed: boolean; t: (key: string) => string }) => (
-  <div className={`${isCollapsed ? 'p-3' : 'p-6'} border-b border-gray-100 ${isCollapsed ? 'flex justify-center' : 'flex flex-col items-center space-y-3'} transition-all duration-300 bg-white/80`}> 
+  <div
+    className={`${isCollapsed ? 'flex items-center justify-center' : 'p-6 flex flex-col items-center space-y-3'} border-b border-gray-100 transition-all duration-300 bg-white/80`}
+    style={isCollapsed ? { height: '88px' } : undefined}
+  >
     {isCollapsed ? (
-      <div className="flex items-center justify-center">
+      <div className="flex items-center justify-center w-full h-full">
         <img 
           src="/yetim-vakfi-logo.png" 
           alt="Yetim Vakfi Logo" 
