@@ -108,12 +108,6 @@ export default function Members() {
   // Tabloya verilecek veri
   const displayMembers: User[] = searchQuery.length > 0 ? searchResults : paginatedMembers?.data ?? [];
 
-  // Arama kutusu değişince sayfayı sıfırla
-  const handleSearch = (q: string) => {
-    setSearchQuery(q);
-    setCurrentPage(1);
-  };
-
   // Status filter
   const statusFilteredMembers: User[] = statusFilter === "all"
     ? displayMembers
@@ -327,7 +321,7 @@ export default function Members() {
           <CardContent>
             {searchQuery.length > 0 ? (
               <DataTable
-                data={displayMembers}
+                data={statusFilteredMembers}
                 columns={columns}
                 loading={isLoading}
                 emptyMessage={
@@ -339,7 +333,17 @@ export default function Members() {
               />
             ) : (
               <ServerDataTable
-                data={paginatedMembers!}
+                data={{
+                  data: statusFilteredMembers,
+                  pagination: {
+                    page: paginatedMembers?.pagination?.page || 1,
+                    limit: paginatedMembers?.pagination?.limit || 10,
+                    total: statusFilteredMembers.length,
+                    totalPages: Math.ceil(statusFilteredMembers.length / 10),
+                    hasNext: false,
+                    hasPrev: false
+                  }
+                }}
                 columns={columns}
                 loading={isLoading}
                 emptyMessage={t("members.noMembersYet")}
