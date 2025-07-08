@@ -474,7 +474,7 @@ export default function Returns() {
       <motion.div variants={itemVariants}>
         <Card className="mt-6">
           <CardHeader>
-            <CardTitle className="text-red-600">Gecikmiş Kitaplar</CardTitle>
+            <CardTitle>Gecikmiş Kitaplar</CardTitle>
             <CardDescription>Tüm kullanıcıların gecikmiş kitapları aşağıda listelenir.</CardDescription>
           </CardHeader>
           <CardContent>
