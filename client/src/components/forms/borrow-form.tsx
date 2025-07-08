@@ -14,7 +14,8 @@ import { useTranslation } from "react-i18next";
 import { useState } from "react";
 
 const borrowFormSchema = insertBorrowingSchema.extend({
-  borrowDate: z.date({ required_error: "Lütfen ödünç alma tarihi giriniz" }),
+  borrowDate: z.string({ required_error: "Lütfen ödünç alma tarihi giriniz" }),
+  dueDate: z.string({ required_error: "Lütfen son iade tarihi giriniz" }),
   notes: z.string().optional(),
 });
 
@@ -61,8 +62,12 @@ export function BorrowForm({ borrowing, onSuccess, onCancel }: BorrowFormProps) 
     defaultValues: {
       bookId: borrowing?.bookId || 0,
       userId: borrowing?.userId || 0,
-      borrowDate: borrowing?.borrowDate ? new Date(borrowing.borrowDate) : new Date(),
-      dueDate: borrowing?.dueDate ? new Date(borrowing.dueDate).toISOString().split('T')[0] : defaultDueDate,
+      borrowDate: borrowing?.borrowDate
+        ? new Date(borrowing.borrowDate).toISOString().split('T')[0]
+        : new Date().toISOString().split('T')[0],
+      dueDate: borrowing?.dueDate
+        ? new Date(borrowing.dueDate).toISOString().split('T')[0]
+        : defaultDueDate,
       status: borrowing?.status || "borrowed",
       extensionRequested: borrowing?.extensionRequested || false,
       notes: borrowing?.notes || "",
@@ -80,14 +85,7 @@ export function BorrowForm({ borrowing, onSuccess, onCancel }: BorrowFormProps) 
   });
 
   const onSubmit = (data: BorrowFormData) => {
-    const dueDateString = typeof data.dueDate === 'string' && data.dueDate.length === 10
-      ? data.dueDate
-      : new Date(data.dueDate).toISOString().split('T')[0];
-    const submitData = {
-      ...data,
-      dueDate: dueDateString,
-    };
-    mutation.mutate(submitData as any);
+    mutation.mutate(data as any);
   };
 
   // Artık adminler de ödünç alabilir, filtreleme yok
@@ -186,7 +184,7 @@ export function BorrowForm({ borrowing, onSuccess, onCancel }: BorrowFormProps) 
           <Input
             id="borrowDate"
             type="date"
-            {...form.register("borrowDate")}
+            {...form.register("borrowDate", { valueAsDate: false })}
             className="rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition"
           />
         </div>
