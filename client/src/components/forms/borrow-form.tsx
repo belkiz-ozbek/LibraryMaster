@@ -84,8 +84,40 @@ export function BorrowForm({ borrowing, onSuccess, onCancel }: BorrowFormProps) 
     onSuccess,
   });
 
+  const [formError, setFormError] = useState<string | null>(null);
+
   const onSubmit = (data: BorrowFormData) => {
-    mutation.mutate(data as any);
+    setFormError(null);
+    // Validation: bookId and userId must not be 0
+    if (!data.bookId || !data.userId) {
+      setFormError(t("borrowing.pleaseSelectBookAndMember") || "Lütfen kitap ve üye seçiniz.");
+      return;
+    }
+    // Status mapping: map Turkish display values to backend values if needed
+    let status = data.status;
+    if (status === "İade Edildi" || status === t("borrowing.returned")) {
+      status = "returned";
+    } else if (status === "Gecikmiş" || status === t("borrowing.overdue")) {
+      status = "overdue";
+    } else if (status === "Devam Ediyor" || status === t("borrowing.borrowed")) {
+      status = "borrowed";
+    }
+    // Validation: status must be one of the allowed values
+    const allowedStatuses = ["borrowed", "returned", "overdue"];
+    if (status && !allowedStatuses.includes(status)) {
+      setFormError(t("borrowing.invalidStatus") || "Geçersiz ödünç alma durumu.");
+      return;
+    }
+    // Convert borrowDate and dueDate to Date objects
+    let borrowDate: Date | undefined = undefined;
+    let dueDate: Date | undefined = undefined;
+    if (data.borrowDate) {
+      borrowDate = new Date(data.borrowDate);
+    }
+    if (data.dueDate) {
+      dueDate = new Date(data.dueDate);
+    }
+    mutation.mutate({ ...data, status, borrowDate, dueDate } as any);
   };
 
   // Artık adminler de ödünç alabilir, filtreleme yok
@@ -241,6 +273,11 @@ export function BorrowForm({ borrowing, onSuccess, onCancel }: BorrowFormProps) 
       {mutation.isError && (
         <p className="text-sm text-red-600 mt-2 text-center font-medium">
           {mutation.error?.message || t(isEditing ? 'borrowing.failed' : 'borrowing.failed')}
+        </p>
+      )}
+      {formError && (
+        <p className="text-sm text-red-600 mt-2 text-center font-medium">
+          {formError}
         </p>
       )}
     </form>

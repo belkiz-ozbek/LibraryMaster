@@ -26,6 +26,7 @@ import { motion } from "framer-motion";
 import { tr, enUS } from "date-fns/locale";
 import { Progress } from "@/components/ui/progress";
 import { capitalizeWords } from "@/lib/utils";
+import LoadingScreen from "@/components/ui/loading-screen";
 
 interface Stats {
   totalBooks: number;
@@ -172,14 +173,21 @@ export default function Dashboard() {
       title: t("borrowing.member"),
       render: (value: string, row: any) => (
         <div className="flex items-center">
-          <div className="w-8 h-8 bg-muted rounded-full flex items-center justify-center mr-3">
-            <span className="text-xs font-medium text-muted-foreground">
+          <Link to={`/members/${row.user.id || row.user.email}`}
+            className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center mr-3 hover:opacity-80 transition-opacity"
+            style={{ textDecoration: 'none' }}
+          >
+            <span className="text-sm font-medium text-primary">
               {value?.split(' ').map((n: string) => n[0]).join('').toUpperCase()}
             </span>
-          </div>
+          </Link>
           <div>
-            <p className="font-medium text-foreground">{value}</p>
-            <p className="text-sm text-muted-foreground">{row.user.email}</p>
+            <Link to={`/members/${row.user.id || row.user.email}`}
+              className="font-medium text-on-surface hover:underline hover:text-primary transition-colors"
+            >
+              {value}
+            </Link>
+            <p className="text-sm text-text-muted">{row.user.email}</p>
           </div>
         </div>
       ),
@@ -189,15 +197,20 @@ export default function Dashboard() {
       title: t("borrowing.book"),
       render: (value: string, row: any) => (
         <div>
-          <p className="font-medium text-foreground">{value}</p>
-          <p className="text-sm text-muted-foreground font-mono">ISBN: {row.book.isbn}</p>
+          <p className="font-medium text-on-surface">{value}</p>
+          <p className="text-sm text-text-muted">{row.book.author}</p>
         </div>
       ),
     },
     {
+      key: "borrowDate",
+      title: t("borrowing.borrowDate"),
+      render: (value: string) => value ? format(new Date(value), "MMM dd, yyyy") : "-",
+    },
+    {
       key: "dueDate",
       title: t("borrowing.dueDate"),
-      render: (value: string) => format(new Date(value), "MMM dd, yyyy"),
+      render: (value: string) => value ? format(new Date(value), "MMM dd, yyyy") : "-",
     },
     {
       key: "dueDate",
@@ -205,21 +218,9 @@ export default function Dashboard() {
       render: (value: string) => {
         const daysOverdue = Math.floor((Date.now() - new Date(value).getTime()) / (1000 * 60 * 60 * 24));
         return (
-          <Badge variant="destructive">
-            {t("dashboard.days", { count: daysOverdue })}
-          </Badge>
+          <span className="font-semibold text-destructive">{daysOverdue}</span>
         );
       },
-    },
-    {
-      key: "actions",
-      title: t("dashboard.action"),
-      render: () => (
-        <div className="flex items-center space-x-2">
-          <Button variant="link" size="sm">{t("dashboard.sendReminder")}</Button>
-          <Button variant="link" size="sm">{t("dashboard.extendDueDate")}</Button>
-        </div>
-      ),
     },
   ];
 

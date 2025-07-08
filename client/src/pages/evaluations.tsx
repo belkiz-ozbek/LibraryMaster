@@ -18,6 +18,7 @@ import type { User } from "@shared/schema";
 import { useTranslation } from "react-i18next";
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
+import LoadingScreen from "@/components/ui/loading-screen";
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -226,6 +227,10 @@ export default function Evaluations() {
         </Card>
       </div>
     );
+  }
+
+  if (isLoading) {
+    return <LoadingScreen />;
   }
 
   return (

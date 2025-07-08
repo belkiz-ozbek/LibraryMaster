@@ -19,6 +19,7 @@ import { useTranslation } from "react-i18next";
 import { useState } from "react";
 import { toast } from "@/components/ui/use-toast";
 import { useAuth } from "@/lib/auth";
+import LoadingScreen from "@/components/ui/loading-screen";
 
 interface ActivityStats {
   total: number;
@@ -103,6 +104,10 @@ export default function Activities() {
       });
     }
   };
+
+  if (isLoading) {
+    return <LoadingScreen />;
+  }
 
   return (
     <div className="space-y-6">

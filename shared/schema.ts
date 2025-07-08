@@ -87,7 +87,16 @@ export const insertBorrowingSchema = createInsertSchema(borrowings).omit({
 // Update schemas
 export const updateUserSchema = insertUserSchema.partial();
 export const updateBookSchema = insertBookSchema.partial();
-export const updateBorrowingSchema = insertBorrowingSchema.partial();
+export const updateBorrowingSchema = insertBorrowingSchema.partial().extend({
+  borrowDate: z.preprocess((val) => {
+    if (typeof val === "string" || val instanceof Date) return new Date(val);
+    return val;
+  }, z.date().optional()),
+  dueDate: z.preprocess((val) => {
+    if (typeof val === "string" || val instanceof Date) return new Date(val);
+    return val;
+  }, z.date().optional()),
+});
 
 // Select schemas
 export const selectUserSchema = createSelectSchema(users);

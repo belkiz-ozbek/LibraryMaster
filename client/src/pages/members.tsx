@@ -28,6 +28,7 @@ import {
   AlertDialogCancel,
 } from "@/components/ui/alert-dialog";
 import { Button as UIButton } from "@/components/ui/button";
+import LoadingScreen from "@/components/ui/loading-screen";
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -227,6 +228,10 @@ export default function Members() {
 
   const activeMembers = members.filter(member => !member.isAdmin);
   const adminMembers = members.filter(member => member.isAdmin);
+
+  if (isLoading) {
+    return <LoadingScreen />;
+  }
 
   return (
     <motion.div

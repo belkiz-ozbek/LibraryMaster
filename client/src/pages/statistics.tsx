@@ -24,6 +24,7 @@ import Confetti from 'react-dom-confetti';
 import Player from 'lottie-react';
 import { Link } from "react-router-dom";
 import { capitalizeWords } from "@/lib/utils";
+import LoadingScreen from "@/components/ui/loading-screen";
 
 interface Stats {
   totalBooks: number;
@@ -71,7 +72,7 @@ export default function Statistics() {
   const { user } = useAuth();
   const { t } = useTranslation();
 
-  const { data: stats } = useQuery<Stats>({
+  const { data: stats, isLoading } = useQuery<Stats>({
     queryKey: ["/api/stats"],
   });
 
@@ -269,6 +270,10 @@ export default function Statistics() {
         </Card>
       </div>
     );
+  }
+
+  if (isLoading) {
+    return <LoadingScreen />;
   }
 
   return (

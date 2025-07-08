@@ -29,6 +29,7 @@ import { motion } from "framer-motion";
 import { useSearch } from "wouter";
 import { Link } from "react-router-dom";
 import { capitalizeWords } from "@/lib/utils";
+import LoadingScreen from "@/components/ui/loading-screen";
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -298,6 +299,10 @@ export default function Borrowing() {
       ),
     },
   ];
+
+  if (isLoading) {
+    return <LoadingScreen />;
+  }
 
   return (
     <motion.div

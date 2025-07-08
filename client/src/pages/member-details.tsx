@@ -16,6 +16,7 @@ import { tr } from "date-fns/locale";
 import { useTranslation } from "react-i18next";
 import { motion } from "framer-motion";
 import type { User, BorrowingWithDetails } from "@shared/schema";
+import LoadingScreen from "@/components/ui/loading-screen";
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -85,6 +86,15 @@ export default function MemberDetails() {
   };
 
   const getStatusBadge = (status: string, row?: BorrowingWithDetails) => {
+    // Show 'Gecikmiş' if overdue (dueDate < today, not returned)
+    if (
+      row &&
+      status === "borrowed" &&
+      !row.returnDate &&
+      new Date(row.dueDate) < new Date()
+    ) {
+      return <Badge variant="destructive">{t('members.details.borrowings.statuses.overdue')}</Badge>;
+    }
     if (
       status === "returned" &&
       row?.returnDate &&
@@ -153,14 +163,7 @@ export default function MemberDetails() {
   const stats = calculateStats();
 
   if (memberLoading) {
-    return (
-      <div className="flex items-center justify-center h-64">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
-          <p className="mt-2 text-muted-foreground">{t('members.details.loading')}</p>
-        </div>
-      </div>
-    );
+    return <LoadingScreen />;
   }
 
   if (!member) {
@@ -407,7 +410,12 @@ export default function MemberDetails() {
                 </div>
               ) : (
                 (() => {
-                  const overdue = borrowings.filter((b: BorrowingWithDetails) => b.status === "overdue");
+                  const today = new Date();
+                  const overdue = borrowings.filter((b: BorrowingWithDetails) => {
+                    const due = new Date(b.dueDate);
+                    // Only show books that are overdue, not returned, and status is 'borrowed' or 'overdue'
+                    return due < today && (b.status === "borrowed" || b.status === "overdue") && !b.returnDate;
+                  });
                   return overdue.length > 0 ? (
                     <DataTable
                       data={overdue}
