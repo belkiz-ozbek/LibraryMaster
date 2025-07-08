@@ -645,6 +645,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.get("/api/borrowings/search", requireAuth, async (req, res) => {
+    try {
+      const q = (req.query.q as string)?.toLocaleLowerCase('tr-TR').trim() || "";
+      if (!q) {
+        return res.json([]);
+      }
+      const all = await storage.getAllBorrowings();
+      const filtered = all.filter(b =>
+        (b.book?.title?.toLocaleLowerCase('tr-TR') || "").includes(q) ||
+        (b.book?.author?.toLocaleLowerCase('tr-TR') || "").includes(q) ||
+        (b.book?.isbn?.toLocaleLowerCase('tr-TR') || "").includes(q) ||
+        (b.user?.name?.toLocaleLowerCase('tr-TR') || "").includes(q) ||
+        (b.user?.email?.toLocaleLowerCase('tr-TR') || "").includes(q)
+      );
+      res.json(filtered);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to search borrowings" });
+    }
+  });
+
   app.get("/api/borrowings/active", requireAuth, async (req, res) => {
     try {
       const { page, limit } = req.query;
@@ -665,6 +685,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
     } catch (error) {
       res.status(500).json({ message: "Failed to fetch active borrowings" });
+    }
+  });
+
+  app.get("/api/borrowings/active/search", requireAuth, async (req, res) => {
+    try {
+      const q = (req.query.q as string)?.toLocaleLowerCase('tr-TR').trim() || "";
+      if (!q) {
+        return res.json([]);
+      }
+      const all = await storage.getActiveBorrowings();
+      const filtered = all.filter(b =>
+        (b.book?.title?.toLocaleLowerCase('tr-TR') || "").includes(q) ||
+        (b.book?.author?.toLocaleLowerCase('tr-TR') || "").includes(q) ||
+        (b.book?.isbn?.toLocaleLowerCase('tr-TR') || "").includes(q) ||
+        (b.user?.name?.toLocaleLowerCase('tr-TR') || "").includes(q) ||
+        (b.user?.email?.toLocaleLowerCase('tr-TR') || "").includes(q)
+      );
+      res.json(filtered);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to search active borrowings" });
     }
   });
 

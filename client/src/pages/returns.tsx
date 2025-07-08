@@ -80,6 +80,26 @@ export default function Returns() {
     queryKey: ["/api/borrowings"],
   });
 
+  // Server-side search (kitaplar sayfası mantığı)
+  const { data: searchResults = [] } = useQuery<BorrowingWithDetails[]>({
+    queryKey: ["/api/borrowings/active/search", { q: searchQuery }],
+    enabled: searchQuery.length > 0,
+    queryFn: async () => {
+      const res = await fetch(`/api/borrowings/active/search?q=${encodeURIComponent(searchQuery)}`);
+      if (!res.ok) throw new Error("Arama başarısız");
+      return res.json();
+    },
+  });
+
+  // Tabloya verilecek veri
+  const displayBorrowings: BorrowingWithDetails[] = searchQuery.length > 0 ? searchResults : paginatedActiveBorrowings?.data ?? [];
+
+  // Arama kutusu değişince sayfayı sıfırla
+  const handleSearch = (q: string) => {
+    setSearchQuery(q);
+    setCurrentPage(1);
+  };
+
   const returnBookMutation = useMutation({
     mutationFn: ({ id, data }: { id: number; data: any }) => 
       apiRequest("PUT", `/api/borrowings/${id}`, data),
@@ -126,17 +146,6 @@ export default function Returns() {
       });
     },
   });
-
-  // Arama ve filtreleme için paginatedActiveBorrowings.data kullanılacak
-  const filteredBorrowings = searchQuery.length > 2 && paginatedActiveBorrowings?.data
-    ? paginatedActiveBorrowings.data.filter((borrowing: BorrowingWithDetails) => 
-        borrowing.user.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        (borrowing.user.email && borrowing.user.email.toLowerCase().includes(searchQuery.toLowerCase())) ||
-        borrowing.book.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        borrowing.book.author.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        (borrowing.book.isbn?.toLowerCase() ?? "").includes(searchQuery.toLowerCase())
-      )
-    : paginatedActiveBorrowings?.data ?? [];
 
   // Recent returns için paginatedActiveBorrowings.data kullanılabilir veya allBorrowings ile devam edilebilir
   const recentReturns = allBorrowings
@@ -400,19 +409,33 @@ export default function Returns() {
               <div className="w-80">
                 <SearchInput
                   placeholder={t("returns.searchPlaceholder")}
-                  onSearch={setSearchQuery}
+                  onSearch={handleSearch}
                 />
               </div>
             </div>
           </CardHeader>
           <CardContent>
-            <ServerDataTable
-              data={paginatedActiveBorrowings!}
-              columns={activeColumns}
-              loading={isLoadingActive}
-              emptyMessage={t("returns.noActiveBorrowingsYet")}
-              onPageChange={setCurrentPage}
-            />
+            {searchQuery.length > 0 ? (
+              <DataTable
+                data={displayBorrowings}
+                columns={activeColumns}
+                loading={isLoadingActive}
+                emptyMessage={
+                  searchQuery.length > 0 
+                    ? t("returns.noActiveBorrowingsFound")
+                    : t("returns.noActiveBorrowingsYet")
+                }
+                pageSize={10}
+              />
+            ) : (
+              <ServerDataTable
+                data={paginatedActiveBorrowings!}
+                columns={activeColumns}
+                loading={isLoadingActive}
+                emptyMessage={t("returns.noActiveBorrowingsYet")}
+                onPageChange={setCurrentPage}
+              />
+            )}
           </CardContent>
         </Card>
       </motion.div>

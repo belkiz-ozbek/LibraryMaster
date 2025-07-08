@@ -95,7 +95,7 @@ export default function Members() {
   });
 
   // Server-side search
-  const { data: searchResults = [] } = useQuery<User[]>({
+  const { data: searchResults = { data: [] } } = useQuery<PaginatedResponse<User>>({
     queryKey: ["/api/users/search", { q: searchQuery }],
     enabled: searchQuery.length > 0,
     queryFn: async () => {
@@ -106,7 +106,9 @@ export default function Members() {
   });
 
   // Tabloya verilecek veri
-  const displayMembers: User[] = searchQuery.length > 0 ? searchResults : paginatedMembers?.data ?? [];
+  const displayMembers: User[] = searchQuery.length > 0
+    ? (Array.isArray(searchResults.data) ? searchResults.data : [])
+    : (Array.isArray(paginatedMembers?.data) ? paginatedMembers.data : []);
 
   // Status filter
   const statusFilteredMembers: User[] = statusFilter === "all"
@@ -362,7 +364,7 @@ export default function Members() {
               <Users className="h-8 w-8 text-primary mr-3" />
               <div>
                 <p className="text-2xl font-bold text-on-surface">
-                  {displayMembers.filter(member => !member.isAdmin).length}
+                  {(Array.isArray(displayMembers) ? displayMembers : []).filter(member => !member.isAdmin).length}
                 </p>
                 <p className="text-sm text-text-muted">{t("members.activeMembers")}</p>
               </div>
@@ -376,7 +378,7 @@ export default function Members() {
               <Users className="h-8 w-8 text-secondary mr-3" />
               <div>
                 <p className="text-2xl font-bold text-on-surface">
-                  {displayMembers.filter(member => member.isAdmin).length}
+                  {(Array.isArray(displayMembers) ? displayMembers : []).filter(member => member.isAdmin).length}
                 </p>
                 <p className="text-sm text-text-muted">{t("members.administrators")}</p>
               </div>
@@ -390,7 +392,7 @@ export default function Members() {
               <Star className="h-8 w-8 text-accent mr-3" />
               <div>
                 <p className="text-2xl font-bold text-on-surface">
-                  {displayMembers.filter(member => member.adminRating && member.adminRating >= 4).length}
+                  {(Array.isArray(displayMembers) ? displayMembers : []).filter(member => member.adminRating && member.adminRating >= 4).length}
                 </p>
                 <p className="text-sm text-text-muted">{t("members.highlyRated")}</p>
               </div>

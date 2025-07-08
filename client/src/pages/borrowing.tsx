@@ -237,6 +237,26 @@ export default function Borrowing() {
         return true;
       });
 
+  // Server-side search (kitaplar mantığı)
+  const { data: searchResults = [] } = useQuery<BorrowingWithDetails[]>({
+    queryKey: ["/api/borrowings/search", { q: searchQuery }],
+    enabled: searchQuery.length > 0,
+    queryFn: async () => {
+      const res = await fetch(`/api/borrowings/search?q=${encodeURIComponent(searchQuery)}`);
+      if (!res.ok) throw new Error("Arama başarısız");
+      return res.json();
+    },
+  });
+
+  // Tabloya verilecek veri
+  const displayBorrowings: BorrowingWithDetails[] = searchQuery.length > 0 ? searchResults : (borrowingsData?.data ?? []);
+
+  // Arama kutusu değişince sayfayı sıfırla
+  const handleSearch = (q: string) => {
+    setSearchQuery(q);
+    setCurrentPage(1);
+  };
+
   const handleEdit = (borrowing: BorrowingWithDetails) => {
     setSelectedBorrowing(borrowing);
     setIsFormOpen(true);
@@ -440,6 +460,12 @@ export default function Borrowing() {
     return <LoadingScreen />;
   }
 
+  console.log('searchQuery:', searchQuery);
+  console.log('searchResults:', searchResults);
+  console.log('displayBorrowings:', displayBorrowings);
+  console.log('borrowingsData:', borrowingsData);
+  console.log('columns:', columns);
+
   return (
     <motion.div
       className="space-y-6"
@@ -554,35 +580,31 @@ export default function Borrowing() {
               <div className="w-80">
                 <SearchInput
                   placeholder={t("borrowing.searchPlaceholder")}
-                  onSearch={setSearchQuery}
+                  onSearch={handleSearch}
                 />
               </div>
             </div>
           </CardHeader>
           <CardContent>
-            {borrowingsData ? (
-              <ServerDataTable
-                data={borrowingsData}
-                columns={columns}
-                loading={isLoading}
-                emptyMessage={
-                  searchQuery.length > 2 
-                    ? t("borrowing.noBorrowingsFound")
-                    : t("borrowing.noBorrowingsYet")
-                }
-                onPageChange={setCurrentPage}
-              />
-            ) : (
+            {searchQuery.length > 0 ? (
               <DataTable
-                data={statusFilteredBorrowings}
+                data={displayBorrowings}
                 columns={columns}
                 loading={isLoading}
                 emptyMessage={
-                  searchQuery.length > 2 
+                  searchQuery.length > 0 
                     ? t("borrowing.noBorrowingsFound")
                     : t("borrowing.noBorrowingsYet")
                 }
                 pageSize={10}
+              />
+            ) : (
+              <ServerDataTable
+                data={borrowingsData!}
+                columns={columns}
+                loading={isLoading}
+                emptyMessage={t("borrowing.noBorrowingsYet")}
+                onPageChange={setCurrentPage}
               />
             )}
           </CardContent>
