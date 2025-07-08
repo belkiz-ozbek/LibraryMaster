@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -69,6 +69,19 @@ export default function Borrowing() {
 
   const urlParams = new URLSearchParams(search);
   const filter = urlParams.get("filter");
+
+  // statusFilter'ı URL'deki filter parametresiyle senkronize et
+  useEffect(() => {
+    if (filter && filter !== statusFilter) {
+      setStatusFilter(filter);
+      setCurrentPage(1);
+    }
+    if (!filter && statusFilter !== "all") {
+      setStatusFilter("all");
+      setCurrentPage(1);
+    }
+    // eslint-disable-next-line
+  }, [filter]);
 
   // Server-side pagination queries
   const { data: allBorrowingsData, isLoading: isLoadingAll } = useQuery<PaginatedResponse<BorrowingWithDetails>>({

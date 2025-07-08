@@ -230,14 +230,11 @@ export default function Dashboard() {
       title: t("borrowing.member"),
       render: (value: string, row: any) => (
         <div className="flex items-center">
-          <Link to={`/members/${row.user.id || row.user.email}`}
-            className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center mr-3 hover:opacity-80 transition-opacity"
-            style={{ textDecoration: 'none' }}
-          >
-            <span className="text-sm font-medium text-primary">
+          <div className="w-10 h-10 bg-destructive/20 rounded-full flex items-center justify-center mr-3">
+            <span className="text-sm font-medium text-destructive">
               {value?.split(' ').map((n: string) => n[0]).join('').toUpperCase()}
             </span>
-          </Link>
+          </div>
           <div>
             <Link to={`/members/${row.user.id || row.user.email}`}
               className="font-medium text-on-surface hover:underline hover:text-primary transition-colors"
@@ -271,11 +268,11 @@ export default function Dashboard() {
     },
     {
       key: "dueDate",
-      title: t("dashboard.daysOverdue"),
+      title: "Gecikme (gün)",
       render: (value: string) => {
         const daysOverdue = Math.floor((Date.now() - new Date(value).getTime()) / (1000 * 60 * 60 * 24));
         return (
-          <span className="font-semibold text-destructive">{daysOverdue}</span>
+          <span className="font-bold text-destructive text-lg">{daysOverdue}</span>
         );
       },
     },
