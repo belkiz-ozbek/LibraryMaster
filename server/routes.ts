@@ -269,32 +269,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get("/api/users/search", requireAuth, async (req, res) => {
     try {
-      const { q, page, limit } = req.query;
-      if (!q || typeof q !== 'string') {
-        return res.status(400).json({ message: "Search query required" });
-      }
-      
-      if (page || limit) {
-        // Paginated response
-        const paginationParams = {
-          page: page ? parseInt(page as string) : 1,
-          limit: limit ? parseInt(limit as string) : 10,
-        };
-        
-        const result = await storage.searchUsersPaginated(q, paginationParams);
-        const usersWithoutPasswords = {
-          ...result,
-          data: result.data.map(({ password, ...user }) => user)
-        };
-        res.json(usersWithoutPasswords);
-      } else {
-        // Non-paginated response (backward compatibility)
-        const users = await storage.searchUsers(q);
-        const usersWithoutPasswords = users.map(({ password, ...user }) => user);
-        res.json(usersWithoutPasswords);
-      }
+      const { q = "", page, limit } = req.query;
+      const paginationParams = {
+        page: page ? parseInt(page as string) : 1,
+        limit: limit ? parseInt(limit as string) : 10,
+      };
+      const result = await storage.searchUsersPaginated(q as string, paginationParams);
+      res.json(result);
     } catch (error) {
-      res.status(500).json({ message: "Search failed" });
+      res.status(500).json({ message: "Failed to search users" });
     }
   });
 

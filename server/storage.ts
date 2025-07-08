@@ -151,44 +151,27 @@ export class DatabaseStorage implements IStorage {
   }
 
   async searchUsersPaginated(query: string, params: PaginationParams): Promise<PaginatedResponse<User>> {
-    const { page = 1, limit = 10 } = params;
+    const page = params.page || 1;
+    const limit = params.limit || 10;
     const offset = (page - 1) * limit;
-
-    // Total count
-    const [{ totalCount }] = await db
-      .select({ totalCount: count() })
+    const q = `%${query.toLowerCase()}%`;
+    const [totalCount] = await db.select({ count: count() })
       .from(users)
-      .where(
-        or(
-          sql`LOWER(${users.name}) LIKE LOWER(${query} || '%')`,
-          ilike(users.email, `%${query}%`)
-        )
-      );
-
-    // Paginated results
-    const results = await db
-      .select()
+      .where(sql`lower(name) LIKE ${q} OR lower(email) LIKE ${q}`);
+    const data = await db.select()
       .from(users)
-      .where(
-        or(
-          sql`LOWER(${users.name}) LIKE LOWER(${query} || '%')`,
-          ilike(users.email, `%${query}%`)
-        )
-      )
+      .where(sql`lower(name) LIKE ${q} OR lower(email) LIKE ${q}`)
+      .orderBy(desc(users.membershipDate))
       .limit(limit)
       .offset(offset);
-
-    const total = Number(totalCount);
-    const totalPages = Math.ceil(total / limit);
-
     return {
-      data: results,
+      data,
       pagination: {
         page,
         limit,
-        total,
-        totalPages,
-        hasNext: page < totalPages,
+        total: totalCount.count,
+        totalPages: Math.ceil(totalCount.count / limit),
+        hasNext: page < Math.ceil(totalCount.count / limit),
         hasPrev: page > 1,
       },
     };

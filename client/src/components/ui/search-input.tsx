@@ -7,14 +7,22 @@ interface SearchInputProps {
   placeholder?: string;
   onSearch: (query: string) => void;
   debounceMs?: number;
+  value?: string;
+  onChange?: (value: string) => void;
 }
 
 export function SearchInput({ 
   placeholder = "Search...", 
   onSearch, 
-  debounceMs = 300 
+  debounceMs = 300,
+  value: externalValue,
+  onChange: externalOnChange
 }: SearchInputProps) {
-  const [query, setQuery] = useState("");
+  const [internalQuery, setInternalQuery] = useState("");
+  
+  // Dışarıdan value verilmişse onu kullan, yoksa kendi state'ini kullan
+  const query = externalValue !== undefined ? externalValue : internalQuery;
+  const setQuery = externalOnChange || setInternalQuery;
   
   const debouncedOnSearch = useCallback(
     useDebounce((query: string) => {

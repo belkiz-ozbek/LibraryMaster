@@ -86,6 +86,7 @@ export default function Members() {
   // Server-side pagination
   const { data: paginatedMembers, isLoading } = useQuery<PaginatedResponse<User>>({
     queryKey: ["/api/users", { page: currentPage, limit: 10 }],
+    enabled: searchQuery.length === 0,
     queryFn: async () => {
       const res = await fetch(`/api/users?page=${currentPage}&limit=10`, { credentials: "include" });
       if (!res.ok) throw new Error("Üyeler yüklenemedi");
@@ -93,14 +94,25 @@ export default function Members() {
     },
   });
 
-  // Client-side search (opsiyonel, istersen kaldırabilirsin)
-  const displayMembers: User[] = paginatedMembers?.data?.filter((member: User) => {
-    const q = searchQuery.toLowerCase();
-    return (
-      member.name.toLowerCase().includes(q) ||
-      (member.email && member.email.toLowerCase().includes(q))
-    );
-  }) ?? [];
+  // Server-side search
+  const { data: searchResults = [] } = useQuery<User[]>({
+    queryKey: ["/api/users/search", { q: searchQuery }],
+    enabled: searchQuery.length > 0,
+    queryFn: async () => {
+      const res = await fetch(`/api/users/search?q=${encodeURIComponent(searchQuery)}`, { credentials: "include" });
+      if (!res.ok) throw new Error("Arama başarısız");
+      return res.json();
+    },
+  });
+
+  // Tabloya verilecek veri
+  const displayMembers: User[] = searchQuery.length > 0 ? searchResults : paginatedMembers?.data ?? [];
+
+  // Arama kutusu değişince sayfayı sıfırla
+  const handleSearch = (q: string) => {
+    setSearchQuery(q);
+    setCurrentPage(1);
+  };
 
   // Status filter
   const statusFilteredMembers: User[] = statusFilter === "all"
@@ -313,13 +325,27 @@ export default function Members() {
             </div>
           </CardHeader>
           <CardContent>
-            <ServerDataTable
-              data={paginatedMembers!}
-              columns={columns}
-              loading={isLoading}
-              emptyMessage={t("members.noMembersYet")}
-              onPageChange={setCurrentPage}
-            />
+            {searchQuery.length > 0 ? (
+              <DataTable
+                data={displayMembers}
+                columns={columns}
+                loading={isLoading}
+                emptyMessage={
+                  searchQuery.length > 0 
+                    ? t("members.noMembersFound")
+                    : t("members.noMembersYet")
+                }
+                pageSize={10}
+              />
+            ) : (
+              <ServerDataTable
+                data={paginatedMembers!}
+                columns={columns}
+                loading={isLoading}
+                emptyMessage={t("members.noMembersYet")}
+                onPageChange={setCurrentPage}
+              />
+            )}
           </CardContent>
         </Card>
       </motion.div>
