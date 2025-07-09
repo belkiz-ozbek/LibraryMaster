@@ -404,8 +404,9 @@ export class DatabaseStorage implements IStorage {
 
     // Sadece güncellenmesi gereken alanları gönder
     const updateData: any = {};
-    updateData.status = updateBorrowing.status;
-    updateData.notes = updateBorrowing.notes;
+    if (updateBorrowing.status !== undefined) updateData.status = updateBorrowing.status;
+    if (updateBorrowing.notes !== undefined) updateData.notes = updateBorrowing.notes;
+    if (updateBorrowing.dueDate !== undefined) updateData.dueDate = updateBorrowing.dueDate;
     // Sadece status 'returned' ise returnDate ekle
     if (updateBorrowing.status === 'returned') {
       updateData.returnDate = new Date();
