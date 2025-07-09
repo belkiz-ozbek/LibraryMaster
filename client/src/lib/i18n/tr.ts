@@ -153,7 +153,8 @@ export const tr = {
     updateMemberInfo: "Üye bilgilerini güncelleyin",
     enterNewMember: "Yeni üye bilgilerini girin",
     form: {
-      fullName: "Tam Adı",
+      firstName: "İsim",
+      lastName: "Soyad",
       email: "E-posta Adresi",
       password: "Şifre",
       passwordHint: "değiştirmeyecekseniz boş bırakın",
@@ -195,7 +196,8 @@ export const tr = {
       allMembers: "Tüm Üyeler",
       normalMembers: "Normal Üyeler",
       administrators: "Yöneticiler"
-    }
+    },
+    addMember: "Üye Ekle"
   },
   borrowing: {
     title: "Kitap ödünç işlemlerini yönet",

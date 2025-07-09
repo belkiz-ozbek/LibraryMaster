@@ -181,7 +181,8 @@ export const en = {
     updateMemberInfo: "Update member information",
     enterNewMember: "Enter new member information",
     form: {
-      fullName: "Full Name",
+      firstName: "First Name",
+      lastName: "Last Name",
       email: "Email Address",
       password: "Password",
       passwordHint: "leave empty if not changing",
@@ -223,7 +224,8 @@ export const en = {
       allMembers: "All Members",
       normalMembers: "Normal Members",
       administrators: "Administrators"
-    }
+    },
+    addMember: "Add Member"
   },
   borrowing: {
     title: "Borrowing",
