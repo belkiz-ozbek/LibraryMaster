@@ -402,17 +402,15 @@ export class DatabaseStorage implements IStorage {
       updateBorrowing.returnDate = new Date();
     }
 
-    // Date alanlarını string'e çevir
-    const updateData: any = { ...updateBorrowing };
-    if (updateData.borrowDate instanceof Date) {
-      updateData.borrowDate = updateData.borrowDate.toISOString();
+    // Sadece güncellenmesi gereken alanları gönder
+    const updateData: any = {};
+    updateData.status = updateBorrowing.status;
+    updateData.notes = updateBorrowing.notes;
+    // Sadece status 'returned' ise returnDate ekle
+    if (updateBorrowing.status === 'returned') {
+      updateData.returnDate = new Date();
     }
-    if (updateData.dueDate instanceof Date) {
-      updateData.dueDate = updateData.dueDate.toISOString();
-    }
-    if (updateData.returnDate instanceof Date) {
-      updateData.returnDate = updateData.returnDate.toISOString();
-    }
+    console.log('Güncellenecek borrowing:', updateData);
     
     const [borrowing] = await db.update(borrowings)
       .set(updateData)

@@ -785,6 +785,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       res.json(borrowing);
     } catch (error) {
+      console.error(error); // Hata detaylarını terminale yazdır
       if (error instanceof z.ZodError) {
         return res.status(400).json({ message: "Invalid borrowing data", errors: error.errors });
       }
