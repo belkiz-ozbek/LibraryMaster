@@ -1,21 +1,23 @@
-import { useState, useRef, useEffect } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/components/ui/use-toast";
 import { useAuth } from "@/lib/auth";
-import { Mail, Lock, User, Eye, EyeOff, Loader2 } from "lucide-react";
+import { Eye, EyeOff, Mail, Lock, Loader2, User, CheckCircle } from "lucide-react";
 import { motion } from "framer-motion";
+import { useTranslation } from "react-i18next";
 
-function getPasswordStrength(password: string) {
-  if (!password) return '';
+// Password strength function
+const getPasswordStrength = (password: string): string => {
+  if (password.length === 0) return '';
   if (password.length < 6) return 'Zayıf';
-  if (/^(?=.*[A-Z])(?=.*[a-z])(?=.*\d).{8,}$/.test(password)) return 'Güçlü';
-  if (password.length >= 8) return 'Orta';
-  return 'Zayıf';
-}
+  if (password.length < 8) return 'Orta';
+  if (/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]/.test(password)) return 'Güçlü';
+  return 'Orta';
+};
 
 export default function SignupPage() {
   const [firstName, setFirstName] = useState("");
@@ -32,6 +34,7 @@ export default function SignupPage() {
   const [, navigate] = useLocation();
   const { toast } = useToast();
   const { signup } = useAuth();
+  const { t } = useTranslation();
   const firstNameRef = useRef<HTMLInputElement>(null);
   const lastNameRef = useRef<HTMLInputElement>(null);
   const usernameRef = useRef<HTMLInputElement>(null);
@@ -51,32 +54,32 @@ export default function SignupPage() {
   const validateForm = () => {
     const newErrors: { firstName?: string; lastName?: string; username?: string; email?: string; password?: string; password2?: string } = {};
     if (!firstName.trim()) {
-      newErrors.firstName = "İsim zorunlu";
+      newErrors.firstName = t("auth.form.firstNameRequired");
     }
     if (!lastName.trim()) {
-      newErrors.lastName = "Soyad zorunlu";
+      newErrors.lastName = t("auth.form.lastNameRequired");
     }
     if (!username.trim()) {
-      newErrors.username = "Kullanıcı adı zorunlu";
+      newErrors.username = t("auth.form.usernameRequired");
     } else if (username.length < 3) {
-      newErrors.username = "Kullanıcı adı en az 3 karakter olmalı";
+      newErrors.username = t("auth.form.usernameMinLength");
     } else if (!/^[a-zA-Z0-9_]+$/.test(username)) {
-      newErrors.username = "Kullanıcı adı sadece harf, rakam ve alt çizgi içerebilir";
+      newErrors.username = t("auth.form.usernameFormat");
     }
     if (!email) {
-      newErrors.email = "E-posta zorunlu";
+      newErrors.email = t("auth.form.emailRequired");
     } else if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) {
-      newErrors.email = "Geçerli bir e-posta adresi girin";
+      newErrors.email = t("auth.form.emailInvalid");
     }
     if (!password) {
-      newErrors.password = "Şifre zorunlu";
+      newErrors.password = t("auth.form.passwordRequired");
     } else if (password.length < 6) {
-      newErrors.password = "Şifre en az 6 karakter olmalı";
+      newErrors.password = t("auth.form.passwordMinLength");
     }
     if (!password2) {
-      newErrors.password2 = "Şifre tekrarı zorunlu";
+      newErrors.password2 = t("auth.form.confirmPasswordRequired");
     } else if (password !== password2) {
-      newErrors.password2 = "Şifreler eşleşmiyor";
+      newErrors.password2 = t("auth.form.passwordsDontMatch");
     }
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -89,14 +92,14 @@ export default function SignupPage() {
     try {
       await signup(`${firstName.trim()} ${lastName.trim()}`, username.trim(), email.trim(), password);
       toast({
-        title: "Kayıt başarılı!",
-        description: "Lütfen e-posta adresinizi doğrulamak için e-postanızı kontrol edin.",
+        title: t("auth.signupSuccess"),
+        description: t("auth.signupSuccessDesc"),
       });
       navigate(`/verify-email?email=${encodeURIComponent(email)}`);
     } catch (error: any) {
       toast({
-        title: "Kayıt başarısız",
-        description: error.message || "Kayıt sırasında bir hata oluştu.",
+        title: t("auth.signupFailed"),
+        description: error.message || t("auth.signupFailedDesc"),
         variant: "destructive",
       });
     } finally {
@@ -116,7 +119,7 @@ export default function SignupPage() {
   };
 
   const passwordStrength = getPasswordStrength(password);
-  const passwordStrengthColor = passwordStrength === 'Güçlü' ? 'text-green-600' : passwordStrength === 'Orta' ? 'text-yellow-600' : passwordStrength === 'Zayıf' ? 'text-red-600' : 'text-gray-400';
+  const passwordStrengthColor = passwordStrength === t("auth.form.passwordStrength.strong") ? 'text-green-600' : passwordStrength === t("auth.form.passwordStrength.medium") ? 'text-yellow-600' : passwordStrength === t("auth.form.passwordStrength.weak") ? 'text-red-600' : 'text-gray-400';
 
   return (
     <div className="min-h-screen flex items-center justify-center p-4 relative overflow-hidden">
@@ -164,7 +167,8 @@ export default function SignupPage() {
                   transition={{ duration: 0.5, delay: 0.4 }}
                   src="/ahdevefa-logo.png" 
                   alt="Ahdevefa Logo" 
-                  className="h-12 w-auto object-contain" 
+                  className="h-12 w-auto object-contain"
+                  loading="lazy"
                 />
                 <motion.div 
                   initial={{ opacity: 0, scale: 0 }}
@@ -178,7 +182,8 @@ export default function SignupPage() {
                   transition={{ duration: 0.5, delay: 0.5 }}
                   src="/yetim-vakfi-logo.png" 
                   alt="Yetim Vakfi Logo" 
-                  className="h-12 w-auto object-contain" 
+                  className="h-12 w-auto object-contain"
+                  loading="lazy"
                 />
               </motion.div>
               <motion.div 
@@ -188,7 +193,7 @@ export default function SignupPage() {
                 className="text-center space-y-1"
               >
                 <CardTitle className="text-2xl font-extrabold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent tracking-tight">
-                  Kütüphane Yönetim Sistemi
+                  {t("auth.systemTitle")}
                 </CardTitle>
                 <motion.div 
                   initial={{ opacity: 0, scaleX: 0 }}
@@ -197,379 +202,241 @@ export default function SignupPage() {
                   className="h-1 w-16 mx-auto bg-gradient-to-r from-blue-400 to-purple-400 rounded-full mb-1"
                 ></motion.div>
                 <CardDescription className="text-gray-700 text-base font-medium">
-                  Güvenli ve hızlı kayıt olun, kitap dünyasına adım atın.
+                  {t("auth.signupDesc")}
                 </CardDescription>
               </motion.div>
             </motion.div>
           </CardHeader>
-          <form onSubmit={handleSubmit} className="space-y-6" autoComplete="off">
+          
+          <form onSubmit={handleSubmit} className="space-y-6">
             <CardContent className="space-y-4">
-              {/* Name fields in two columns */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <motion.div 
-                  whileHover={{ scale: 1.02, y: -2 }}
-                  whileFocus={{ scale: 1.03, boxShadow: "0 0 0 3px rgba(59, 130, 246, 0.3)" }}
-                  className="space-y-1.5"
+              <div className="grid grid-cols-2 gap-4">
+                <motion.div
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.5, delay: 0.1 }}
+                  transition={{ duration: 0.5, delay: 0.3 }}
                 >
-                  <Label htmlFor="firstName" className="text-xs font-medium text-gray-500">
-                    İsim
+                  <Label htmlFor="firstName" className="text-sm font-medium text-gray-700">
+                    {t("auth.form.firstName")}
                   </Label>
-                  <div className="relative group">
-                    <motion.div
-                      initial={{ opacity: 0, scale: 0.8 }}
-                      animate={{ opacity: 1, scale: 1 }}
-                      transition={{ duration: 0.3, delay: 0.2 }}
-                    >
-                      <User className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4 transition-all duration-300 group-focus-within:text-blue-500 group-hover:text-blue-400" />
-                    </motion.div>
+                  <div className="relative">
+                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                      <User className="h-4 w-4 text-gray-400" />
+                    </div>
                     <Input
+                      ref={firstNameRef}
                       id="firstName"
                       type="text"
-                      placeholder="İsminizi girin"
+                      placeholder={t("auth.form.firstName")}
                       value={firstName}
                       onChange={(e) => handleInputChange('firstName', e.target.value)}
-                      className={`pl-10 h-10 rounded-lg transition-all duration-300 focus:shadow-lg hover:shadow-md text-sm placeholder:text-gray-400 border-2 ${errors.firstName ? 'border-red-500 focus:border-red-500 ring-2 ring-red-300' : 'focus:border-blue-500 ring-1 ring-blue-100 hover:border-blue-300 border-gray-200'}`}
-                      disabled={isLoading}
-                      ref={firstNameRef}
-                      aria-invalid={!!errors.firstName}
-                      aria-describedby={errors.firstName ? 'firstName-error' : undefined}
-                      autoComplete="given-name"
+                      className={`pl-10 ${errors.firstName ? 'border-red-500' : 'border-gray-300'} focus:ring-2 focus:ring-blue-500 focus:border-transparent`}
                     />
-                    {errors.firstName && (
-                      <motion.div 
-                        className="absolute right-3 top-1/2 transform -translate-y-1/2 text-red-400 h-4 w-4"
-                        initial={{ opacity: 0, scale: 0 }}
-                        animate={{ opacity: 1, scale: 1 }}
-                        transition={{ duration: 0.3 }}
-                      >
-                        <User className="h-4 w-4" />
-                      </motion.div>
-                    )}
                   </div>
                   {errors.firstName && (
-                    <motion.p 
-                      className="text-red-400 text-xs animate-in slide-in-from-top-1" 
-                      id="firstName-error" 
-                      initial={{ opacity: 0, y: -10 }} 
+                    <motion.p
+                      initial={{ opacity: 0, y: -10 }}
                       animate={{ opacity: 1, y: 0 }}
-                      transition={{ duration: 0.3 }}
+                      className="text-sm text-red-600"
                     >
                       {errors.firstName}
                     </motion.p>
                   )}
                 </motion.div>
-                <motion.div 
-                  whileHover={{ scale: 1.02, y: -2 }}
-                  whileFocus={{ scale: 1.03, boxShadow: "0 0 0 3px rgba(59, 130, 246, 0.3)" }}
-                  className="space-y-1.5"
+                
+                <motion.div
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.5, delay: 0.15 }}
+                  transition={{ duration: 0.5, delay: 0.4 }}
                 >
-                  <Label htmlFor="lastName" className="text-xs font-medium text-gray-500">
-                    Soyad
+                  <Label htmlFor="lastName" className="text-sm font-medium text-gray-700">
+                    {t("auth.form.lastName")}
                   </Label>
-                  <div className="relative group">
-                    <motion.div
-                      initial={{ opacity: 0, scale: 0.8 }}
-                      animate={{ opacity: 1, scale: 1 }}
-                      transition={{ duration: 0.3, delay: 0.25 }}
-                    >
-                      <User className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4 transition-all duration-300 group-focus-within:text-blue-500 group-hover:text-blue-400" />
-                    </motion.div>
+                  <div className="relative">
+                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                      <User className="h-4 w-4 text-gray-400" />
+                    </div>
                     <Input
+                      ref={lastNameRef}
                       id="lastName"
                       type="text"
-                      placeholder="Soyadınızı girin"
+                      placeholder={t("auth.form.lastName")}
                       value={lastName}
                       onChange={(e) => handleInputChange('lastName', e.target.value)}
-                      className={`pl-10 h-10 rounded-lg transition-all duration-300 focus:shadow-lg hover:shadow-md text-sm placeholder:text-gray-400 border-2 ${errors.lastName ? 'border-red-500 focus:border-red-500 ring-2 ring-red-300' : 'focus:border-blue-500 ring-1 ring-blue-100 hover:border-blue-300 border-gray-200'}`}
-                      disabled={isLoading}
-                      ref={lastNameRef}
-                      aria-invalid={!!errors.lastName}
-                      aria-describedby={errors.lastName ? 'lastName-error' : undefined}
-                      autoComplete="family-name"
+                      className={`pl-10 ${errors.lastName ? 'border-red-500' : 'border-gray-300'} focus:ring-2 focus:ring-blue-500 focus:border-transparent`}
                     />
-                    {errors.lastName && (
-                      <motion.div 
-                        className="absolute right-3 top-1/2 transform -translate-y-1/2 text-red-400 h-4 w-4"
-                        initial={{ opacity: 0, scale: 0 }}
-                        animate={{ opacity: 1, scale: 1 }}
-                        transition={{ duration: 0.3 }}
-                      >
-                        <User className="h-4 w-4" />
-                      </motion.div>
-                    )}
                   </div>
                   {errors.lastName && (
-                    <motion.p 
-                      className="text-red-400 text-xs animate-in slide-in-from-top-1" 
-                      id="lastName-error" 
-                      initial={{ opacity: 0, y: -10 }} 
+                    <motion.p
+                      initial={{ opacity: 0, y: -10 }}
                       animate={{ opacity: 1, y: 0 }}
-                      transition={{ duration: 0.3 }}
+                      className="text-sm text-red-600"
                     >
                       {errors.lastName}
                     </motion.p>
                   )}
                 </motion.div>
               </div>
-
-              {/* Username field */}
-              <motion.div 
-                whileHover={{ scale: 1.02, y: -2 }}
-                whileFocus={{ scale: 1.03, boxShadow: "0 0 0 3px rgba(59, 130, 246, 0.3)" }}
-                className="space-y-1.5"
+              
+              <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5, delay: 0.2 }}
+                transition={{ duration: 0.5, delay: 0.5 }}
               >
-                <Label htmlFor="username" className="text-xs font-medium text-gray-500">
-                  Kullanıcı Adı
+                <Label htmlFor="username" className="text-sm font-medium text-gray-700">
+                  {t("auth.form.username")}
                 </Label>
-                <div className="relative group">
-                  <motion.div
-                    initial={{ opacity: 0, scale: 0.8 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    transition={{ duration: 0.3, delay: 0.3 }}
-                  >
-                    <User className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4 transition-all duration-300 group-focus-within:text-blue-500 group-hover:text-blue-400" />
-                  </motion.div>
+                <div className="relative">
+                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    <User className="h-4 w-4 text-gray-400" />
+                  </div>
                   <Input
+                    ref={usernameRef}
                     id="username"
                     type="text"
-                    placeholder="Kullanıcı adınızı girin"
+                    placeholder={t("auth.form.username")}
                     value={username}
                     onChange={(e) => handleInputChange('username', e.target.value)}
-                    className={`pl-10 h-10 rounded-lg transition-all duration-300 focus:shadow-lg hover:shadow-md text-sm placeholder:text-gray-400 border-2 ${errors.username ? 'border-red-500 focus:border-red-500 ring-2 ring-red-300' : 'focus:border-blue-500 ring-1 ring-blue-100 hover:border-blue-300 border-gray-200'}`}
-                    disabled={isLoading}
-                    ref={usernameRef}
-                    aria-invalid={!!errors.username}
-                    aria-describedby={errors.username ? 'username-error' : undefined}
-                    autoComplete="username"
+                    className={`pl-10 ${errors.username ? 'border-red-500' : 'border-gray-300'} focus:ring-2 focus:ring-blue-500 focus:border-transparent`}
                   />
-                  {errors.username && (
-                    <motion.div 
-                      className="absolute right-3 top-1/2 transform -translate-y-1/2 text-red-400 h-4 w-4"
-                      initial={{ opacity: 0, scale: 0 }}
-                      animate={{ opacity: 1, scale: 1 }}
-                      transition={{ duration: 0.3 }}
-                    >
-                      <User className="h-4 w-4" />
-                    </motion.div>
-                  )}
                 </div>
                 {errors.username && (
-                  <motion.p 
-                    className="text-red-400 text-xs animate-in slide-in-from-top-1" 
-                    id="username-error" 
-                    initial={{ opacity: 0, y: -10 }} 
+                  <motion.p
+                    initial={{ opacity: 0, y: -10 }}
                     animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.3 }}
+                    className="text-sm text-red-600"
                   >
                     {errors.username}
                   </motion.p>
                 )}
               </motion.div>
-
-              {/* Email field */}
-              <motion.div 
-                whileHover={{ scale: 1.02, y: -2 }}
-                whileFocus={{ scale: 1.03, boxShadow: "0 0 0 3px rgba(59, 130, 246, 0.3)" }}
-                className="space-y-1.5"
+              
+              <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5, delay: 0.25 }}
+                transition={{ duration: 0.5, delay: 0.6 }}
               >
-                <Label htmlFor="email" className="text-xs font-medium text-gray-500">
-                  E-posta
+                <Label htmlFor="email" className="text-sm font-medium text-gray-700">
+                  {t("auth.form.email")}
                 </Label>
-                <div className="relative group">
-                  <motion.div
-                    initial={{ opacity: 0, scale: 0.8 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    transition={{ duration: 0.3, delay: 0.35 }}
-                  >
-                    <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4 transition-all duration-300 group-focus-within:text-blue-500 group-hover:text-blue-400" />
-                  </motion.div>
+                <div className="relative">
+                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    <Mail className="h-4 w-4 text-gray-400" />
+                  </div>
                   <Input
+                    ref={emailRef}
                     id="email"
                     type="email"
-                    placeholder="E-posta adresinizi girin"
+                    placeholder={t("auth.form.email")}
                     value={email}
                     onChange={(e) => handleInputChange('email', e.target.value)}
-                    className={`pl-10 h-10 rounded-lg transition-all duration-300 focus:shadow-lg hover:shadow-md text-sm placeholder:text-gray-400 border-2 ${errors.email ? 'border-red-500 focus:border-red-500 ring-2 ring-red-300' : 'focus:border-blue-500 ring-1 ring-blue-100 hover:border-blue-300 border-gray-200'}`}
-                    disabled={isLoading}
-                    ref={emailRef}
-                    aria-invalid={!!errors.email}
-                    aria-describedby={errors.email ? 'email-error' : undefined}
-                    autoComplete="email"
+                    className={`pl-10 ${errors.email ? 'border-red-500' : 'border-gray-300'} focus:ring-2 focus:ring-blue-500 focus:border-transparent`}
                   />
-                  {errors.email && (
-                    <motion.div 
-                      className="absolute right-3 top-1/2 transform -translate-y-1/2 text-red-400 h-4 w-4"
-                      initial={{ opacity: 0, scale: 0 }}
-                      animate={{ opacity: 1, scale: 1 }}
-                      transition={{ duration: 0.3 }}
-                    >
-                      <Mail className="h-4 w-4" />
-                    </motion.div>
-                  )}
                 </div>
                 {errors.email && (
-                  <motion.p 
-                    className="text-red-400 text-xs animate-in slide-in-from-top-1" 
-                    id="email-error" 
-                    initial={{ opacity: 0, y: -10 }} 
+                  <motion.p
+                    initial={{ opacity: 0, y: -10 }}
                     animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.3 }}
+                    className="text-sm text-red-600"
                   >
                     {errors.email}
                   </motion.p>
                 )}
               </motion.div>
-
-              {/* Password fields side by side */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <motion.div 
-                  whileHover={{ scale: 1.02, y: -2 }}
-                  whileFocus={{ scale: 1.03, boxShadow: "0 0 0 3px rgba(59, 130, 246, 0.3)" }}
-                  className="space-y-1.5"
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.5, delay: 0.3 }}
-                >
-                  <Label htmlFor="password" className="text-xs font-medium text-gray-500">
-                    Şifre
-                  </Label>
-                  <div className="relative group">
-                    <motion.div
-                      initial={{ opacity: 0, scale: 0.8 }}
-                      animate={{ opacity: 1, scale: 1 }}
-                      transition={{ duration: 0.3, delay: 0.4 }}
-                    >
-                      <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4 transition-all duration-300 group-focus-within:text-blue-500 group-hover:text-blue-400" />
-                    </motion.div>
-                    <Input
-                      id="password"
-                      type={showPassword ? "text" : "password"}
-                      placeholder="Şifrenizi girin"
-                      value={password}
-                      onChange={(e) => handleInputChange('password', e.target.value)}
-                      className={`pl-10 pr-10 h-10 rounded-lg transition-all duration-300 focus:shadow-lg hover:shadow-md text-sm placeholder:text-gray-400 border-2 ${errors.password ? 'border-red-500 focus:border-red-500 ring-2 ring-red-300' : 'focus:border-blue-500 ring-1 ring-blue-100 hover:border-blue-300 border-gray-200'}`}
-                      disabled={isLoading}
-                      ref={passwordRef}
-                      aria-invalid={!!errors.password}
-                      aria-describedby={errors.password ? 'password-error' : undefined}
-                      autoComplete="new-password"
-                    />
-                    <motion.button
-                      type="button"
-                      whileHover={{ scale: 1.1 }}
-                      whileTap={{ scale: 0.9 }}
-                      onClick={() => setShowPassword(!showPassword)}
-                      className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-blue-600 transition-all duration-200"
-                      disabled={isLoading}
-                      tabIndex={-1}
-                      aria-label={showPassword ? "Şifreyi gizle" : "Şifreyi göster"}
-                    >
-                      {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                      <span className="sr-only">Şifreyi göster/gizle</span>
-                    </motion.button>
-                    {errors.password && (
-                      <motion.div 
-                        className="absolute right-10 top-1/2 transform -translate-y-1/2 text-red-400 h-4 w-4"
-                        initial={{ opacity: 0, scale: 0 }}
-                        animate={{ opacity: 1, scale: 1 }}
-                        transition={{ duration: 0.3 }}
-                      >
-                        <Lock className="h-4 w-4" />
-                      </motion.div>
-                    )}
+              
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, delay: 0.7 }}
+              >
+                <Label htmlFor="password" className="text-sm font-medium text-gray-700">
+                  {t("auth.form.password")}
+                </Label>
+                <div className="relative">
+                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    <Lock className="h-4 w-4 text-gray-400" />
                   </div>
-                  {errors.password && (
-                    <motion.p 
-                      className="text-red-400 text-xs animate-in slide-in-from-top-1" 
-                      id="password-error" 
-                      initial={{ opacity: 0, y: -10 }} 
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ duration: 0.3 }}
-                    >
-                      {errors.password}
-                    </motion.p>
-                  )}
-                  {password && (
-                    <motion.div 
-                      className="flex items-center space-x-2 text-xs"
-                      initial={{ opacity: 0, y: 5 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ duration: 0.3 }}
-                    >
-                      <span className="text-gray-500">Güçlük:</span>
-                      <span className={`font-medium ${passwordStrengthColor}`}>
-                        {passwordStrength}
-                      </span>
-                    </motion.div>
-                  )}
-                </motion.div>
-
-                <motion.div 
-                  whileHover={{ scale: 1.02, y: -2 }}
-                  whileFocus={{ scale: 1.03, boxShadow: "0 0 0 3px rgba(59, 130, 246, 0.3)" }}
-                  className="space-y-1.5"
-                >
-                  <Label htmlFor="password2" className="text-xs font-medium text-gray-500">
-                    Şifre Tekrar
-                  </Label>
-                  <div className="relative group">
-                    <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4 transition-all duration-300 group-focus-within:text-blue-500 group-hover:text-blue-400" />
-                    <Input
-                      id="password2"
-                      type={showPassword2 ? "text" : "password"}
-                      placeholder="Şifrenizi tekrar girin"
-                      value={password2}
-                      onChange={(e) => handleInputChange('password2', e.target.value)}
-                      className={`pl-10 pr-14 h-10 rounded-lg transition-all duration-300 focus:shadow-lg hover:shadow-md text-sm placeholder:text-gray-400 ${errors.password2 ? 'border-red-500 focus:border-red-500 ring-2 ring-red-300' : 'focus:border-blue-500 ring-1 ring-blue-100 hover:border-blue-300'}`}
-                      disabled={isLoading}
-                      ref={password2Ref}
-                      aria-invalid={!!errors.password2}
-                      aria-describedby={errors.password2 ? 'password2-error' : undefined}
-                      autoComplete="new-password"
-                    />
-                    <motion.button
-                      type="button"
-                      whileHover={{ scale: 1.1 }}
-                      whileTap={{ scale: 0.9 }}
-                      onClick={() => setShowPassword2(!showPassword2)}
-                      className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-blue-600 transition-all duration-200"
-                      disabled={isLoading}
-                      tabIndex={-1}
-                      aria-label={showPassword2 ? "Şifreyi gizle" : "Şifreyi göster"}
-                    >
-                      {showPassword2 ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                      <span className="sr-only">Şifreyi göster/gizle</span>
-                    </motion.button>
-                    {errors.password2 && (
-                      <Lock className="absolute right-10 top-1/2 transform -translate-y-1/2 text-red-400 h-4 w-4 animate-shake" />
-                    )}
+                  <Input
+                    ref={passwordRef}
+                    id="password"
+                    type={showPassword ? "text" : "password"}
+                    placeholder={t("auth.form.password")}
+                    value={password}
+                    onChange={(e) => handleInputChange('password', e.target.value)}
+                    className={`pl-10 pr-10 ${errors.password ? 'border-red-500' : 'border-gray-300'} focus:ring-2 focus:ring-blue-500 focus:border-transparent`}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute inset-y-0 right-0 pr-3 flex items-center"
+                  >
+                    {showPassword ? <EyeOff className="h-4 w-4 text-gray-400" /> : <Eye className="h-4 w-4 text-gray-400" />}
+                  </button>
+                </div>
+                {password && (
+                  <motion.div
+                    initial={{ opacity: 0, y: -10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="flex items-center space-x-2 mt-1"
+                  >
+                    <div className={`flex items-center space-x-1 ${passwordStrengthColor}`}>
+                      <CheckCircle className="h-3 w-3" />
+                      <span className="text-xs">{passwordStrength}</span>
+                    </div>
+                  </motion.div>
+                )}
+                {errors.password && (
+                  <motion.p
+                    initial={{ opacity: 0, y: -10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="text-sm text-red-600"
+                  >
+                    {errors.password}
+                  </motion.p>
+                )}
+              </motion.div>
+              
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, delay: 0.8 }}
+              >
+                <Label htmlFor="password2" className="text-sm font-medium text-gray-700">
+                  {t("auth.form.confirmPassword")}
+                </Label>
+                <div className="relative">
+                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    <Lock className="h-4 w-4 text-gray-400" />
                   </div>
-                  {errors.password2 && (
-                    <motion.p 
-                      className="text-red-400 text-xs animate-in slide-in-from-top-1" 
-                      id="password2-error" 
-                      initial={{ opacity: 0, y: -10 }} 
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ duration: 0.3 }}
-                    >
-                      {errors.password2}
-                    </motion.p>
-                  )}
-                </motion.div>
-              </div>
+                  <Input
+                    ref={password2Ref}
+                    id="password2"
+                    type={showPassword2 ? "text" : "password"}
+                    placeholder={t("auth.form.confirmPassword")}
+                    value={password2}
+                    onChange={(e) => handleInputChange('password2', e.target.value)}
+                    className={`pl-10 pr-10 ${errors.password2 ? 'border-red-500' : 'border-gray-300'} focus:ring-2 focus:ring-blue-500 focus:border-transparent`}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword2(!showPassword2)}
+                    className="absolute inset-y-0 right-0 pr-3 flex items-center"
+                  >
+                    {showPassword2 ? <EyeOff className="h-4 w-4 text-gray-400" /> : <Eye className="h-4 w-4 text-gray-400" />}
+                  </button>
+                </div>
+                {errors.password2 && (
+                  <motion.p
+                    initial={{ opacity: 0, y: -10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="text-sm text-red-600"
+                  >
+                    {errors.password2}
+                  </motion.p>
+                )}
+              </motion.div>
             </CardContent>
+            
             <CardFooter className="flex flex-col space-y-4 pt-0">
               <div className="flex flex-col space-y-3 w-full">
                 <motion.div 
@@ -588,14 +455,14 @@ export default function SignupPage() {
                         className="flex items-center"
                       >
                         <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                        Kayıt olunuyor...
+                        {t("auth.signupProcessing")}
                       </motion.div>
                     ) : (
                       <motion.span
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                       >
-                        Kayıt Ol
+                        {t("auth.signup")}
                       </motion.span>
                     )}
                   </Button>
@@ -608,7 +475,7 @@ export default function SignupPage() {
                   animate={{ opacity: 1 }}
                   transition={{ delay: 0.5 }}
                 >
-                  Zaten hesabınız var mı?{" "}
+                  {t("auth.alreadyHaveAccount")}{" "}
                   <motion.button
                     type="button"
                     whileHover={{ scale: 1.05, y: -1 }}
@@ -617,7 +484,7 @@ export default function SignupPage() {
                     className="text-blue-600 hover:text-blue-700 font-medium transition-all duration-200 underline underline-offset-2 hover:underline-offset-4"
                     disabled={isLoading}
                   >
-                    Giriş yapın
+                    {t("auth.goToLogin")}
                   </motion.button>
                 </motion.p>
               </div>
@@ -626,7 +493,7 @@ export default function SignupPage() {
         </Card>
         <div className="mt-8 text-center">
           <p className="text-xs text-gray-500">
-            © 2024 Kütüphane Yönetim Sistemi. All rights reserved.
+            © 2024 {t("auth.systemTitle")}. All rights reserved.
           </p>
         </div>
       </div>

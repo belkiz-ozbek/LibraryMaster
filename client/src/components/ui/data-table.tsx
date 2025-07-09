@@ -9,6 +9,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 
 interface Column<T> {
   key: keyof T | string;
@@ -55,6 +56,7 @@ export function DataTable<T extends Record<string, any>>({
   const [currentPage, setCurrentPage] = useState(1);
   const [sortColumn, setSortColumn] = useState<string | null>(null);
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("asc");
+  const { t } = useTranslation();
 
   // Sort data
   const sortedData = [...data].sort((a, b) => {
@@ -152,7 +154,11 @@ export function DataTable<T extends Record<string, any>>({
       {totalPages > 1 && (
         <div className="flex items-center justify-between">
           <p className="text-sm text-text-muted">
-            Showing {startIndex + 1} to {Math.min(startIndex + pageSize, data.length)} of {data.length} results
+            {t("pagination.showing", {
+              start: startIndex + 1,
+              end: Math.min(startIndex + pageSize, data.length),
+              total: data.length
+            })}
           </p>
           <div className="flex items-center space-x-2">
             <Button
@@ -162,7 +168,7 @@ export function DataTable<T extends Record<string, any>>({
               disabled={currentPage === 1}
             >
               <ChevronLeft size={16} />
-              Previous
+              {t("pagination.previous")}
             </Button>
             <div className="flex items-center space-x-1">
               {Array.from({ length: totalPages }, (_, i) => i + 1)
@@ -193,7 +199,7 @@ export function DataTable<T extends Record<string, any>>({
               onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
               disabled={currentPage === totalPages}
             >
-              Next
+              {t("pagination.next")}
               <ChevronRight size={16} />
             </Button>
           </div>
@@ -244,6 +250,7 @@ export function ServerDataTable<T extends Record<string, any>>({
   }
 
   const { data: tableData, pagination } = data;
+  const { t } = useTranslation();
 
   const getValue = (row: T, key: string) => {
     if (key.includes('.')) {
@@ -309,7 +316,11 @@ export function ServerDataTable<T extends Record<string, any>>({
       {pagination.totalPages > 1 && (
         <div className="flex items-center justify-between">
           <p className="text-sm text-text-muted">
-            Showing {((pagination.page - 1) * pagination.limit) + 1} to {Math.min(pagination.page * pagination.limit, pagination.total)} of {pagination.total} results
+            {t("pagination.showing", {
+              start: ((pagination.page - 1) * pagination.limit) + 1,
+              end: Math.min(pagination.page * pagination.limit, pagination.total),
+              total: pagination.total
+            })}
           </p>
           <div className="flex items-center space-x-2">
             <Button
@@ -319,7 +330,7 @@ export function ServerDataTable<T extends Record<string, any>>({
               disabled={!pagination.hasPrev}
             >
               <ChevronLeft size={16} />
-              Previous
+              {t("pagination.previous")}
             </Button>
             <div className="flex items-center space-x-1">
               {Array.from({ length: pagination.totalPages }, (_, i) => i + 1)
@@ -350,7 +361,7 @@ export function ServerDataTable<T extends Record<string, any>>({
               onClick={() => onPageChange?.(pagination.page + 1)}
               disabled={!pagination.hasNext}
             >
-              Next
+              {t("pagination.next")}
               <ChevronRight size={16} />
             </Button>
           </div>

@@ -47,54 +47,57 @@ const SearchBox = ({
   showDropdown: boolean;
   searchResults: SearchResults;
   onResultClick: (type: string, id: number) => void;
-}) => (
-  <div className="relative">
-    <form onSubmit={onSearch} autoComplete="off">
-      <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={16} />
-      <Input
-        type="text"
-        placeholder="Üye ara"
-        value={searchQuery}
-        onChange={onInputChange}
-        onFocus={() => searchQuery.length >= 2 && onResultClick('', 0)}
-        className="w-80 pl-9 pr-3 py-2 rounded-lg bg-white border border-gray-200 focus:ring-2 focus:ring-blue-200 text-sm placeholder-gray-400"
-      />
-    </form>
-    {showDropdown && (searchQuery.length >= 2) && (
-      <div className="absolute z-50 mt-2 w-96 bg-white border border-gray-200 rounded-xl shadow-2xl max-h-96 overflow-auto">
-        {searchLoading ? (
-          <div className="p-4 text-center text-gray-500 text-sm">Aranıyor...</div>
-        ) : (
-          <>
-            {searchResults.users.length > 0 && (
-              <div>
-                <div className="px-6 pt-3 pb-2 text-xs font-semibold text-gray-400 uppercase tracking-wider">Üyeler</div>
-                {searchResults.users.map((user: SearchResult) => (
-                  <div
-                    key={user.id}
-                    className="flex items-center gap-4 px-6 py-3 cursor-pointer hover:bg-blue-50 transition-colors rounded-lg mb-1"
-                    onClick={() => onResultClick('user', user.id)}
-                  >
-                    <div className="flex-shrink-0 w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 font-bold text-lg uppercase shadow-sm">
-                      {user.name?.[0] || '?'}
+}) => {
+  const { t } = useTranslation();
+  return (
+    <div className="relative">
+      <form onSubmit={onSearch} autoComplete="off">
+        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={16} />
+        <Input
+          type="text"
+          placeholder={t("header.searchMember")}
+          value={searchQuery}
+          onChange={onInputChange}
+          onFocus={() => searchQuery.length >= 2 && onResultClick('', 0)}
+          className="w-80 pl-9 pr-3 py-2 rounded-lg bg-white border border-gray-200 focus:ring-2 focus:ring-blue-200 text-sm placeholder-gray-400"
+        />
+      </form>
+      {showDropdown && (searchQuery.length >= 2) && (
+        <div className="absolute z-50 mt-2 w-96 bg-white border border-gray-200 rounded-xl shadow-2xl max-h-96 overflow-auto">
+          {searchLoading ? (
+            <div className="p-4 text-center text-gray-500 text-sm">Aranıyor...</div>
+          ) : (
+            <>
+              {searchResults.users.length > 0 && (
+                <div>
+                  <div className="px-6 pt-3 pb-2 text-xs font-semibold text-gray-400 uppercase tracking-wider">Üyeler</div>
+                  {searchResults.users.map((user: SearchResult) => (
+                    <div
+                      key={user.id}
+                      className="flex items-center gap-4 px-6 py-3 cursor-pointer hover:bg-blue-50 transition-colors rounded-lg mb-1"
+                      onClick={() => onResultClick('user', user.id)}
+                    >
+                      <div className="flex-shrink-0 w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 font-bold text-lg uppercase shadow-sm">
+                        {user.name?.[0] || '?'}
+                      </div>
+                      <div className="flex flex-col">
+                        <span className="font-medium text-gray-900 text-base">{user.name}</span>
+                        <span className="text-xs text-gray-500">{user.email}</span>
+                      </div>
                     </div>
-                    <div className="flex flex-col">
-                      <span className="font-medium text-gray-900 text-base">{user.name}</span>
-                      <span className="text-xs text-gray-500">{user.email}</span>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-            {searchResults.users.length === 0 && (
-              <div className="p-6 text-center text-gray-500 text-sm">Sonuç bulunamadı</div>
-            )}
-          </>
-        )}
-      </div>
-    )}
-  </div>
-);
+                  ))}
+                </div>
+              )}
+              {searchResults.users.length === 0 && (
+                <div className="p-6 text-center text-gray-500 text-sm">Sonuç bulunamadı</div>
+              )}
+            </>
+          )}
+        </div>
+      )}
+    </div>
+  );
+};
 
 const LanguageSelector = ({ 
   i18n, 
@@ -156,8 +159,8 @@ export default function Header() {
     }
     if (location.startsWith("/activities")) {
       return { 
-        title: "Aktivite Akışı", 
-        description: "Kütüphane sistemindeki tüm aktiviteleri takip edin" 
+        title: t("activities.title"), 
+        description: t("activities.description") 
       };
     }
     return pageInfo[location] || { title: t("header.pageNotFound"), description: "" };

@@ -1,13 +1,14 @@
-import { useState, useRef, useEffect, useCallback, useMemo } from "react";
+import React, { useState, useEffect, useCallback, useRef } from "react";
 import { useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/components/ui/use-toast";
 import { useAuth } from "@/lib/auth";
-import { Eye, EyeOff, Mail, Lock, Loader2, User } from "lucide-react";
+import { Eye, EyeOff, Lock, Loader2, User } from "lucide-react";
 import { motion } from "framer-motion";
+import { useTranslation } from "react-i18next";
 
 // Types
 interface FormErrors {
@@ -15,23 +16,66 @@ interface FormErrors {
   password?: string;
 }
 
-interface InputFieldProps {
-  id: string;
+// Form Field Component
+interface FormFieldProps {
+  label: string;
   type: string;
   placeholder: string;
   value: string;
   onChange: (value: string) => void;
   error?: string;
-  disabled: boolean;
-  ref: React.RefObject<HTMLInputElement>;
-  autoComplete: string;
-  icon: React.ReactNode;
+  ref?: React.Ref<HTMLInputElement>;
+  icon?: React.ReactNode;
   showPasswordToggle?: boolean;
   showPassword?: boolean;
   onTogglePassword?: () => void;
 }
 
-// Extracted Components
+const FormField = React.forwardRef<HTMLInputElement, FormFieldProps>(
+  ({ label, type, placeholder, value, onChange, error, icon, showPasswordToggle, showPassword, onTogglePassword }, ref) => (
+    <div className="space-y-2">
+      <Label htmlFor={label.toLowerCase()} className="text-sm font-medium text-gray-700">
+        {label}
+      </Label>
+      <div className="relative">
+        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+          {icon}
+        </div>
+        <Input
+          ref={ref}
+          id={label.toLowerCase()}
+          type={type}
+          placeholder={placeholder}
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+          className={`pl-10 pr-10 ${error ? 'border-red-500' : 'border-gray-300'} focus:ring-2 focus:ring-blue-500 focus:border-transparent`}
+        />
+        {showPasswordToggle && (
+          <button
+            type="button"
+            onClick={onTogglePassword}
+            className="absolute inset-y-0 right-0 pr-3 flex items-center"
+          >
+            {showPassword ? <EyeOff className="h-4 w-4 text-gray-400" /> : <Eye className="h-4 w-4 text-gray-400" />}
+          </button>
+        )}
+      </div>
+      {error && (
+        <motion.p
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="text-sm text-red-600"
+        >
+          {error}
+        </motion.p>
+      )}
+    </div>
+  )
+);
+
+FormField.displayName = "FormField";
+
+// Video Background Component
 const VideoBackground = () => (
   <div className="fixed inset-0 -z-10 w-full h-full overflow-hidden">
     <video
@@ -91,156 +135,77 @@ const LogoSection = () => (
   </motion.div>
 );
 
-const TitleSection = () => (
-  <motion.div 
-    initial={{ opacity: 0, y: -10 }}
-    animate={{ opacity: 1, y: 0 }}
-    transition={{ duration: 0.5, delay: 0.7 }}
-    className="text-center space-y-1"
-  >
-    <CardTitle className="text-2xl font-extrabold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent tracking-tight">
-      Kütüphane Yönetim Sistemi
-    </CardTitle>
+const TitleSection = () => {
+  const { t } = useTranslation();
+  
+  return (
     <motion.div 
-      initial={{ opacity: 0, scaleX: 0 }}
-      animate={{ opacity: 1, scaleX: 1 }}
-      transition={{ duration: 0.4, delay: 0.8 }}
-      className="h-1 w-16 mx-auto bg-gradient-to-r from-blue-400 to-purple-400 rounded-full mb-1"
-    ></motion.div>
-    <CardDescription className="text-gray-700 text-base font-medium">
-      Hesabınıza giriş yapın ve kitap dünyasına erişin.
-    </CardDescription>
-  </motion.div>
-);
-
-const InputField = ({ 
-  id, 
-  type, 
-  placeholder, 
-  value, 
-  onChange, 
-  error, 
-  disabled, 
-  ref, 
-  autoComplete, 
-  icon, 
-  showPasswordToggle, 
-  showPassword, 
-  onTogglePassword 
-}: InputFieldProps) => (
-  <motion.div 
-    whileHover={{ scale: 1.02, y: -2 }}
-    whileFocus={{ scale: 1.03, boxShadow: "0 0 0 3px rgba(59, 130, 246, 0.3)" }}
-    className="space-y-2"
-    initial={{ opacity: 0, y: 20 }}
-    animate={{ opacity: 1, y: 0 }}
-    transition={{ duration: 0.5, delay: 0.1 }}
-  >
-    <Label htmlFor={id} className="text-xs font-medium text-gray-500">
-      {placeholder}
-    </Label>
-    <div className="relative group">
-      <motion.div
-        initial={{ opacity: 0, scale: 0.8 }}
-        animate={{ opacity: 1, scale: 1 }}
-        transition={{ duration: 0.3, delay: 0.2 }}
-      >
-        {icon}
-      </motion.div>
-      <Input
-        id={id}
-        type={type}
-        placeholder={placeholder}
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        className={`pl-10 h-10 rounded-lg transition-all duration-300 focus:shadow-lg hover:shadow-md text-sm placeholder:text-gray-400 border-2 ${error ? 'border-red-500 focus:border-red-500 ring-2 ring-red-300' : 'focus:border-blue-500 ring-1 ring-blue-100 hover:border-blue-300 border-gray-200'}`}
-        disabled={disabled}
-        ref={ref}
-        aria-invalid={!!error}
-        aria-describedby={error ? `${id}-error` : undefined}
-        autoComplete={autoComplete}
-      />
-      {showPasswordToggle && (
-        <motion.button
-          type="button"
-          whileHover={{ scale: 1.1 }}
-          whileTap={{ scale: 0.9 }}
-          onClick={onTogglePassword}
-          className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-blue-600 transition-all duration-200"
-          disabled={disabled}
-          tabIndex={-1}
-          aria-label={showPassword ? "Şifreyi gizle" : "Şifreyi göster"}
-        >
-          {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-          <span className="sr-only">Şifreyi göster/gizle</span>
-        </motion.button>
-      )}
-      {error && (
-        <motion.div 
-          className="absolute right-3 top-1/2 transform -translate-y-1/2 text-red-400 h-4 w-4"
-          initial={{ opacity: 0, scale: 0 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 0.3 }}
-        >
-          {type === "password" ? <Lock className="h-4 w-4" /> : <User className="h-4 w-4" />}
-        </motion.div>
-      )}
-    </div>
-    {error && (
-      <motion.p 
-        className="text-red-400 text-xs animate-in slide-in-from-top-1" 
-        id={`${id}-error`} 
-        initial={{ opacity: 0, y: -10 }} 
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.3 }}
-      >
-        {error}
-      </motion.p>
-    )}
-  </motion.div>
-);
-
-const SubmitButton = ({ isLoading, onSubmit }: { isLoading: boolean; onSubmit: (e: React.FormEvent) => void }) => (
-  <motion.div 
-    whileHover={{ scale: 1.02, y: -2 }}
-    whileTap={{ scale: 0.98 }}
-    initial={{ opacity: 0, y: 20 }}
-    animate={{ opacity: 1, y: 0 }}
-    transition={{ duration: 0.5, delay: 0.3 }}
-  >
-    <Button 
-      type="submit" 
-      className="w-full h-11 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-medium rounded-lg shadow-lg transition-all duration-300 transform hover:scale-[1.02] active:scale-[0.98] hover:shadow-xl relative overflow-hidden group"
-      disabled={isLoading}
-      onClick={onSubmit}
+      initial={{ opacity: 0, y: -10 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5, delay: 0.7 }}
+      className="text-center space-y-1"
     >
-      <motion.div
-        className="absolute inset-0 bg-gradient-to-r from-white/20 to-transparent"
-        initial={{ x: "-100%" }}
-        whileHover={{ x: "100%" }}
-        transition={{ duration: 0.6 }}
-      />
-      {isLoading ? (
+      <CardTitle className="text-2xl font-extrabold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent tracking-tight">
+        {t("auth.systemTitle")}
+      </CardTitle>
+      <motion.div 
+        initial={{ opacity: 0, scaleX: 0 }}
+        animate={{ opacity: 1, scaleX: 1 }}
+        transition={{ duration: 0.4, delay: 0.8 }}
+        className="h-1 w-16 mx-auto bg-gradient-to-r from-blue-400 to-purple-400 rounded-full mb-1"
+      ></motion.div>
+      <CardDescription className="text-gray-700 text-base font-medium">
+        {t("auth.loginDesc")}
+      </CardDescription>
+    </motion.div>
+  );
+};
+
+const SubmitButton = ({ isLoading, onSubmit }: { isLoading: boolean; onSubmit: (e: React.FormEvent) => void }) => {
+  const { t } = useTranslation();
+  
+  return (
+    <motion.div 
+      whileHover={{ scale: 1.02, y: -2 }}
+      whileTap={{ scale: 0.98 }}
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5, delay: 0.3 }}
+    >
+      <Button 
+        type="submit" 
+        className="w-full h-11 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-medium rounded-lg shadow-lg transition-all duration-300 transform hover:scale-[1.02] active:scale-[0.98] hover:shadow-xl relative overflow-hidden group"
+        disabled={isLoading}
+        onClick={onSubmit}
+      >
         <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          className="flex items-center relative z-10"
-        >
-          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-          Giriş yapılıyor...
-        </motion.div>
-      ) : (
-        <motion.span
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          className="relative z-10"
-        >
-          Giriş Yap
-        </motion.span>
-      )}
-    </Button>
-  </motion.div>
-);
+          className="absolute inset-0 bg-gradient-to-r from-white/20 to-transparent"
+          initial={{ x: "-100%" }}
+          whileHover={{ x: "100%" }}
+          transition={{ duration: 0.6 }}
+        />
+        {isLoading ? (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            className="flex items-center relative z-10"
+          >
+            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+            {t("loading.signingIn")}
+          </motion.div>
+        ) : (
+          <motion.span
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            className="relative z-10"
+          >
+            {t("auth.signIn")}
+          </motion.span>
+        )}
+      </Button>
+    </motion.div>
+  );
+};
 
 export default function LoginPage() {
   const [identifier, setIdentifier] = useState("");
@@ -251,6 +216,7 @@ export default function LoginPage() {
   const [, navigate] = useLocation();
   const { toast } = useToast();
   const { login } = useAuth();
+  const { t } = useTranslation();
   const identifierRef = useRef<HTMLInputElement>(null);
   const passwordRef = useRef<HTMLInputElement>(null);
 
@@ -263,14 +229,14 @@ export default function LoginPage() {
   const validateForm = useCallback(() => {
     const newErrors: FormErrors = {};
     if (!identifier.trim()) {
-      newErrors.identifier = "Kullanıcı adı veya e-posta zorunlu";
+      newErrors.identifier = t("auth.form.identifierRequired");
     }
     if (!password) {
-      newErrors.password = "Şifre zorunlu";
+      newErrors.password = t("auth.form.passwordRequired");
     }
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
-  }, [identifier, password]);
+  }, [identifier, password, t]);
 
   // Memoized submit handler
   const handleSubmit = useCallback(async (e: React.FormEvent) => {
@@ -282,14 +248,14 @@ export default function LoginPage() {
       navigate("/");
     } catch (error: any) {
       toast({
-        title: "Giriş başarısız",
-        description: error.message || "Giriş sırasında bir hata oluştu.",
+        title: t("auth.loginFailed"),
+        description: error.message || t("auth.invalidCredentials"),
         variant: "destructive",
       });
     } finally {
       setIsLoading(false);
     }
-  }, [identifier, password, validateForm, login, navigate, toast]);
+  }, [identifier, password, validateForm, login, navigate, toast, t]);
 
   // Memoized input change handler
   const handleInputChange = useCallback((field: 'identifier' | 'password', value: string) => {
@@ -326,43 +292,39 @@ export default function LoginPage() {
             </motion.div>
           </CardHeader>
           
-          <form onSubmit={handleSubmit} className="space-y-6" autoComplete="off">
-            <CardContent className="space-y-5">
+          <form onSubmit={handleSubmit} className="space-y-6">
+            <CardContent className="space-y-4">
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5, delay: 0.1 }}
+                transition={{ duration: 0.5, delay: 0.3 }}
               >
-                <InputField
-                  id="identifier"
+                <FormField
+                  label={t("auth.form.identifier")}
                   type="text"
-                  placeholder="Kullanıcı adı veya e-posta"
+                  placeholder={t("auth.form.identifier")}
                   value={identifier}
                   onChange={(value) => handleInputChange('identifier', value)}
                   error={errors.identifier}
-                  disabled={isLoading}
                   ref={identifierRef}
-                  autoComplete="username"
-                  icon={<User className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4 transition-all duration-300 group-focus-within:text-blue-500 group-hover:text-blue-400" />}
+                  icon={<User className="h-4 w-4" />}
                 />
               </motion.div>
               
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5, delay: 0.2 }}
+                transition={{ duration: 0.5, delay: 0.4 }}
               >
-                <InputField
-                  id="password"
+                <FormField
+                  label={t("auth.form.password")}
                   type={showPassword ? "text" : "password"}
-                  placeholder="Şifrenizi girin"
+                  placeholder={t("auth.form.password")}
                   value={password}
                   onChange={(value) => handleInputChange('password', value)}
                   error={errors.password}
-                  disabled={isLoading}
                   ref={passwordRef}
-                  autoComplete="current-password"
-                  icon={<Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4 transition-all duration-300 group-focus-within:text-blue-500 group-hover:text-blue-400" />}
+                  icon={<Lock className="h-4 w-4" />}
                   showPasswordToggle={true}
                   showPassword={showPassword}
                   onTogglePassword={togglePassword}
@@ -386,7 +348,7 @@ export default function LoginPage() {
                   animate={{ opacity: 1 }}
                   transition={{ delay: 0.5 }}
                 >
-                  Hesabınız yok mu?{" "}
+                  {t("auth.dontHaveAccount")}{" "}
                   <motion.button
                     type="button"
                     whileHover={{ scale: 1.05, y: -1 }}
@@ -395,7 +357,7 @@ export default function LoginPage() {
                     className="text-blue-600 hover:text-blue-700 font-medium transition-all duration-200 underline underline-offset-2 hover:underline-offset-4"
                     disabled={isLoading}
                   >
-                    Kayıt olun
+                    {t("auth.goToSignup")}
                   </motion.button>
                 </motion.p>
               </motion.div>
@@ -404,7 +366,7 @@ export default function LoginPage() {
         </Card>
         <div className="mt-8 text-center">
           <p className="text-xs text-gray-500">
-            © 2024 Kütüphane Yönetim Sistemi. All rights reserved.
+            © 2024 {t("auth.systemTitle")}. All rights reserved.
           </p>
         </div>
       </div>

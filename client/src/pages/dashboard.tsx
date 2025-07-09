@@ -219,6 +219,33 @@ export default function Dashboard() {
     queryKey: ["/api/stats/weekly-activity"],
   });
 
+  // Gün kısaltmalarını çeviri sistemi ile eşleştir
+  const dayMap: Record<string, string> = {
+    "Pzt": "mon",
+    "Sal": "tue",
+    "Çar": "wed",
+    "Per": "thu",
+    "Cum": "fri",
+    "Cmt": "sat",
+    "Paz": "sun",
+    "mon": "mon",
+    "tue": "tue",
+    "wed": "wed",
+    "thu": "thu",
+    "fri": "fri",
+    "sat": "sat",
+    "sun": "sun"
+  };
+  const getDayTranslation = (dayKey: string) => {
+    return t(`common.days.${dayMap[dayKey] || dayKey}`);
+  };
+
+  // Weekly activity verilerini çeviri ile dönüştür
+  const translatedWeeklyActivity = weeklyActivity.map(item => ({
+    ...item,
+    day: getDayTranslation(item.day)
+  }));
+
   // Tür dağılımı verisi
   const { data: genreDistribution = [] } = useQuery<any[]>({
     queryKey: ["/api/stats/genre-distribution"],
@@ -268,7 +295,7 @@ export default function Dashboard() {
     },
     {
       key: "dueDate",
-      title: "Gecikme (gün)",
+      title: t("borrowing.delayDays"),
       render: (value: string) => {
         const daysOverdue = Math.floor((Date.now() - new Date(value).getTime()) / (1000 * 60 * 60 * 24));
         return (
@@ -384,13 +411,13 @@ export default function Dashboard() {
           <motion.div variants={itemVariants} className="lg:col-span-3">
             <Card>
               <CardHeader>
-                <CardTitle>Haftalık Aktivite</CardTitle>
-                <CardDescription>Son 7 gündeki ödünç alma ve iade işlemleri</CardDescription>
+                <CardTitle>{t("dashboard.weeklyActivity")}</CardTitle>
+                <CardDescription>{t("dashboard.weeklyActivityDesc")}</CardDescription>
               </CardHeader>
               <CardContent>
                 <ResponsiveContainer width="100%" height={300}>
                   <AreaChart
-                    data={weeklyActivity}
+                    data={translatedWeeklyActivity}
                     margin={{ top: 10, right: 30, left: 0, bottom: 0 }}
                   >
                     <defs>
@@ -428,7 +455,7 @@ export default function Dashboard() {
                       stroke={chartColors.primary} 
                       fillOpacity={1} 
                       fill="url(#colorBorrowed)" 
-                      name="Ödünç Alınan"
+                      name={t("dashboard.borrowed")}
                       strokeWidth={2}
                     />
                     <Area 
@@ -437,7 +464,7 @@ export default function Dashboard() {
                       stroke={chartColors.secondary} 
                       fillOpacity={1} 
                       fill="url(#colorReturned)" 
-                      name="İade Edilen"
+                      name={t("dashboard.returned")}
                       strokeWidth={2}
                     />
                   </AreaChart>
@@ -450,8 +477,8 @@ export default function Dashboard() {
           <motion.div variants={itemVariants} className="lg:col-span-2">
             <Card>
               <CardHeader>
-                <CardTitle>Koleksiyon Dağılımı</CardTitle>
-                <CardDescription>Kitapların türlere göre dağılımı</CardDescription>
+                <CardTitle>{t("dashboard.collectionDistribution")}</CardTitle>
+                <CardDescription>{t("dashboard.collectionDistributionDesc")}</CardDescription>
               </CardHeader>
               <CardContent>
                 <ResponsiveContainer width="100%" height={300}>
@@ -465,7 +492,18 @@ export default function Dashboard() {
                       paddingAngle={8}
                       dataKey="value"
                       labelLine={false}
-                      label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
+                      label={({ name, percent }) => {
+                        const key = (name || '')
+                          .toLowerCase()
+                          .replace(/ /g, '')
+                          .replace(/ç/g, 'c')
+                          .replace(/ı/g, 'i')
+                          .replace(/ş/g, 's')
+                          .replace(/ü/g, 'u')
+                          .replace(/ö/g, 'o')
+                          .replace(/ğ/g, 'g');
+                        return `${t('genres.' + key)} ${(percent * 100).toFixed(0)}%`;
+                      }}
                     >
                       {genreDistribution.map((entry, index) => (
                         <Cell 

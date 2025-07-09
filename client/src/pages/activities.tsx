@@ -115,22 +115,22 @@ export default function Activities() {
       setIsRefreshing(false);
       if (JSON.stringify(newData) === prev) {
         toast({
-          title: "Aktiviteler zaten güncel",
-          description: "Yeni bir aktivite bulunamadı.",
+          title: t("activities.refreshNoNew"),
+          description: t("activities.refreshNoNew"),
           variant: "default",
         });
       } else {
         toast({
-          title: "Aktiviteler başarıyla yenilendi",
-          description: "Son aktiviteler güncellendi.",
+          title: t("activities.refreshSuccess"),
+          description: t("activities.refreshSuccess"),
           variant: "default",
         });
       }
     } catch (err) {
       setIsRefreshing(false);
       toast({
-        title: "Aktiviteler yenilenemedi",
-        description: "Bir hata oluştu. Lütfen tekrar deneyin.",
+        title: t("activities.refreshError"),
+        description: t("activities.refreshError"),
         variant: "destructive",
       });
     }
@@ -161,7 +161,7 @@ export default function Activities() {
             ) : (
               <RefreshCw size={16} className="mr-1" />
             )}
-            {isRefreshing ? 'Yenileniyor...' : 'Yenile'}
+            {isRefreshing ? t("activities.refreshing") : t("activities.refresh")}
           </Button>
         </div>
       </motion.div>
@@ -174,7 +174,7 @@ export default function Activities() {
               <Activity className="h-8 w-8 text-primary mr-3" />
               <div>
                 <p className="text-2xl font-bold">{stats.total}</p>
-                <p className="text-sm text-muted-foreground">Toplam</p>
+                <p className="text-sm text-muted-foreground">{t("activities.stats.total")}</p>
               </div>
             </div>
           </CardContent>
@@ -186,7 +186,7 @@ export default function Activities() {
               <TrendingUp className="h-8 w-8 text-green-600 mr-3" />
               <div>
                 <p className="text-2xl font-bold">{stats.borrowing}</p>
-                <p className="text-sm text-muted-foreground">Ödünç Alma</p>
+                <p className="text-sm text-muted-foreground">{t("activities.stats.borrowing")}</p>
               </div>
             </div>
           </CardContent>
@@ -198,7 +198,7 @@ export default function Activities() {
               <CheckCircle className="h-8 w-8 text-blue-600 mr-3" />
               <div>
                 <p className="text-2xl font-bold">{stats.returns}</p>
-                <p className="text-sm text-muted-foreground">İade</p>
+                <p className="text-sm text-muted-foreground">{t("activities.stats.returns")}</p>
               </div>
             </div>
           </CardContent>
@@ -210,7 +210,7 @@ export default function Activities() {
               <AlertTriangle className="h-8 w-8 text-red-600 mr-3" />
               <div>
                 <p className="text-2xl font-bold">{stats.overdue}</p>
-                <p className="text-sm text-muted-foreground">Gecikmiş</p>
+                <p className="text-sm text-muted-foreground">{t("activities.stats.overdue")}</p>
               </div>
             </div>
           </CardContent>
@@ -222,7 +222,7 @@ export default function Activities() {
               <Clock className="h-8 w-8 text-purple-600 mr-3" />
               <div>
                 <p className="text-2xl font-bold">{stats.newMembers}</p>
-                <p className="text-sm text-muted-foreground">Yeni Üye</p>
+                <p className="text-sm text-muted-foreground">{t("activities.stats.newMembers")}</p>
               </div>
             </div>
           </CardContent>
@@ -234,7 +234,7 @@ export default function Activities() {
               <Activity className="h-8 w-8 text-orange-600 mr-3" />
               <div>
                 <p className="text-2xl font-bold">{stats.newBooks}</p>
-                <p className="text-sm text-muted-foreground">Yeni Kitap</p>
+                <p className="text-sm text-muted-foreground">{t("activities.stats.newBooks")}</p>
               </div>
             </div>
           </CardContent>
@@ -252,12 +252,12 @@ export default function Activities() {
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">Tüm Aktiviteler</SelectItem>
-            <SelectItem value="borrowing">Ödünç Almalar</SelectItem>
-            <SelectItem value="return">İadeler</SelectItem>
-            <SelectItem value="overdue">Gecikmiş</SelectItem>
-            <SelectItem value="member_added">Yeni Üyeler</SelectItem>
-            <SelectItem value="book_added">Yeni Kitaplar</SelectItem>
+            <SelectItem value="all">{t("activities.filters.all")}</SelectItem>
+            <SelectItem value="borrowing">{t("activities.filters.borrowing")}</SelectItem>
+            <SelectItem value="return">{t("activities.filters.return")}</SelectItem>
+            <SelectItem value="overdue">{t("activities.filters.overdue")}</SelectItem>
+            <SelectItem value="member_added">{t("activities.filters.member_added")}</SelectItem>
+            <SelectItem value="book_added">{t("activities.filters.book_added")}</SelectItem>
           </SelectContent>
         </Select>
 
@@ -270,16 +270,16 @@ export default function Activities() {
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="default">Varsayılan</SelectItem>
-            <SelectItem value="compact">Kompakt</SelectItem>
+            <SelectItem value="default">{t("activities.filters.default")}</SelectItem>
+            <SelectItem value="compact">{t("activities.filters.compact")}</SelectItem>
             {user?.isAdmin && (
-              <SelectItem value="detailed">Detaylı</SelectItem>
+              <SelectItem value="detailed">{t("activities.filters.detailed")}</SelectItem>
             )}
           </SelectContent>
         </Select>
 
         <Badge variant="secondary" className="ml-auto">
-          {filteredActivities.length} aktivite
+          {filteredActivities.length} {t("activities.badge.count")}
         </Badge>
       </motion.div>
 
@@ -287,16 +287,16 @@ export default function Activities() {
       <motion.div variants={itemVariants}>
         <Card>
           <CardHeader>
-            <CardTitle>Aktivite Akışı</CardTitle>
+            <CardTitle>{t("activities.title")}</CardTitle>
             <CardDescription>
-              Sistemdeki son aktiviteleri kronolojik sırayla görüntüleyin
+              {t("activities.description")}
             </CardDescription>
           </CardHeader>
           <CardContent>
             {isLoading ? (
               <div className="text-center py-12">
                 <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
-                <p className="text-muted-foreground mt-2">Aktiviteler yükleniyor...</p>
+                <p className="text-muted-foreground mt-2">{t("activities.timeline.loading")}</p>
               </div>
             ) : (
               <ActivityTimeline 
@@ -314,7 +314,7 @@ export default function Activities() {
               onClick={() => handlePageChange(page - 1)}
               disabled={!pagination.hasPrev}
             >
-              Önceki
+              {t("activities.pagination.previous")}
             </button>
             {Array.from({ length: pagination.totalPages }, (_, i) => (
               <button
@@ -330,7 +330,7 @@ export default function Activities() {
               onClick={() => handlePageChange(page + 1)}
               disabled={!pagination.hasNext}
             >
-              Sonraki
+              {t("activities.pagination.next")}
             </button>
           </div>
         )}

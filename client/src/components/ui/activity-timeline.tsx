@@ -199,7 +199,10 @@ export function ActivityTimeline({
                       <div className="flex items-start justify-between gap-2 mb-1">
                         <div className="flex-1">
                           <h4 className={`${titleSize} font-medium text-foreground leading-tight`}>
-                            {activity.title}
+                            {t(`activity.messages.${activity.type}`, {
+                              user: activity.user?.name || '',
+                              book: activity.book?.title || ''
+                            })}
                           </h4>
                           {variant === 'detailed' && (
                             <p className={`${textSize} text-muted-foreground mt-1`}>

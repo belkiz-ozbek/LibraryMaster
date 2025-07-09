@@ -26,9 +26,12 @@ import { useState, useEffect } from "react";
 import { useToast } from "./hooks/use-toast";
 import { Loader2 } from "lucide-react";
 import { motion } from "framer-motion";
+import { useTranslation } from "react-i18next";
 
 // Loading Screen Component
 function LoadingScreen() {
+  const { t } = useTranslation();
+  
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-purple-50">
       <motion.div 
@@ -44,16 +47,16 @@ function LoadingScreen() {
           className="flex flex-col items-center justify-center mb-6"
         >
           <motion.div
-            initial={{ y: -100, opacity: 0 }} // Yukarıdan başla
+            initial={{ y: -100, opacity: 0 }}
             animate={{ 
-              y: [0, -10, 0], // Hafif yukarı-aşağı floating
+              y: [0, -10, 0],
               opacity: 1,
-              rotate: [-8, 8, -8], // Hafif açısal hareket
+              rotate: [-8, 8, -8],
             }}
             transition={{ 
               y: { duration: 3, repeat: Infinity, ease: "easeInOut" },
               rotate: { duration: 4, repeat: Infinity, ease: "easeInOut" },
-              initial: { duration: 1.5, ease: "easeOut" } // İlk iniş animasyonu
+              initial: { duration: 1.5, ease: "easeOut" }
             }}
             className="mb-0"
           >
@@ -82,7 +85,7 @@ function LoadingScreen() {
           transition={{ duration: 0.5, delay: 0.6 }}
           className="text-gray-600 mb-6"
         >
-          Yükleniyor...
+          {t("loading.loading")}
         </motion.p>
         <motion.div 
           initial={{ opacity: 0, scale: 0.8 }}
@@ -90,7 +93,6 @@ function LoadingScreen() {
           transition={{ duration: 0.3, delay: 0.8 }}
           className="flex items-center justify-center space-x-2"
         >
-          {/* Modern Dot Loading Animation */}
           {[0, 1, 2].map((index) => (
             <motion.div
               key={index}

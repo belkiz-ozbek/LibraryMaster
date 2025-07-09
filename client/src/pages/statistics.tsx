@@ -305,7 +305,7 @@ export default function Statistics() {
                   onClick={() => setShowChampions(true)}
                   className="px-8 py-4 bg-gradient-to-r from-yellow-400 to-amber-500 text-white text-lg font-bold rounded-full shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105"
                 >
-                  🏆 Ayın Okuma Şampiyonlarını Göster
+                  🏆 {t("statistics.showTopReadersButton")}
                 </button>
               </motion.div>
             ) : (
@@ -348,7 +348,7 @@ export default function Statistics() {
                         visible: { transition: { staggerChildren: 0.05 } },
                       }}
                     >
-                      {"Ayın Okuma Şampiyonları".split("").map((char, index) => (
+                      {t("statistics.topReadersOfMonth").split("").map((char, index) => (
                         <div key={index} className="overflow-hidden py-1">
                           <motion.span
                             className="inline-block"
@@ -395,6 +395,7 @@ export default function Statistics() {
                       borderColor="border-blue-200"
                       avatarBg="bg-gradient-to-br from-gray-300 via-gray-100 to-blue-100"
                       delay={1.1}
+                      t={t}
                     />
                     {/* 1. */}
                     <PodiumUser
@@ -405,6 +406,7 @@ export default function Statistics() {
                       borderColor="border-yellow-300"
                       avatarBg="bg-gradient-to-br from-yellow-200 via-yellow-50 to-yellow-100"
                       delay={0.5}
+                      t={t}
                     />
                     {/* 3. */}
                     <PodiumUser
@@ -415,6 +417,7 @@ export default function Statistics() {
                       borderColor="border-orange-300"
                       avatarBg="bg-gradient-to-br from-orange-300 via-orange-100 to-yellow-100"
                       delay={1.7}
+                      t={t}
                     />
                   </div>
                   {/* Podyum taban */}
@@ -558,7 +561,7 @@ export default function Statistics() {
 
 // --- SAHNE BİLEŞENLERİ ---
 
-function PodiumUser({ place, reader, height, podiumColor, borderColor, avatarBg, delay }: any) {
+function PodiumUser({ place, reader, height, podiumColor, borderColor, avatarBg, delay, t }: any) {
   if (!reader) return <div className={`flex flex-col items-center justify-end w-24 ${height}`}></div>;
   const avatar = reader.name.split(' ').map((n: string) => n[0]).join('').toUpperCase();
   return (
@@ -593,7 +596,7 @@ function PodiumUser({ place, reader, height, podiumColor, borderColor, avatarBg,
         </div>
         <div className="mb-2">
           <p className="font-semibold text-base text-yellow-700">{reader.totalPagesRead.toLocaleString()}</p>
-          <p className="text-xs text-gray-400">okunan sayfa</p>
+          <p className="text-xs text-gray-400">{t("statistics.pagesRead")}</p>
         </div>
       </motion.div>
       {/* Podyum kutusu */}

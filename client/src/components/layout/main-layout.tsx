@@ -3,6 +3,7 @@ import ModernSidebar from "./sidebar";
 import Header from "./header";
 import { Drawer, DrawerContent, DrawerTrigger } from "@/components/ui/drawer";
 import { Menu } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 interface MainLayoutProps {
   children: ReactNode;
@@ -19,17 +20,21 @@ const MobileMenuButton = ({ onOpen }: { onOpen: () => void }) => (
   </button>
 );
 
-const Footer = () => (
-  <footer className="w-full py-2 text-center text-xs text-muted-foreground bg-background flex items-center justify-center gap-2">
-    Bu sistem, Ahdevefa Sosyal Yardımlaşma Kulübü yazılım geliştirici ekibi tarafından geliştirilmiştir.
-    <img 
-      src="/ahdevefa-logo.png" 
-      alt="Ahdevefa Logo" 
-      className="h-5 inline-block align-middle"
-      loading="lazy"
-    />
-  </footer>
-);
+const Footer = () => {
+  const { t } = useTranslation();
+  
+  return (
+    <footer className="w-full py-2 text-center text-xs text-muted-foreground bg-background flex items-center justify-center gap-2">
+      {t("footer.developedBy")}
+      <img 
+        src="/ahdevefa-logo.png" 
+        alt={t("footer.ahdevefaLogo")}
+        className="h-5 inline-block align-middle"
+        loading="lazy"
+      />
+    </footer>
+  );
+};
 
 export default function MainLayout({ children }: MainLayoutProps) {
   const [open, setOpen] = useState(false);

@@ -874,12 +874,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/stats/weekly-activity", requireAuth, async (req, res) => {
     try {
       const today = new Date();
-      const days = ["Pzt", "Sal", "Çar", "Per", "Cum", "Cmt", "Paz"];
+      // Gün kısaltmaları - dil desteği için frontend'den alınacak
+      const days = ["mon", "tue", "wed", "thu", "fri", "sat", "sun"];
       const result = [];
       for (let i = 6; i >= 0; i--) {
         const d = new Date(today);
         d.setDate(today.getDate() - i);
-        const dayLabel = days[d.getDay() === 0 ? 6 : d.getDay() - 1];
+        const dayKey = days[d.getDay() === 0 ? 6 : d.getDay() - 1];
         const dateStr = d.toISOString().split("T")[0];
         // Borrowed
         const [{ count: borrowed }] = await db
@@ -891,12 +892,37 @@ export async function registerRoutes(app: Express): Promise<Server> {
           .select({ count: count() })
           .from(borrowings)
           .where(sql`to_char(${borrowings.returnDate}, 'YYYY-MM-DD') = ${dateStr}`);
-        result.push({ day: dayLabel, borrowed, returned });
+        result.push({ day: dayKey, borrowed, returned });
       }
       res.json(result);
     } catch (error) {
       res.status(500).json({ message: "Failed to fetch weekly activity" });
     }
+  });
+
+  // Gün kısaltmaları endpoint'i
+  app.get("/api/translations/days", (req, res) => {
+    const days = {
+      tr: {
+        mon: "Pzt",
+        tue: "Sal", 
+        wed: "Çar",
+        thu: "Per",
+        fri: "Cum",
+        sat: "Cmt",
+        sun: "Paz"
+      },
+      en: {
+        mon: "Mon",
+        tue: "Tue",
+        wed: "Wed", 
+        thu: "Thu",
+        fri: "Fri",
+        sat: "Sat",
+        sun: "Sun"
+      }
+    };
+    res.json(days);
   });
 
   // Tür dağılımı

@@ -1,6 +1,9 @@
 import { motion } from "framer-motion";
+import { useTranslation } from "react-i18next";
 
 export default function LoadingScreen() {
+  const { t } = useTranslation();
+  
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-purple-50">
       <motion.div 
@@ -54,7 +57,7 @@ export default function LoadingScreen() {
           transition={{ duration: 0.5, delay: 0.6 }}
           className="text-gray-600 mb-6"
         >
-          Yükleniyor...
+          {t("loading.loading")}
         </motion.p>
         <motion.div 
           initial={{ opacity: 0, scale: 0.8 }}

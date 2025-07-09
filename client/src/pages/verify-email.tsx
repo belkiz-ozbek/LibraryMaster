@@ -1,10 +1,11 @@
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/components/ui/use-toast";
 import { CheckCircle, XCircle, Loader2, Mail } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import { useTranslation } from "react-i18next";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { useRef } from "react";
@@ -12,6 +13,7 @@ import { useRef } from "react";
 // import Confetti from "react-confetti";
 
 export default function VerifyEmailPage() {
+  const { t } = useTranslation();
   const [isLoading, setIsLoading] = useState(true);
   const [isVerified, setIsVerified] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -38,24 +40,24 @@ export default function VerifyEmailPage() {
       if (successParam === '1') {
         setIsVerified(true);
         toast({
-          title: "Email başarıyla doğrulandı!",
-          description: "Artık hesabınıza giriş yapabilirsiniz.",
+          title: t("verifyEmail.successTitle"),
+          description: t("verifyEmail.successDesc"),
         });
       } else {
-        let errorMessage = "Email doğrulanamadı. Lütfen tekrar deneyin.";
+        let errorMessage = t("verifyEmail.errorGeneric");
         if (errorParam === 'invalid_token') {
-          errorMessage = "Geçersiz doğrulama bağlantısı.";
+          errorMessage = t("verifyEmail.errorInvalidToken");
         } else if (errorParam === 'token_expired') {
-          errorMessage = "Doğrulama bağlantısının süresi dolmuş.";
+          errorMessage = t("verifyEmail.errorTokenExpired");
         } else if (errorParam === 'server_error') {
-          errorMessage = "Sunucu hatası oluştu. Lütfen daha sonra tekrar deneyin.";
+          errorMessage = t("verifyEmail.errorServerError");
         }
         setError(errorMessage);
       }
       setIsLoading(false);
     };
     verifyEmail();
-  }, [toast]);
+  }, [toast, t]);
 
   // Başarı durumunda otomatik yönlendirme
   useEffect(() => {
@@ -74,8 +76,8 @@ export default function VerifyEmailPage() {
   const handleResendEmail = async () => {
     if (!email) {
       toast({
-        title: "E-posta adresi bulunamadı",
-        description: "Lütfen tekrar kayıt olun.",
+        title: t("verifyEmail.emailNotFound"),
+        description: t("verifyEmail.emailNotFoundDesc"),
         variant: "destructive",
       });
       return;
@@ -89,20 +91,20 @@ export default function VerifyEmailPage() {
       const data = await response.json();
       if (response.ok) {
         toast({
-          title: "Doğrulama e-postası tekrar gönderildi!",
-          description: "Lütfen e-posta kutunuzu kontrol edin.",
+          title: t("verifyEmail.resendEmailSuccess"),
+          description: t("verifyEmail.resendEmailSuccessDesc"),
         });
       } else {
         toast({
-          title: "Tekrar gönderilemedi",
-          description: data.message || "Bir hata oluştu.",
+          title: t("verifyEmail.resendEmailFailed"),
+          description: data.message || t("verifyEmail.resendEmailFailedDesc"),
           variant: "destructive",
         });
       }
     } catch (error) {
       toast({
-        title: "Tekrar gönderilemedi",
-        description: "Bir hata oluştu.",
+        title: t("verifyEmail.resendEmailFailed"),
+        description: t("verifyEmail.resendEmailFailedDesc"),
         variant: "destructive",
       });
     }
@@ -168,7 +170,7 @@ export default function VerifyEmailPage() {
                   transition={{ duration: 0.5, delay: 0.5 }}
                   src="/yetim-vakfi-logo.png" 
                   alt="Yetim Vakfi Logo" 
-                  className="h-12 w-auto object-contain" 
+                  className="h-12 w-auto object-contain"
                 />
               </motion.div>
               <motion.div 
@@ -178,7 +180,7 @@ export default function VerifyEmailPage() {
                 className="text-center space-y-1"
               >
                 <CardTitle className="text-2xl font-extrabold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent tracking-tight">
-                  Kütüphane Yönetim Sistemi
+                  {t("auth.systemTitle")}
                 </CardTitle>
                 <motion.div 
                   initial={{ opacity: 0, scaleX: 0 }}
@@ -187,7 +189,7 @@ export default function VerifyEmailPage() {
                   className="h-1 w-16 mx-auto bg-gradient-to-r from-blue-400 to-purple-400 rounded-full mb-1"
                 ></motion.div>
                 <CardDescription className="text-gray-700 text-base font-medium">
-                  E-posta doğrulama işlemini tamamlayın.
+                  {t("auth.verifyEmailDesc")}
                 </CardDescription>
               </motion.div>
             </motion.div>
@@ -208,7 +210,7 @@ export default function VerifyEmailPage() {
                     animate={{ opacity: 1 }}
                     transition={{ delay: 0.3 }}
                   >
-                    Email adresiniz doğrulanıyor...
+                    {t("loading.verifyingEmail")}
                   </motion.p>
                 </motion.div>
               ) : isVerified ? (
@@ -226,15 +228,15 @@ export default function VerifyEmailPage() {
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.2 }}
                   >
-                    <h3 className="text-2xl font-bold text-green-700">Tebrikler!</h3>
-                    <p className="text-lg text-gray-800 font-semibold">Email adresiniz başarıyla doğrulandı.</p>
-                    <p className="text-gray-600">Artık hesabınıza giriş yapabilirsiniz.</p>
+                    <h3 className="text-2xl font-bold text-green-700">{t("verifyEmail.success")}</h3>
+                    <p className="text-lg text-gray-800 font-semibold">{t("verifyEmail.successTitle")}</p>
+                    <p className="text-gray-600">{t("verifyEmail.successDesc")}</p>
                     <motion.p 
                       className="text-sm text-gray-400"
                       animate={{ opacity: [0.5, 1, 0.5] }}
                       transition={{ duration: 2, repeat: Infinity }}
                     >
-                      3 saniye içinde giriş sayfasına yönlendirileceksiniz...
+                      {t("verifyEmail.redirecting")}
                     </motion.p>
                   </motion.div>
                   <motion.div 
@@ -254,7 +256,7 @@ export default function VerifyEmailPage() {
                         whileHover={{ x: "100%" }}
                         transition={{ duration: 0.6 }}
                       />
-                      <span className="relative z-10">Hemen Giriş Yap</span>
+                      <span className="relative z-10">{t("auth.loginImmediately")}</span>
                     </Button>
                   </motion.div>
                 </motion.div>
@@ -273,8 +275,8 @@ export default function VerifyEmailPage() {
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.2 }}
                   >
-                    <h3 className="text-lg font-semibold text-gray-900">Doğrulama Başarısız</h3>
-                    <p className="text-gray-600">{error || "Email doğrulama işlemi başarısız oldu."}</p>
+                    <h3 className="text-xl font-bold text-red-700">{t("verifyEmail.error")}</h3>
+                    <p className="text-gray-600">{error || t("verifyEmail.errorTitle")}</p>
                   </motion.div>
                   <div className="flex flex-col space-y-3 w-full">
                     <motion.div 
@@ -285,7 +287,7 @@ export default function VerifyEmailPage() {
                       transition={{ delay: 0.3 }}
                     >
                       <Button onClick={handleGoToLogin} variant="outline" className="w-full">
-                        Giriş Sayfasına Dön
+                        {t("auth.goToLoginPage")}
                       </Button>
                     </motion.div>
                     <motion.div 
@@ -297,7 +299,7 @@ export default function VerifyEmailPage() {
                     >
                       <Button onClick={handleResendEmail} variant="ghost" className="w-full">
                         <Mail className="mr-2 h-4 w-4" />
-                        Doğrulama Emailini Tekrar Gönder
+                        {t("verifyEmail.resendEmail")}
                       </Button>
                     </motion.div>
                   </div>
@@ -316,9 +318,8 @@ export default function VerifyEmailPage() {
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.2 }}
                   >
-                    <h3 className="text-lg font-semibold text-gray-900">Email Doğrulama Gerekli</h3>
-                    <p className="text-gray-600">{email ? `${email} adresine doğrulama emaili gönderdik.` : "Email adresinize doğrulama emaili gönderdik."}</p>
-                    <p className="text-gray-600 text-sm">Lütfen email kutunuzu kontrol edin ve doğrulama linkine tıklayın.</p>
+                    <h3 className="text-lg font-semibold text-gray-900">{t("verifyEmail.emailRequired")}</h3>
+                    <p className="text-gray-600 text-sm">{t("verifyEmail.emailRequiredDesc")}</p>
                   </motion.div>
                   <div className="flex flex-col space-y-3 w-full">
                     <motion.div 
@@ -347,7 +348,7 @@ export default function VerifyEmailPage() {
                             className="flex items-center relative z-10"
                           >
                             <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                            Doğrulama e-postası gönderiliyor...
+                            {t("verifyEmail.resendEmailSending")}
                           </motion.div>
                         ) : (
                           <motion.span
@@ -355,7 +356,7 @@ export default function VerifyEmailPage() {
                             animate={{ opacity: 1 }}
                             className="relative z-10"
                           >
-                            Doğrulama E-postasını Tekrar Gönder
+                            {t("verifyEmail.resendEmail")}
                           </motion.span>
                         )}
                       </Button>
@@ -373,7 +374,7 @@ export default function VerifyEmailPage() {
                       animate={{ opacity: 1 }}
                       transition={{ delay: 0.5 }}
                     >
-                      Zaten hesabınız var mı?{" "}
+                      {t("auth.alreadyHaveAccount")}{" "}
                       <motion.button
                         type="button"
                         whileHover={{ scale: 1.05, y: -1 }}
@@ -382,7 +383,7 @@ export default function VerifyEmailPage() {
                         className="text-blue-600 hover:text-blue-700 font-medium transition-all duration-200 underline underline-offset-2 hover:underline-offset-4"
                         disabled={isLoading}
                       >
-                        Giriş yapın
+                        {t("auth.goToLogin")}
                       </motion.button>
                     </motion.p>
                   </motion.div>
@@ -393,7 +394,7 @@ export default function VerifyEmailPage() {
         </Card>
         <div className="mt-8 text-center">
           <p className="text-xs text-gray-500">
-            © 2024 Kütüphane Yönetim Sistemi. All rights reserved.
+            © 2024 {t("auth.systemTitle")}. All rights reserved.
           </p>
         </div>
       </div>

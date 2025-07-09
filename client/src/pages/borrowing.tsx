@@ -197,6 +197,16 @@ export default function Borrowing() {
   const borrowings = filter === "overdue" ? overdueBorrowings : (filter === "active" ? activeBorrowings : allBorrowings);
   const isLoading = isLoadingAll || isLoadingActive || isLoadingOverdue || isLoadingAllLegacy || isLoadingActiveLegacy || isLoadingOverdueLegacy;
 
+  // Always-enabled queries for summary cards
+  const { data: allActiveBorrowings = [] } = useQuery<BorrowingWithDetails[]>({
+    queryKey: ["/api/borrowings/active"],
+    enabled: true,
+  });
+  const { data: allOverdueBorrowings = [] } = useQuery<BorrowingWithDetails[]>({
+    queryKey: ["/api/borrowings/overdue"],
+    enabled: true,
+  });
+
   const deleteBorrowingMutation = useMutation({
     mutationFn: (id: number) => apiRequest("DELETE", `/api/borrowings/${id}`),
     onSuccess: () => {
@@ -479,13 +489,13 @@ export default function Borrowing() {
           <Filter className="w-5 h-5 text-muted-foreground" />
           <Select value={statusFilter} onValueChange={handleStatusFilterChange}>
             <SelectTrigger className="w-40">
-              <SelectValue placeholder="Durum" />
+              <SelectValue placeholder={t("borrowing.statusFilter.all")}/>
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">Tüm Durumlar</SelectItem>
-              <SelectItem value="active">Aktif</SelectItem>
-              <SelectItem value="overdue">Gecikmiş</SelectItem>
-              <SelectItem value="returned">İade Edildi</SelectItem>
+              <SelectItem value="all">{t("borrowing.statusFilter.all")}</SelectItem>
+              <SelectItem value="active">{t("borrowing.statusFilter.active")}</SelectItem>
+              <SelectItem value="overdue">{t("borrowing.statusFilter.overdue")}</SelectItem>
+              <SelectItem value="returned">{t("borrowing.statusFilter.returned")}</SelectItem>
             </SelectContent>
           </Select>
         </div>
@@ -528,7 +538,7 @@ export default function Borrowing() {
               <HandHeart className="h-8 w-8 text-primary mr-3" />
               <div>
                 <p className="text-2xl font-bold text-on-surface">
-                  {activeBorrowings.length}
+                  {allActiveBorrowings.length}
                 </p>
                 <p className="text-sm text-text-muted">{t("borrowing.activeBorrowings")}</p>
               </div>
@@ -541,7 +551,7 @@ export default function Borrowing() {
               <Clock className="h-8 w-8 text-accent mr-3" />
               <div>
                 <p className="text-2xl font-bold text-on-surface">
-                  {activeBorrowings.filter(b => {
+                  {allActiveBorrowings.filter(b => {
                     const daysUntilDue = differenceInDays(new Date(b.dueDate), new Date());
                     return daysUntilDue <= 3 && daysUntilDue >= 0;
                   }).length}
@@ -557,7 +567,7 @@ export default function Borrowing() {
               <AlertTriangle className="h-8 w-8 text-destructive mr-3" />
               <div>
                 <p className="text-2xl font-bold text-on-surface">
-                  {overdueBorrowings.length}
+                  {allOverdueBorrowings.length}
                 </p>
                 <p className="text-sm text-text-muted">{t("borrowing.overdueItems")}</p>
               </div>

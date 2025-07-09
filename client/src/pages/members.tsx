@@ -267,12 +267,12 @@ export default function Members() {
           <Filter className="w-5 h-5 text-muted-foreground" />
           <Select value={statusFilter} onValueChange={setStatusFilter}>
             <SelectTrigger className="w-40">
-              <SelectValue placeholder="Üye Tipi" />
+              <SelectValue placeholder={t("members.filters.memberType")} />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">Tüm Üyeler</SelectItem>
-              <SelectItem value="active">Normal Üyeler</SelectItem>
-              <SelectItem value="admin">Yöneticiler</SelectItem>
+              <SelectItem value="all">{t("members.filters.allMembers")}</SelectItem>
+              <SelectItem value="active">{t("members.filters.normalMembers")}</SelectItem>
+              <SelectItem value="admin">{t("members.filters.administrators")}</SelectItem>
             </SelectContent>
           </Select>
         </div>
