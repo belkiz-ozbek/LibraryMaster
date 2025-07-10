@@ -124,6 +124,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const signup = useCallback(async (name: string, username: string, email: string, password: string) => {
+    // This function is now deprecated as signup is handled directly in the signup page
+    // Keeping for backward compatibility but it's not used anymore
     const response = await fetch("/api/auth/signup", {
       method: "POST",
       headers: {

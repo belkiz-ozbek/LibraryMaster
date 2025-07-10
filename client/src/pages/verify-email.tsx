@@ -19,6 +19,7 @@ export default function VerifyEmailPage() {
   const [error, setError] = useState<string | null>(null);
   const [email, setEmail] = useState<string | null>(null);
   const [token, setToken] = useState<string | null>(null);
+  const [isPendingRegistration, setIsPendingRegistration] = useState(false);
   const [, navigate] = useLocation();
   const { toast } = useToast();
   const emailRef = useRef<HTMLInputElement>(null);
@@ -29,8 +30,18 @@ export default function VerifyEmailPage() {
       const successParam = urlParams.get('success');
       const errorParam = urlParams.get('error');
       const emailParam = urlParams.get('email');
+      const pendingParam = urlParams.get('pending');
+      const tokenParam = urlParams.get('token');
       
       if (emailParam) setEmail(emailParam);
+      if (tokenParam) setToken(tokenParam);
+      
+      // Check if this is a pending registration
+      if (pendingParam === 'true') {
+        setIsPendingRegistration(true);
+        setIsLoading(false);
+        return;
+      }
       
       if (successParam === null) {
         setIsLoading(false);
@@ -39,6 +50,8 @@ export default function VerifyEmailPage() {
 
       if (successParam === '1') {
         setIsVerified(true);
+        // Clear any pending user data since registration is complete
+        sessionStorage.removeItem('pendingUserData');
         toast({
           title: t("verifyEmail.successTitle"),
           description: t("verifyEmail.successDesc"),
@@ -53,6 +66,8 @@ export default function VerifyEmailPage() {
           errorMessage = t("verifyEmail.errorServerError");
         }
         setError(errorMessage);
+        // Clear pending data on error
+        sessionStorage.removeItem('pendingUserData');
       }
       setIsLoading(false);
     };
@@ -300,6 +315,54 @@ export default function VerifyEmailPage() {
                       <Button onClick={handleResendEmail} variant="ghost" className="w-full">
                         <Mail className="mr-2 h-4 w-4" />
                         {t("verifyEmail.resendEmail")}
+                      </Button>
+                    </motion.div>
+                  </div>
+                </motion.div>
+              ) : isPendingRegistration ? (
+                <motion.div key="pending" className="flex flex-col items-center space-y-4" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }}>
+                  <motion.div
+                    animate={{ y: [0, -5, 0] }}
+                    transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+                  >
+                    <Mail className="h-16 w-16 text-blue-500" />
+                  </motion.div>
+                  <motion.div 
+                    className="text-center space-y-2"
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.2 }}
+                  >
+                    <h3 className="text-lg font-semibold text-gray-900">{t("verifyEmail.checkEmail")}</h3>
+                    <p className="text-gray-600 text-sm">
+                      {email ? `${t("verifyEmail.checkEmailDesc")} ${email}` : t("verifyEmail.checkEmailDesc")}
+                    </p>
+                    <p className="text-gray-500 text-xs mt-2">
+                      {t("verifyEmail.checkSpam")}
+                    </p>
+                  </motion.div>
+                  <div className="flex flex-col space-y-3 w-full">
+                    <motion.div 
+                      whileHover={{ scale: 1.02, y: -2 }}
+                      whileTap={{ scale: 0.97 }}
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: 0.3 }}
+                    >
+                      <Button onClick={handleResendEmail} className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white">
+                        <Mail className="mr-2 h-4 w-4" />
+                        {t("verifyEmail.resendEmail")}
+                      </Button>
+                    </motion.div>
+                    <motion.div 
+                      whileHover={{ scale: 1.02, y: -2 }}
+                      whileTap={{ scale: 0.97 }}
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: 0.4 }}
+                    >
+                      <Button onClick={handleGoToLogin} variant="outline" className="w-full">
+                        {t("auth.goToLoginPage")}
                       </Button>
                     </motion.div>
                   </div>

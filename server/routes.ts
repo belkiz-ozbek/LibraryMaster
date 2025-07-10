@@ -12,6 +12,19 @@ import { books, borrowings, users } from "@shared/schema";
 import { sendVerificationEmail, generateVerificationToken } from "./emailService";
 import path from "path";
 import { fileURLToPath } from "url";
+
+// Type declarations for global verification store
+declare global {
+  var verificationStore: Map<string, {
+    name: string;
+    username: string;
+    email: string;
+    password: string;
+    token: string;
+    expires: Date;
+  }> | undefined;
+}
+
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
@@ -106,45 +119,112 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "This username is already taken" });
       }
       
-      // Hash password
-      const hashedPassword = await bcrypt.hash(password, 10);
-      
       // Generate verification token
       const verificationToken = generateVerificationToken();
-      const verificationExpires = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 saat
+      const verificationExpires = new Date(Date.now() + 15 * 60 * 1000); // 15 dakika
       
-      // Create new user with verification fields
-      const newUser = await storage.createUser({
+      // Store verification data temporarily (in memory or temporary storage)
+      // For now, we'll use a simple in-memory store, but in production you might want to use Redis
+      const verificationData = {
         name: name.trim(),
         username: username.trim(),
         email: email.toLowerCase().trim(),
-        password: hashedPassword,
-        isAdmin: false, // Default to regular user
-        membershipDate: new Date(),
-        emailVerified: false,
-        emailVerificationToken: verificationToken,
-        emailVerificationExpires: verificationExpires
-      });
+        password: password,
+        token: verificationToken,
+        expires: verificationExpires
+      };
+      
+      // Store verification data (in production, use Redis or similar)
+      global.verificationStore = global.verificationStore || new Map();
+      global.verificationStore.set(verificationToken, verificationData);
+      
+      // Clean up expired tokens
+      for (const [token, data] of Array.from(global.verificationStore.entries())) {
+        if (data.expires < new Date()) {
+          global.verificationStore.delete(token);
+        }
+      }
       
       // Send verification email
       try {
         await sendVerificationEmail(email, name.trim(), verificationToken);
+        res.status(200).json({ 
+          message: "Verification email sent successfully. Please check your email to complete registration.",
+          email: email
+        });
       } catch (emailError) {
         console.error("Failed to send verification email:", emailError);
-        // Email gönderilemese bile kullanıcıyı oluştur, ama uyarı ver
-        return res.status(201).json({ 
-          message: "Account created but verification email could not be sent. Please contact support.",
-          user: { id: newUser.id, name: newUser.name, email: newUser.email, emailVerified: false }
-        });
+        // Clean up stored data if email fails
+        global.verificationStore.delete(verificationToken);
+        return res.status(500).json({ message: "Failed to send verification email. Please try again." });
       }
+    } catch (error) {
+      console.error("Signup error:", error);
+      res.status(500).json({ message: "Failed to process signup request" });
+    }
+  });
+
+  app.post("/api/auth/confirm", async (req, res) => {
+    try {
+      const { token } = req.body;
+      
+      if (!token || typeof token !== 'string') {
+        return res.status(400).json({ message: "Invalid verification token" });
+      }
+      
+      // Get verification data from storage
+      global.verificationStore = global.verificationStore || new Map();
+      const verificationData = global.verificationStore.get(token);
+      
+      if (!verificationData) {
+        return res.status(400).json({ message: "Invalid or expired verification token" });
+      }
+      
+      // Check if token is expired
+      if (verificationData.expires < new Date()) {
+        global.verificationStore.delete(token);
+        return res.status(400).json({ message: "Verification token has expired" });
+      }
+      
+      // Check if email or username still exists (double-check)
+      const existingUser = await storage.getUserByEmail(verificationData.email);
+      if (existingUser) {
+        global.verificationStore.delete(token);
+        return res.status(400).json({ message: "Bu e-posta adresi zaten kayıtlı. Lütfen farklı bir e-posta adresi kullanın." });
+      }
+      
+      const existingUserByUsername = await storage.getUserByUsername(verificationData.username);
+      if (existingUserByUsername) {
+        global.verificationStore.delete(token);
+        return res.status(400).json({ message: "This username is already taken" });
+      }
+      
+      // Hash password
+      const hashedPassword = await bcrypt.hash(verificationData.password, 10);
+      
+      // Create new user
+      const newUser = await storage.createUser({
+        name: verificationData.name,
+        username: verificationData.username,
+        email: verificationData.email,
+        password: hashedPassword,
+        isAdmin: false, // Default to regular user
+        membershipDate: new Date(),
+        emailVerified: true, // Already verified since they clicked the link
+        emailVerificationToken: null,
+        emailVerificationExpires: null
+      });
+      
+      // Clean up verification data
+      global.verificationStore.delete(token);
       
       const { password: _, ...userWithoutPassword } = newUser;
       res.status(201).json({ 
-        message: "Account created successfully. Please check your email to verify your account.",
+        message: "Account created successfully. You can now log in.",
         user: userWithoutPassword 
       });
     } catch (error) {
-      console.error("Signup error:", error);
+      console.error("Confirm registration error:", error);
       res.status(500).json({ message: "Failed to create account" });
     }
   });
@@ -157,29 +237,60 @@ export async function registerRoutes(app: Express): Promise<Server> {
         console.log("[VERIFY-EMAIL] Invalid token format");
         return res.sendFile(path.join(__dirname, "error.html"));
       }
-      // Token ile kullanıcıyı bul
-      const [user] = await db.select().from(users).where(eq(users.emailVerificationToken, token));
-      console.log("[VERIFY-EMAIL] User found for token:", user);
-      if (!user) {
-        console.log("[VERIFY-EMAIL] No user found for token");
+      
+      // Get verification data from storage
+      global.verificationStore = global.verificationStore || new Map();
+      const verificationData = global.verificationStore.get(token);
+      
+      if (!verificationData) {
+        console.log("[VERIFY-EMAIL] No verification data found for token");
         return res.sendFile(path.join(__dirname, "error.html"));
       }
-      // Token'ın süresi dolmuş mu kontrol et
-      console.log("[VERIFY-EMAIL] Token expires at:", user.emailVerificationExpires, "Current time:", new Date());
-      if (user.emailVerificationExpires && new Date() > user.emailVerificationExpires) {
+      
+      // Check if token is expired
+      if (verificationData.expires < new Date()) {
         console.log("[VERIFY-EMAIL] Token expired");
+        global.verificationStore.delete(token);
         return res.sendFile(path.join(__dirname, "error.html"));
       }
-      // Email'i doğrula
-      await db.update(users)
-        .set({ 
-          emailVerified: true, 
-          emailVerificationToken: null, 
-          emailVerificationExpires: null 
-        })
-        .where(eq(users.id, user.id));
-      console.log("[VERIFY-EMAIL] Email verified for user id:", user.id);
-      // Başarılıysa success.html göster
+      
+      // Check if email or username still exists
+      const existingUser = await storage.getUserByEmail(verificationData.email);
+      if (existingUser) {
+        console.log("[VERIFY-EMAIL] Email already exists");
+        global.verificationStore.delete(token);
+        return res.sendFile(path.join(__dirname, "error.html"));
+      }
+      
+      const existingUserByUsername = await storage.getUserByUsername(verificationData.username);
+      if (existingUserByUsername) {
+        console.log("[VERIFY-EMAIL] Username already exists");
+        global.verificationStore.delete(token);
+        return res.sendFile(path.join(__dirname, "error.html"));
+      }
+      
+      // Hash password
+      const hashedPassword = await bcrypt.hash(verificationData.password, 10);
+      
+      // Create new user
+      const newUser = await storage.createUser({
+        name: verificationData.name,
+        username: verificationData.username,
+        email: verificationData.email,
+        password: hashedPassword,
+        isAdmin: false,
+        membershipDate: new Date(),
+        emailVerified: true,
+        emailVerificationToken: null,
+        emailVerificationExpires: null
+      });
+      
+      console.log("[VERIFY-EMAIL] User created successfully:", newUser.id);
+      
+      // Clean up verification data
+      global.verificationStore.delete(token);
+      
+      // Show classic server-side success.html page
       return res.sendFile(path.join(__dirname, "success.html"));
     } catch (error) {
       console.error("[VERIFY-EMAIL] Email verification error:", error);
@@ -211,31 +322,45 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (!email) {
         return res.status(400).json({ message: "Email is required" });
       }
-      const user = await storage.getUserByEmail(email);
-      if (!user) {
-        return res.status(404).json({ message: "User not found" });
+      // First, check DB
+      let user = await storage.getUserByEmail(email);
+      if (user) {
+        if (user.emailVerified) {
+          return res.status(400).json({ message: "Email is already verified" });
+        }
+        // Generate new token and expiry
+        const verificationToken = generateVerificationToken();
+        const verificationExpires = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 saat
+        // Update user in DB
+        await db.update(users)
+          .set({
+            emailVerificationToken: verificationToken,
+            emailVerificationExpires: verificationExpires
+          })
+          .where(eq(users.id, user.id));
+        // Send email
+        try {
+          await sendVerificationEmail(user.email ?? "", user.name ?? "", verificationToken);
+        } catch (emailError) {
+          console.error("Failed to send verification email:", emailError);
+          return res.status(500).json({ message: "Failed to send verification email" });
+        }
+        return res.json({ message: "Verification email sent successfully" });
       }
-      if (user.emailVerified) {
-        return res.status(400).json({ message: "Email is already verified" });
+      // If not in DB, check verificationStore
+      global.verificationStore = global.verificationStore || new Map();
+      const pending = Array.from(global.verificationStore.values()).find(v => v.email === email.toLowerCase().trim());
+      if (pending) {
+        try {
+          await sendVerificationEmail(pending.email, pending.name, pending.token);
+        } catch (emailError) {
+          console.error("Failed to send verification email (pending):", emailError);
+          return res.status(500).json({ message: "Failed to send verification email" });
+        }
+        return res.json({ message: "Verification email sent successfully" });
       }
-      // Generate new token and expiry
-      const verificationToken = generateVerificationToken();
-      const verificationExpires = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 saat
-      // Update user in DB
-      await db.update(users)
-        .set({
-          emailVerificationToken: verificationToken,
-          emailVerificationExpires: verificationExpires
-        })
-        .where(eq(users.id, user.id));
-      // Send email
-      try {
-        await sendVerificationEmail(user.email ?? "", user.name ?? "", verificationToken);
-      } catch (emailError) {
-        console.error("Failed to send verification email:", emailError);
-        return res.status(500).json({ message: "Failed to send verification email" });
-      }
-      res.json({ message: "Verification email sent successfully" });
+      // Not found anywhere
+      return res.status(404).json({ message: "User not found" });
     } catch (error) {
       console.error("Resend verification error:", error);
       res.status(500).json({ message: "Failed to resend verification email" });

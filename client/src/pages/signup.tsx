@@ -90,13 +90,40 @@ export default function SignupPage() {
     if (!validateForm()) return;
     setIsLoading(true);
     try {
-      await signup(`${firstName.trim()} ${lastName.trim()}`, username.trim(), email.trim(), password);
+      // Store user data temporarily in sessionStorage
+      const userData = {
+        name: `${firstName.trim()} ${lastName.trim()}`,
+        username: username.trim(),
+        email: email.trim(),
+        password: password
+      };
+      sessionStorage.setItem('pendingUserData', JSON.stringify(userData));
+      
+      // Send verification email request
+      const response = await fetch("/api/auth/signup", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(userData),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || "Signup failed");
+      }
+
+      const data = await response.json();
       toast({
         title: t("auth.signupSuccess"),
         description: t("auth.signupSuccessDesc"),
       });
-      navigate(`/verify-email?email=${encodeURIComponent(email)}`);
+      
+      // Navigate to verify email page with email parameter
+      navigate(`/verify-email?email=${encodeURIComponent(email)}&pending=true`);
     } catch (error: any) {
+      // Clear stored data on error
+      sessionStorage.removeItem('pendingUserData');
       toast({
         title: t("auth.signupFailed"),
         description: error.message || t("auth.signupFailedDesc"),
