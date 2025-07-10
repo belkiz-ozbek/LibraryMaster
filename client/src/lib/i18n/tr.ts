@@ -248,6 +248,8 @@ export const tr = {
       overdue: "Gecikmiş",
       returned: "İade Edildi"
     },
+    statusActive: "Devam Ediyor",
+    daysRemaining: "{{count}} gün kaldı",
     statusReturned: "İade Edildi",
     statusOverdue: "Gecikmiş",
     returnedLate: "Geç İade Edildi",

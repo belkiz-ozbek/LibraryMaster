@@ -3,7 +3,7 @@ import crypto from 'crypto';
 
 // Email transporter oluştur
 const transporter = nodemailer.createTransport({
-  service: 'gmail', // Gmail kullanıyoruz, diğer servisler de kullanılabilir
+  service: process.env.EMAIL_SERVICE || 'gmail', // Gmail kullanıyoruz, diğer servisler de kullanılabilir
   auth: {
     user: process.env.EMAIL_USER,
     pass: process.env.EMAIL_PASS

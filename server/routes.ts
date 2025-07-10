@@ -56,7 +56,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     resave: true,
     saveUninitialized: false,
     cookie: { 
-      secure: process.env.NODE_ENV === 'production',
+      secure: process.env.IS_PRODUCTION === 'true' || process.env.NODE_ENV === 'production',
       httpOnly: true,
       maxAge: 24 * 60 * 60 * 1000, // 24 hours
       sameSite: 'lax'
@@ -713,12 +713,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const id = parseInt(req.params.id);
       const bookData = updateBookSchema.parse(req.body);
-      const book = await storage.updateBook(id, bookData);
+      // ISBN boşsa null'a çevir
+      let normalizedBookData = { ...bookData };
+      if (typeof normalizedBookData.isbn === 'string' && normalizedBookData.isbn.trim() === "") {
+        normalizedBookData.isbn = null;
+      }
+      const book = await storage.updateBook(id, normalizedBookData);
       if (!book) {
         return res.status(404).json({ message: "Book not found" });
       }
       res.json(book);
     } catch (error) {
+      console.error("Book update error:", error);
       if (error instanceof z.ZodError) {
         return res.status(400).json({ message: "Invalid book data", errors: error.errors });
       }
