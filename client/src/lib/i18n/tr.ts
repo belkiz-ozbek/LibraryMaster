@@ -472,6 +472,10 @@ export const tr = {
     roman: "Roman",
     cocuk: "Çocuk",
     klasik: "Klasik",
+    novella: "Novella",
+    felsefe: "Felsefe",
+    tiyatro: "Tiyatro",
+    bilim: "Bilim",
   },
   footer: {
     developedBy: "Bu sistem, Ahdevefa Sosyal Yardımlaşma Kulübü yazılım geliştirici ekibi tarafından geliştirilmiştir.",

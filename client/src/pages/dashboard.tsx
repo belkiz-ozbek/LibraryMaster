@@ -142,6 +142,25 @@ const chartColors = {
   info: "#3b82f6"
 };
 
+// Daha fazla ve farklı renkler içeren dizi
+const pieColors = [
+  '#FFB300', // Amber
+  '#1E88E5', // Blue
+  '#43A047', // Green
+  '#E53935', // Red
+  '#8E24AA', // Purple
+  '#FDD835', // Yellow
+  '#00ACC1', // Cyan
+  '#FB8C00', // Orange
+  '#6D4C41', // Brown
+  '#3949AB', // Indigo
+  '#C0CA33', // Lime
+  '#D81B60', // Pink
+  '#00897B', // Teal
+  '#F4511E', // Deep Orange
+  '#757575', // Grey
+];
+
 export default function Dashboard() {
   const { t, i18n } = useTranslation();
 
@@ -491,9 +510,31 @@ export default function Dashboard() {
                       outerRadius={100}
                       paddingAngle={8}
                       dataKey="value"
+                      label={false} // Etiketleri kaldır
                       labelLine={false}
-                      label={({ name, percent }) => {
-                        const key = (name || '')
+                    >
+                      {genreDistribution.map((entry, index) => (
+                        <Cell 
+                          key={`cell-${index}`} 
+                          fill={pieColors[index % pieColors.length]}
+                          stroke="hsl(var(--background))"
+                          strokeWidth={2}
+                        />
+                      ))}
+                    </Pie>
+                    <Legend 
+                      verticalAlign="bottom" 
+                      align="center"
+                      iconType="circle"
+                      wrapperStyle={{
+                        fontFamily: 'inherit',
+                        fontSize: 14,
+                        fontWeight: 500,
+                        color: 'hsl(var(--foreground))',
+                        marginTop: 16
+                      }}
+                      formatter={(value) => {
+                        const key = (value || '')
                           .toLowerCase()
                           .replace(/ /g, '')
                           .replace(/ç/g, 'c')
@@ -502,18 +543,9 @@ export default function Dashboard() {
                           .replace(/ü/g, 'u')
                           .replace(/ö/g, 'o')
                           .replace(/ğ/g, 'g');
-                        return `${t('genres.' + key)} ${(percent * 100).toFixed(0)}%`;
+                        return t('genres.' + key);
                       }}
-                    >
-                      {genreDistribution.map((entry, index) => (
-                        <Cell 
-                          key={`cell-${index}`} 
-                          fill={Object.values(chartColors)[index % Object.values(chartColors).length]}
-                          stroke="hsl(var(--background))"
-                          strokeWidth={2}
-                        />
-                      ))}
-                    </Pie>
+                    />
                     <Tooltip 
                       cursor={{ fill: "hsl(var(--accent) / 0.1)" }}
                       content={<CustomTooltip />}
