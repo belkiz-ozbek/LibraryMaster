@@ -3,6 +3,7 @@ import express, { type Request, Response, NextFunction } from "express";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
 import cors from "cors";
+import path from "path";
 
 const app = express();
 app.use(cors({
@@ -52,6 +53,17 @@ app.use((req, res, next) => {
     res.status(status).json({ message });
     throw err;
   });
+
+  // Ana route ve SPA fallback
+  if (app.get("env") !== "development") {
+    const distPath = path.resolve(__dirname, "..", "public");
+    app.get("/", (req, res) => {
+      res.sendFile(path.join(distPath, "index.html"));
+    });
+    app.get("*", (req, res) => {
+      res.sendFile(path.join(distPath, "index.html"));
+    });
+  }
 
   // importantly only setup vite in development and after
   // setting up all the other routes so the catch-all route
