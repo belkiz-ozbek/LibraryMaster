@@ -1,8 +1,11 @@
 export const en = {
   "members.member": "Member",
   "members.administrator": "Administrator",
-  common: {
+  loading: {
     loading: "Loading...",
+    signingIn: "Signing in..."
+  },
+  common: {
     error: "Error",
     success: "Success",
     cancel: "Cancel",
@@ -442,12 +445,6 @@ export const en = {
   footer: {
     developedBy: "This system was developed by the software development team of Ahdevefa Social Solidarity Club.",
     ahdevefaLogo: "Ahdevefa Logo"
-  },
-  loading: {
-    loading: "Loading...",
-    signingIn: "Signing in...",
-    verifyingEmail: "Verifying your email address...",
-    processing: "Processing..."
   },
   notFound: {
     title: "Page Not Found",

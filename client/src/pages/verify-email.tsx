@@ -6,6 +6,7 @@ import { useToast } from "@/components/ui/use-toast";
 import { CheckCircle, XCircle, Loader2, Mail } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useTranslation } from "react-i18next";
+import { LanguageSwitcher } from "@/components/ui/language-switcher";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { useRef } from "react";
@@ -127,6 +128,16 @@ export default function VerifyEmailPage() {
 
   return (
     <div className="min-h-screen flex items-center justify-center p-4 relative overflow-hidden">
+      {/* Language Switcher */}
+      <motion.div
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, delay: 0.1 }}
+        className="absolute top-6 right-6 z-10"
+      >
+        <LanguageSwitcher />
+      </motion.div>
+      
       <div className="fixed inset-0 -z-10 w-full h-full overflow-hidden">
         <video
           src="/video.mp4"

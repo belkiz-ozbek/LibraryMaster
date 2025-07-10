@@ -9,6 +9,7 @@ import { useAuth } from "@/lib/auth";
 import { Eye, EyeOff, Lock, Loader2, User } from "lucide-react";
 import { motion } from "framer-motion";
 import { useTranslation } from "react-i18next";
+import { LanguageSwitcher } from "@/components/ui/language-switcher";
 
 // Types
 interface FormErrors {
@@ -277,6 +278,16 @@ export default function LoginPage() {
   return (
     <div className="min-h-screen flex items-center justify-center p-4 relative overflow-hidden">
       <VideoBackground />
+      
+      {/* Language Switcher */}
+      <motion.div
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, delay: 0.1 }}
+        className="absolute top-6 right-6 z-10"
+      >
+        <LanguageSwitcher />
+      </motion.div>
       
       <div className="w-full max-w-md mx-auto">
         <Card className="border-0 shadow-2xl bg-white">

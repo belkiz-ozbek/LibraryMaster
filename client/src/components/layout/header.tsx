@@ -108,24 +108,51 @@ const LanguageSelector = ({
 }) => (
   <DropdownMenu>
     <DropdownMenuTrigger asChild>
-      <Button variant="ghost" size="icon" className="rounded-full hover:bg-gray-50 transition-colors">
-        <Globe className="h-5 w-5 text-gray-400" />
+      <Button 
+        variant="ghost" 
+        size="default"
+        className="h-10 px-3 py-2 bg-transparent border-0 hover:bg-transparent shadow-none hover:shadow-none transition-all duration-300"
+      >
+        <div className="flex items-center space-x-1">
+          <Globe className="h-4 w-4 text-blue-600" />
+          <span className="text-xs font-semibold text-blue-600 uppercase">
+            {i18n.language}
+          </span>
+        </div>
       </Button>
     </DropdownMenuTrigger>
-    <DropdownMenuContent align="end" className="min-w-[140px] rounded-xl shadow p-1">
+    <DropdownMenuContent align="end" className="w-36 p-1 bg-white/95 backdrop-blur-sm border border-gray-200 shadow-lg">
       <DropdownMenuItem 
         onClick={() => changeLanguage('tr')} 
-        className={`flex items-center gap-2 px-3 py-2 rounded-lg transition-colors ${i18n.language === 'tr' ? 'bg-blue-50 font-semibold' : ''}`}
+        className={`cursor-pointer p-2 rounded-md transition-all duration-200 ${
+          i18n.language === 'tr' 
+            ? 'bg-blue-100 text-blue-700' 
+            : 'hover:bg-gray-50'
+        }`}
       >
-        <span className="text-lg">🇹🇷</span>
-        <span>Turkish</span>
+        <div className="flex items-center space-x-2 w-full">
+          <span className="text-lg">🇹🇷</span>
+          <span className="text-sm font-medium">Türkçe</span>
+          {i18n.language === 'tr' && (
+            <div className="ml-auto w-1.5 h-1.5 bg-blue-600 rounded-full"></div>
+          )}
+        </div>
       </DropdownMenuItem>
       <DropdownMenuItem 
         onClick={() => changeLanguage('en')} 
-        className={`flex items-center gap-2 px-3 py-2 rounded-lg transition-colors ${i18n.language === 'en' ? 'bg-blue-50 font-semibold' : ''}`}
+        className={`cursor-pointer p-2 rounded-md transition-all duration-200 ${
+          i18n.language === 'en' 
+            ? 'bg-blue-100 text-blue-700' 
+            : 'hover:bg-gray-50'
+        }`}
       >
-        <span className="text-lg">🇺🇸</span>
-        <span>English</span>
+        <div className="flex items-center space-x-2 w-full">
+          <span className="text-lg">🇺🇸</span>
+          <span className="text-sm font-medium">English</span>
+          {i18n.language === 'en' && (
+            <div className="ml-auto w-1.5 h-1.5 bg-blue-600 rounded-full"></div>
+          )}
+        </div>
       </DropdownMenuItem>
     </DropdownMenuContent>
   </DropdownMenu>
@@ -210,6 +237,8 @@ export default function Header() {
 
   const changeLanguage = useCallback((lng: string) => {
     i18n.changeLanguage(lng);
+    // Save language preference to localStorage
+    localStorage.setItem("preferredLanguage", lng);
   }, [i18n]);
 
   return (

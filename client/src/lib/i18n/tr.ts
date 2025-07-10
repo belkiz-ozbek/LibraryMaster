@@ -1,8 +1,11 @@
 export const tr = {
   "members.member": "Üye",
   "members.administrator": "Yönetici",
-  common: {
+  loading: {
     loading: "Yükleniyor...",
+    signingIn: "Giriş yapılıyor..."
+  },
+  common: {
     error: "Hata",
     success: "Başarılı",
     cancel: "İptal",
@@ -39,7 +42,6 @@ export const tr = {
     email: "E-posta",
     password: "Şifre",
     signIn: "Giriş Yap",
-    signingIn: "Giriş yapılıyor...",
     welcome: "Kütüphane Yönetim Sistemine Hoş Geldiniz",
     loginFailed: "Giriş başarısız",
     invalidCredentials: "Geçersiz e-posta veya şifre",
@@ -512,12 +514,6 @@ export const tr = {
   footer: {
     developedBy: "Bu sistem, Ahdevefa Sosyal Yardımlaşma Kulübü yazılım geliştirici ekibi tarafından geliştirilmiştir.",
     ahdevefaLogo: "Ahdevefa Logo"
-  },
-  loading: {
-    loading: "Yükleniyor...",
-    signingIn: "Giriş yapılıyor...",
-    verifyingEmail: "E-posta adresiniz doğrulanıyor...",
-    processing: "İşleniyor..."
   },
   verifyEmail: {
     success: "E-posta Başarıyla Doğrulandı!",
