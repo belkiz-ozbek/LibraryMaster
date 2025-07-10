@@ -15,6 +15,7 @@ import { useTranslation } from "react-i18next";
 const memberFormSchema = insertUserSchema.extend({
   firstName: z.string().min(2, 'İsim gerekli'),
   lastName: z.string().min(2, 'Soyisim gerekli'),
+  username: z.string().min(3, 'Kullanıcı adı en az 3 karakter olmalı').regex(/^[a-zA-Z0-9_]+$/, 'Kullanıcı adı sadece harf, rakam ve altçizgi içerebilir'),
   adminRating: z.number().min(1).max(5).optional(),
   adminNotes: z.string().optional(),
   membershipDate: z.string(),
@@ -47,6 +48,7 @@ export function MemberForm({ member, onSuccess, onCancel }: MemberFormProps) {
     defaultValues: {
       firstName,
       lastName,
+      username: member?.username || "",
       name: member?.name || "",
       email: member?.email || "",
       password: "",
@@ -90,6 +92,31 @@ export function MemberForm({ member, onSuccess, onCancel }: MemberFormProps) {
     mutation.mutate(data);
   };
 
+  // Capitalize first letter function
+  const capitalizeFirstLetter = (str: string) => {
+    return str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
+  };
+
+  const handleFirstNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = capitalizeFirstLetter(e.target.value);
+    form.setValue("firstName", value);
+  };
+
+  const handleLastNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = capitalizeFirstLetter(e.target.value);
+    form.setValue("lastName", value);
+  };
+
+  const handleFirstNameBlur = (e: React.FocusEvent<HTMLInputElement>) => {
+    const value = capitalizeFirstLetter(e.target.value);
+    form.setValue("firstName", value);
+  };
+
+  const handleLastNameBlur = (e: React.FocusEvent<HTMLInputElement>) => {
+    const value = capitalizeFirstLetter(e.target.value);
+    form.setValue("lastName", value);
+  };
+
   return (
     <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6 p-2">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -98,7 +125,9 @@ export function MemberForm({ member, onSuccess, onCancel }: MemberFormProps) {
           <Input
             id="firstName"
             {...form.register("firstName")}
-            className="rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition"
+            onChange={handleFirstNameChange}
+            onBlur={handleFirstNameBlur}
+            className="rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition capitalize"
           />
           {form.formState.errors.firstName && <p className="text-xs text-red-500 mt-0.5">{form.formState.errors.firstName.message}</p>}
         </div>
@@ -107,12 +136,23 @@ export function MemberForm({ member, onSuccess, onCancel }: MemberFormProps) {
           <Input
             id="lastName"
             {...form.register("lastName")}
-            className="rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition"
+            onChange={handleLastNameChange}
+            onBlur={handleLastNameBlur}
+            className="rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition capitalize"
           />
           {form.formState.errors.lastName && <p className="text-xs text-red-500 mt-0.5">{form.formState.errors.lastName.message}</p>}
         </div>
       </div>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="flex flex-col gap-2">
+          <Label htmlFor="username" className="font-semibold text-gray-800">{t('members.form.username')} *</Label>
+          <Input
+            id="username"
+            {...form.register("username")}
+            className="rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition"
+          />
+          {form.formState.errors.username && <p className="text-xs text-red-500 mt-0.5">{form.formState.errors.username.message}</p>}
+        </div>
         <div className="flex flex-col gap-2">
           <Label htmlFor="email" className="font-semibold text-gray-800">
             {t('members.form.email')} {form.watch('isAdmin') ? '*' : ''}

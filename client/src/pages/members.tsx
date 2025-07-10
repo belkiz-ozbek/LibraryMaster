@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -94,12 +94,12 @@ export default function Members() {
     },
   });
 
-  // Server-side search
-  const { data: searchResults = { data: [] } } = useQuery<PaginatedResponse<User>>({
-    queryKey: ["/api/users/search", { q: searchQuery }],
+  // Server-side search with pagination
+  const { data: searchResults = { data: [], pagination: { page: 1, limit: 10, total: 0, totalPages: 1, hasNext: false, hasPrev: false } } } = useQuery<PaginatedResponse<User>>({
+    queryKey: ["/api/users/search", { q: searchQuery, page: currentPage }],
     enabled: searchQuery.length > 0,
     queryFn: async () => {
-      const res = await fetch(`/api/users/search?q=${encodeURIComponent(searchQuery)}`, { credentials: "include" });
+      const res = await fetch(`/api/users/search?q=${encodeURIComponent(searchQuery)}&page=${currentPage}&limit=10`, { credentials: "include" });
       if (!res.ok) throw new Error("Arama başarısız");
       return res.json();
     },
@@ -114,6 +114,9 @@ export default function Members() {
   const statusFilteredMembers: User[] = statusFilter === "all"
     ? displayMembers
     : displayMembers.filter((m: User) => statusFilter === "active" ? !m.isAdmin : m.isAdmin);
+
+  // Pagination data
+  const paginationData = searchQuery.length > 0 ? searchResults.pagination : paginatedMembers?.pagination;
 
   const deleteMemberMutation = useMutation({
     mutationFn: (id: number) => apiRequest("DELETE", `/api/users/${id}`),
@@ -250,6 +253,10 @@ export default function Members() {
     },
   ], [t, user, deleteMemberMutation.isPending]);
 
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchQuery, statusFilter]);
+
   if (isLoading) {
     return <LoadingScreen />;
   }
@@ -309,7 +316,7 @@ export default function Members() {
               <div>
                 <CardTitle>{t("members.title")}</CardTitle>
                 <CardDescription>
-                  {paginatedMembers?.pagination?.total ?? 0} {t("members.totalMembers")}
+                  {paginationData?.total ?? 0} {t("members.totalMembers")}
                 </CardDescription>
               </div>
               <div className="w-80">
@@ -321,37 +328,27 @@ export default function Members() {
             </div>
           </CardHeader>
           <CardContent>
-            {searchQuery.length > 0 ? (
-              <DataTable
-                data={statusFilteredMembers}
-                columns={columns}
-                loading={isLoading}
-                emptyMessage={
-                  searchQuery.length > 0 
-                    ? t("members.noMembersFound")
-                    : t("members.noMembersYet")
+            <ServerDataTable
+              data={{
+                data: statusFilteredMembers,
+                pagination: paginationData || {
+                  page: 1,
+                  limit: 10,
+                  total: 0,
+                  totalPages: 1,
+                  hasNext: false,
+                  hasPrev: false
                 }
-                pageSize={10}
-              />
-            ) : (
-              <ServerDataTable
-                data={{
-                  data: statusFilteredMembers,
-                  pagination: {
-                    page: paginatedMembers?.pagination?.page || 1,
-                    limit: paginatedMembers?.pagination?.limit || 10,
-                    total: statusFilteredMembers.length,
-                    totalPages: Math.ceil(statusFilteredMembers.length / 10),
-                    hasNext: false,
-                    hasPrev: false
-                  }
-                }}
-                columns={columns}
-                loading={isLoading}
-                emptyMessage={t("members.noMembersYet")}
-                onPageChange={setCurrentPage}
-              />
-            )}
+              }}
+              columns={columns}
+              loading={isLoading}
+              emptyMessage={
+                searchQuery.length > 0 
+                  ? t("members.noMembersFound")
+                  : t("members.noMembersYet")
+              }
+              onPageChange={setCurrentPage}
+            />
           </CardContent>
         </Card>
       </motion.div>
