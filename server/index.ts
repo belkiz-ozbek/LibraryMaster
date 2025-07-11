@@ -4,6 +4,9 @@ import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
 import cors from "cors";
 import path from "path";
+import { fileURLToPath } from "url";
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const app = express();
 app.use(cors({
@@ -54,12 +57,10 @@ app.use((req, res, next) => {
     throw err;
   });
 
-  // Ana route ve SPA fallback
+  // Production ortamında statik dosya ve SPA fallback
   if (app.get("env") !== "development") {
     const distPath = path.resolve(__dirname, "..", "public");
-    app.get("/", (req, res) => {
-      res.sendFile(path.join(distPath, "index.html"));
-    });
+    app.use(express.static(distPath));
     app.get("*", (req, res) => {
       res.sendFile(path.join(distPath, "index.html"));
     });
