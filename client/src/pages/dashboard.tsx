@@ -333,93 +333,149 @@ export default function Dashboard() {
         variants={containerVariants}
       >
         <motion.div variants={itemVariants}>
-          <Card>
-            <CardHeader>
-              <CardTitle>{t("dashboard.quickActions")}</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                <Link to="/books?action=add">
-                  <div className="flex flex-col items-center justify-center p-4 border rounded-lg hover:bg-muted transition-colors text-center h-full">
-                    <div className="p-3 bg-blue-100 dark:bg-blue-900/30 rounded-full mb-2">
-                      <Plus className="h-6 w-6 text-blue-600 dark:text-blue-400" />
+          <div className="mb-6">
+            <div className="flex items-center gap-2 mb-4">
+              <div className="w-1.5 h-1.5 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full animate-pulse"></div>
+              <h3 className="text-base font-semibold text-gray-800">{t("dashboard.quickActions")}</h3>
+            </div>
+            <div className="flex flex-wrap gap-3">
+              <Link to="/books?action=add" className="flex-1 min-w-[140px]">
+                <div className="group relative overflow-hidden rounded-xl bg-gradient-to-br from-blue-50 to-blue-100/50 hover:from-blue-100 hover:to-blue-200/50 border border-blue-200/30 hover:border-blue-300/50 transition-all duration-300 hover:shadow-lg hover:shadow-blue-500/20 hover:-translate-y-1">
+                  <div className="absolute inset-0 bg-gradient-to-br from-blue-500/10 to-purple-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                  <div className="relative p-4 text-center">
+                    <div className="inline-flex items-center justify-center w-10 h-10 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl mb-3 shadow-lg shadow-blue-500/30 group-hover:scale-110 transition-transform duration-300">
+                      <Plus className="h-5 w-5 text-white" />
                     </div>
-                    <p className="font-semibold text-sm">{t("books.addBook")}</p>
-                    <p className="text-xs text-muted-foreground">{t("dashboard.addBookDesc")}</p>
+                    <p className="font-semibold text-sm text-gray-800 mb-1">{t("books.addBook")}</p>
+                    <p className="text-xs text-gray-600 leading-tight">{t("dashboard.addBookDesc")}</p>
                   </div>
-                </Link>
-                <Link to="/members?action=add">
-                  <div className="flex flex-col items-center justify-center p-4 border rounded-lg hover:bg-muted transition-colors text-center h-full">
-                    <div className="p-3 bg-green-100 dark:bg-green-900/30 rounded-full mb-2">
-                      <UserPlus className="h-6 w-6 text-green-600 dark:text-green-400" />
+                </div>
+              </Link>
+              
+              <Link to="/members?action=add" className="flex-1 min-w-[140px]">
+                <div className="group relative overflow-hidden rounded-xl bg-gradient-to-br from-green-50 to-emerald-100/50 hover:from-green-100 hover:to-emerald-200/50 border border-green-200/30 hover:border-green-300/50 transition-all duration-300 hover:shadow-lg hover:shadow-green-500/20 hover:-translate-y-1">
+                  <div className="absolute inset-0 bg-gradient-to-br from-green-500/10 to-emerald-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                  <div className="relative p-4 text-center">
+                    <div className="inline-flex items-center justify-center w-10 h-10 bg-gradient-to-br from-green-500 to-emerald-600 rounded-xl mb-3 shadow-lg shadow-green-500/30 group-hover:scale-110 transition-transform duration-300">
+                      <UserPlus className="h-5 w-5 text-white" />
                     </div>
-                    <p className="font-semibold text-sm">{t("members.addMember")}</p>
-                    <p className="text-xs text-muted-foreground">{t("dashboard.addMemberDesc")}</p>
+                    <p className="font-semibold text-sm text-gray-800 mb-1">{t("members.addMember")}</p>
+                    <p className="text-xs text-gray-600 leading-tight">{t("dashboard.addMemberDesc")}</p>
                   </div>
-                </Link>
-                 <Link to="/borrowing?action=add">
-                  <div className="flex flex-col items-center justify-center p-4 border rounded-lg hover:bg-muted transition-colors text-center h-full">
-                    <div className="p-3 bg-orange-100 dark:bg-orange-900/30 rounded-full mb-2">
-                      <BarChart3 className="h-6 w-6 text-orange-600 dark:text-orange-400" />
+                </div>
+              </Link>
+              
+              <Link to="/borrowing?action=add" className="flex-1 min-w-[140px]">
+                <div className="group relative overflow-hidden rounded-xl bg-gradient-to-br from-orange-50 to-amber-100/50 hover:from-orange-100 hover:to-amber-200/50 border border-orange-200/30 hover:border-orange-300/50 transition-all duration-300 hover:shadow-lg hover:shadow-orange-500/20 hover:-translate-y-1">
+                  <div className="absolute inset-0 bg-gradient-to-br from-orange-500/10 to-amber-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                  <div className="relative p-4 text-center">
+                    <div className="inline-flex items-center justify-center w-10 h-10 bg-gradient-to-br from-orange-500 to-amber-600 rounded-xl mb-3 shadow-lg shadow-orange-500/30 group-hover:scale-110 transition-transform duration-300">
+                      <BarChart3 className="h-5 w-5 text-white" />
                     </div>
-                    <p className="font-semibold text-sm">{t("dashboard.quickBorrow")}</p>
-                    <p className="text-xs text-muted-foreground">{t("dashboard.quickBorrowDesc")}</p>
+                    <p className="font-semibold text-sm text-gray-800 mb-1">{t("dashboard.quickBorrow")}</p>
+                    <p className="text-xs text-gray-600 leading-tight">{t("dashboard.quickBorrowDesc")}</p>
                   </div>
-                </Link>
-                <Link to="/returns">
-                  <div className="flex flex-col items-center justify-center p-4 border rounded-lg hover:bg-muted transition-colors text-center h-full">
-                    <div className="p-3 bg-red-100 dark:bg-red-900/30 rounded-full mb-2">
-                      <Undo2 className="h-6 w-6 text-red-600 dark:text-red-400" />
+                </div>
+              </Link>
+              
+              <Link to="/returns" className="flex-1 min-w-[140px]">
+                <div className="group relative overflow-hidden rounded-xl bg-gradient-to-br from-red-50 to-pink-100/50 hover:from-red-100 hover:to-pink-200/50 border border-red-200/30 hover:border-red-300/50 transition-all duration-300 hover:shadow-lg hover:shadow-red-500/20 hover:-translate-y-1">
+                  <div className="absolute inset-0 bg-gradient-to-br from-red-500/10 to-pink-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                  <div className="relative p-4 text-center">
+                    <div className="inline-flex items-center justify-center w-10 h-10 bg-gradient-to-br from-red-500 to-pink-600 rounded-xl mb-3 shadow-lg shadow-red-500/30 group-hover:scale-110 transition-transform duration-300">
+                      <Undo2 className="h-5 w-5 text-white" />
                     </div>
-                    <p className="font-semibold text-sm">{t("dashboard.processReturn")}</p>
-                    <p className="text-xs text-muted-foreground">{t("dashboard.processReturnDesc")}</p>
+                    <p className="font-semibold text-sm text-gray-800 mb-1">{t("dashboard.processReturn")}</p>
+                    <p className="text-xs text-gray-600 leading-tight">{t("dashboard.processReturnDesc")}</p>
                   </div>
-                </Link>
-              </div>
-            </CardContent>
-          </Card>
+                </div>
+              </Link>
+            </div>
+          </div>
         </motion.div>
 
         {/* Stats Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          <motion.div variants={itemVariants}>
+          <motion.div 
+            variants={itemVariants}
+            whileHover={{ 
+              scale: 1.02,
+              transition: { duration: 0.2 }
+            }}
+          >
           <StatsCard
             title={t("statistics.totalBooks")}
             value={stats?.totalBooks || 0}
-            change={typeof stats?.totalBooksChangePercent === 'number' ? t("dashboard.percentFromLastMonth", { percent: stats.totalBooksChangePercent }) : t("dashboard.changeBooks")}
-            changeType="positive"
+            change={typeof stats?.totalBooksChangePercent === 'number' ? 
+              `${stats.totalBooksChangePercent > 0 ? '+' : ''}${stats.totalBooksChangePercent}%` : 
+              t("dashboard.changeBooks")
+            }
+            changeType={typeof stats?.totalBooksChangePercent === 'number' ? 
+              (stats.totalBooksChangePercent > 0 ? "positive" : stats.totalBooksChangePercent < 0 ? "negative" : "neutral") : 
+              "neutral"
+            }
             icon={<Book size={20} />}
-            iconColor="bg-primary/10 text-primary"
+            iconColor="bg-emerald-500/20 text-emerald-400"
           />
           </motion.div>
-          <motion.div variants={itemVariants}>
+          <motion.div 
+            variants={itemVariants}
+            whileHover={{ 
+              scale: 1.02,
+              transition: { duration: 0.2 }
+            }}
+          >
           <StatsCard
             title={t("statistics.activeMembers")}
             value={stats?.totalUsers || 0}
-            change={typeof stats?.totalUsersChangePercent === 'number' ? t("dashboard.percentFromLastMonth", { percent: stats.totalUsersChangePercent }) : t("dashboard.changeMembers")}
-            changeType="positive"
+            change={typeof stats?.totalUsersChangePercent === 'number' ? 
+              `${stats.totalUsersChangePercent > 0 ? '+' : ''}${stats.totalUsersChangePercent}%` : 
+              t("dashboard.changeMembers")
+            }
+            changeType={typeof stats?.totalUsersChangePercent === 'number' ? 
+              (stats.totalUsersChangePercent > 0 ? "positive" : stats.totalUsersChangePercent < 0 ? "negative" : "neutral") : 
+              "neutral"
+            }
             icon={<Users size={20} />}
-            iconColor="bg-secondary/10 text-secondary"
+            iconColor="bg-blue-500/20 text-blue-400"
           />
           </motion.div>
-          <motion.div variants={itemVariants}>
+          <motion.div 
+            variants={itemVariants}
+            whileHover={{ 
+              scale: 1.02,
+              transition: { duration: 0.2 }
+            }}
+          >
           <StatsCard
             title={t("dashboard.booksBorrowed")}
             value={stats?.activeBorrowings || 0}
-            change={typeof stats?.avgBorrowDays === 'number' ? t("dashboard.avgDaysLabel", { days: stats.avgBorrowDays }) : t("dashboard.avgDays")}
+            change={typeof stats?.avgBorrowDays === 'number' ? 
+              `${stats.avgBorrowDays} gün` : 
+              t("dashboard.avgDays")
+            }
             changeType="neutral"
             icon={<HandHeart size={20} />}
-            iconColor="bg-accent/10 text-accent"
+            iconColor="bg-purple-500/20 text-purple-400"
           />
           </motion.div>
-          <motion.div variants={itemVariants}>
+          <motion.div 
+            variants={itemVariants}
+            whileHover={{ 
+              scale: 1.02,
+              transition: { duration: 0.2 }
+            }}
+          >
           <StatsCard
             title={t("dashboard.overdueItems")}
             value={stats?.overdueBorrowings || 0}
-            change={t("dashboard.requiresAttention")}
+            change={stats?.overdueBorrowings && stats.overdueBorrowings > 0 ? 
+              `${stats.overdueBorrowings} gecikmiş` : 
+              t("dashboard.requiresAttention")
+            }
             changeType="negative"
             icon={<AlertTriangle size={20} />}
-            iconColor="bg-destructive/10 text-destructive"
+            iconColor="bg-red-500/20 text-red-400"
           />
           </motion.div>
         </div>

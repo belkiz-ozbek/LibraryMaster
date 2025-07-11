@@ -242,7 +242,7 @@ export default function Header() {
   }, [i18n]);
 
   return (
-    <header className="bg-white border-b border-gray-100 px-8 py-5 transition-all duration-300">
+    <header className="bg-white border-b border-gray-100 px-8 py-5 transition-all duration-300" style={{ padding: '12px 32px' }}>
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-xl font-semibold text-gray-900 tracking-tight">

@@ -54,7 +54,7 @@ const UserProfile = ({ user, isCollapsed, onLogout, getInitials, t }: UserProfil
           {user?.name || t('sidebar.user')}
         </p>
         <div className="flex items-center gap-1 mt-0.5">
-          <span className={`text-[11px] px-2 py-0.5 rounded-full font-medium border ${user?.isAdmin ? 'bg-purple-50 text-purple-600 border-purple-200' : 'bg-blue-50 text-blue-600 border-blue-200'}`}> 
+          <span className={`text-[10px] px-2 py-0.5 rounded-full font-medium border ${user?.isAdmin ? 'bg-purple-50 text-purple-600 border-purple-200' : 'bg-blue-50 text-blue-600 border-blue-200'}`}> 
             {user?.isAdmin ? t('sidebar.administrator') : t('sidebar.staff')}
           </span>
         </div>
@@ -104,7 +104,7 @@ const NavigationButton = ({ item, isActive, isCollapsed }: NavigationButtonProps
     >
       <span className="flex items-center space-x-3">
         <Icon size={19} />
-        <span className="transition-opacity duration-200 opacity-100 text-[15px] tracking-tight">{item.name}</span>
+        <span className="transition-opacity duration-200 opacity-100 text-sm tracking-tight">{item.name}</span>
       </span>
     </Button>
   );
@@ -112,8 +112,8 @@ const NavigationButton = ({ item, isActive, isCollapsed }: NavigationButtonProps
 
 const SidebarHeader = ({ isCollapsed, t }: { isCollapsed: boolean; t: (key: string) => string }) => (
   <div
-    className={`${isCollapsed ? 'flex items-center justify-center' : 'p-6 flex flex-col items-center space-y-3'} border-b border-gray-100 transition-all duration-300 bg-white/80`}
-    style={isCollapsed ? { height: '88px' } : undefined}
+    className={`${isCollapsed ? 'flex items-center justify-center' : 'flex flex-col items-center space-y-3'} transition-all duration-300 bg-white/80`}
+    style={isCollapsed ? { height: '64px', padding: '12px 0' } : { padding: '12px 24px', minHeight: '64px' }}
   >
     {isCollapsed ? (
       <div className="flex items-center justify-center w-full h-full">
@@ -142,7 +142,7 @@ const SidebarHeader = ({ isCollapsed, t }: { isCollapsed: boolean; t: (key: stri
           />
         </div>
         <div className="transition-opacity duration-300 opacity-100 text-center">
-          <h1 className="text-xl font-bold text-gray-900 tracking-tight">LibraryMS</h1>
+          <h1 className="text-lg font-bold text-gray-900 tracking-tight">LibraryMS</h1>
           <p className="text-xs text-gray-400 font-medium">{t('sidebar.managementSystem')}</p>
         </div>
       </>
@@ -230,8 +230,8 @@ export default function Sidebar() {
           {user?.isAdmin && (
             <div className={`pt-5 mt-5 border-t border-gray-100 ${isCollapsed ? 'px-1' : ''} transition-all duration-300`}> 
               {!isCollapsed && (
-                <p className="px-3 mb-2 text-[11px] font-semibold text-purple-500 uppercase tracking-widest flex items-center gap-1">
-                  <Star size={13} className="inline-block text-purple-300 mr-1" /> {t('sidebar.admin')}
+                <p className="px-3 mb-2 text-[10px] font-semibold text-purple-500 uppercase tracking-widest flex items-center gap-1">
+                  <Star size={12} className="inline-block text-purple-300 mr-1" /> {t('sidebar.admin')}
                 </p>
               )}
               {adminNavigation.map((item) => (
