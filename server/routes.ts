@@ -55,11 +55,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
     secret: process.env.SESSION_SECRET || 'library-management-secret',
     resave: true,
     saveUninitialized: false,
-    cookie: { 
-      secure: process.env.IS_PRODUCTION === 'true' || process.env.NODE_ENV === 'production',
+    cookie: {
+      secure: process.env.NODE_ENV === 'production', // production'da true
       httpOnly: true,
       maxAge: 24 * 60 * 60 * 1000, // 24 hours
-      sameSite: 'lax'
+      sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax', // cross-site ise 'none'
+      domain: process.env.NODE_ENV === 'production' ? '.railway.app' : undefined // production'da domain ekle
     }
   }));
 
