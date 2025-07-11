@@ -101,16 +101,16 @@ export default function Statistics() {
   });
 
   // Calculate additional statistics
-  const totalCopies = allBooks.reduce((sum, book) => sum + book.totalCopies, 0);
-  const availableCopies = allBooks.reduce((sum, book) => sum + book.availableCopies, 0);
+  const totalCopies = allBooks?.reduce((sum, book) => sum + book.totalCopies, 0) || 0;
+  const availableCopies = allBooks?.reduce((sum, book) => sum + book.availableCopies, 0) || 0;
   const utilizationRate = totalCopies > 0 ? ((totalCopies - availableCopies) / totalCopies * 100) : 0;
   
-  const ratedMembers = allUsers.filter((user) => user.adminRating);
+  const ratedMembers = allUsers?.filter((user) => user.adminRating) || [];
   const averageRating = ratedMembers.length > 0 
     ? ratedMembers.reduce((sum, user) => sum + (user.adminRating || 0), 0) / ratedMembers.length 
     : 0;
 
-  const returnedBorrowings = allBorrowings.filter((b) => b.status === "returned");
+  const returnedBorrowings = allBorrowings?.filter((b) => b.status === "returned") || [];
   const onTimeReturns = returnedBorrowings.filter((b) => 
     new Date(b.returnDate!) <= new Date(b.dueDate)
   ).length;
@@ -250,8 +250,9 @@ export default function Statistics() {
   const confettiRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    if (showChampions && topReaders.length >= 3) {
-      setTimeout(() => setConfettiActive(true), 700);
+    if (showChampions && topReaders && topReaders.length >= 3) {
+      const timer = setTimeout(() => setConfettiActive(true), 700);
+      return () => clearTimeout(timer);
     }
   }, [showChampions, topReaders]);
 
@@ -275,6 +276,20 @@ export default function Statistics() {
   if (isLoading) {
     return <LoadingScreen />;
   }
+
+  // Memoize expensive calculations
+  const statsData = {
+    totalBooks: stats?.totalBooks || 0,
+    totalUsers: stats?.totalUsers || 0,
+    activeBorrowings: stats?.activeBorrowings || 0,
+    totalCopies,
+    utilizationRate,
+    averageRating,
+    onTimeRate,
+    onTimeReturns,
+    returnedBorrowingsLength: returnedBorrowings.length,
+    highlyRatedMembers: ratedMembers.filter(u => u.adminRating! >= 4).length
+  };
 
   return (
     <motion.div
@@ -430,21 +445,21 @@ export default function Statistics() {
       </motion.div>
 
       {/* Main Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 items-stretch">
-        <motion.div variants={itemVariants}>
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <motion.div variants={itemVariants} className="h-full">
           <StatsCard
             title={t("statistics.totalBooks")}
-            value={stats?.totalBooks || 0}
+            value={statsData.totalBooks}
             change={t("statistics.totalCopies", { count: totalCopies })}
             changeType="neutral"
             icon={<BookIcon size={20} />}
             iconColor="bg-primary/10 text-primary"
           />
         </motion.div>
-        <motion.div variants={itemVariants}>
+        <motion.div variants={itemVariants} className="h-full">
           <StatsCard
             title={t("statistics.activeMembers")}
-            value={stats?.totalUsers || 0}
+            value={statsData.totalUsers}
             change={t("statistics.avgRating", { rating: averageRating.toFixed(1) })}
             changeType="positive"
             icon={<Users size={20} />}
@@ -454,14 +469,14 @@ export default function Statistics() {
         <motion.div variants={itemVariants}>
           <StatsCard
             title={t("statistics.activeBorrowings")}
-            value={stats?.activeBorrowings || 0}
-            change={t("statistics.utilizationRate", { rate: utilizationRate.toFixed(0) })}
+            value={statsData.activeBorrowings}
+            change={`%${utilizationRate.toFixed(0)} kullanım`}
             changeType="neutral"
             icon={<Activity size={20} />}
             iconColor="bg-accent/10 text-accent"
           />
         </motion.div>
-        <motion.div variants={itemVariants}>
+        <motion.div variants={itemVariants} className="h-full">
           <StatsCard
             title={t("statistics.onTimeReturns")}
             value={`${onTimeRate.toFixed(0)}%`}
@@ -475,10 +490,10 @@ export default function Statistics() {
 
       {/* Additional Metrics */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <Card>
-          <CardContent className="p-6">
-            <div className="flex items-center">
-              <TrendingUp className="h-8 w-8 text-accent mr-3" />
+        <Card className="h-full">
+          <CardContent className="p-6 h-full flex items-center">
+            <div className="flex items-center w-full">
+              <TrendingUp className="h-8 w-8 text-accent mr-3 flex-shrink-0" />
               <div>
                 <p className="text-2xl font-bold text-on-surface">
                   {utilizationRate.toFixed(1)}%
@@ -488,10 +503,10 @@ export default function Statistics() {
             </div>
           </CardContent>
         </Card>
-        <Card>
-          <CardContent className="p-6">
-            <div className="flex items-center">
-              <Star className="h-8 w-8 text-accent mr-3" />
+        <Card className="h-full">
+          <CardContent className="p-6 h-full flex items-center">
+            <div className="flex items-center w-full">
+              <Star className="h-8 w-8 text-accent mr-3 flex-shrink-0" />
               <div>
                 <p className="text-2xl font-bold text-on-surface">
                   {averageRating.toFixed(1)}/5
@@ -501,13 +516,13 @@ export default function Statistics() {
             </div>
           </CardContent>
         </Card>
-        <Card>
-          <CardContent className="p-6">
-            <div className="flex items-center">
-              <Award className="h-8 w-8 text-secondary mr-3" />
+        <Card className="h-full">
+          <CardContent className="p-6 h-full flex items-center">
+            <div className="flex items-center w-full">
+              <Award className="h-8 w-8 text-secondary mr-3 flex-shrink-0" />
               <div>
                 <p className="text-2xl font-bold text-on-surface">
-                  {ratedMembers.filter(u => u.adminRating! >= 4).length}
+                  {statsData.highlyRatedMembers}
                 </p>
                 <p className="text-sm text-text-muted">{t("statistics.highlyRatedMembers")}</p>
               </div>

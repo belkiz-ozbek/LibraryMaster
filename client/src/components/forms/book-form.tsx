@@ -167,10 +167,22 @@ export function BookForm({ book, onSuccess, onCancel }: BookFormProps) {
       </div>
 
       <div className="flex justify-end space-x-3 pt-6">
-        <Button type="button" variant="outline" onClick={onCancel} className="rounded-lg px-6 py-2 text-base">
+        <Button 
+          type="button" 
+          variant="outline" 
+          onClick={onCancel} 
+          size="lg"
+          className="font-medium shadow-sm hover:shadow-md"
+        >
           {t("common.cancel")}
         </Button>
-        <Button type="submit" disabled={mutation.isPending} className="rounded-lg px-6 py-2 text-base">
+        <Button 
+          type="submit" 
+          variant="gradient"
+          disabled={mutation.isPending} 
+          size="lg"
+          className="font-semibold shadow-lg hover:shadow-xl"
+        >
           {mutation.isPending ? t("common.saving", "Kaydediliyor...") : isEditing ? t("books.editBook") : t("books.addBook")}
         </Button>
       </div>

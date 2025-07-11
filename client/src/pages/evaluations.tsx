@@ -201,10 +201,11 @@ export default function Evaluations() {
       title: t("evaluations.actions"),
       render: (_: any, row: User) => (
         <Button
-          variant="outline"
+          variant="modern"
           size="sm"
           onClick={() => handleEvaluate(row)}
           disabled={updateMemberMutation.isPending}
+          className="text-blue-600 hover:text-blue-700 hover:bg-blue-50"
         >
           <Edit size={14} className="mr-1" />
           {t("evaluations.evaluate")}

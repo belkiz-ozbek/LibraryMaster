@@ -279,18 +279,20 @@ export default function Returns() {
       render: (_: any, row: BorrowingWithDetails) => (
         <div className="flex items-center space-x-2">
           <Button
-            variant="default"
+            variant="gradientGreen"
             size="sm"
             onClick={() => handleReturn(row)}
             disabled={returnBookMutation.isPending}
+            className="font-medium shadow-sm hover:shadow-md"
           >
             <Check size={14} className="mr-1" />
             {t("returns.return")}
           </Button>
           <Button
-            variant="outline"
+            variant="modern"
             size="sm"
             onClick={() => handleExtendDueDate(row)}
+            className="text-blue-600 hover:text-blue-700 hover:bg-blue-50"
             // disabled={extendDueDateMutation.isPending}
           >
             <Calendar size={14} className="mr-1" />

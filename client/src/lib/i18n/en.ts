@@ -432,6 +432,7 @@ export const en = {
     avgDaysLabel: "Avg. {{days}} days",
     weeklyActivity: "Weekly Activity",
     weeklyActivityDesc: "Borrow and return transactions in the last 7 days",
+    borrowCountShort: "borrows"
   },
   genres: {
     kurgu: "Fiction",
@@ -441,6 +442,10 @@ export const en = {
     roman: "Novel",
     cocuk: "Children",
     klasik: "Classic",
+    novella: "Novella",
+    felsefe: "Philosophy",
+    tiyatro: "Theater",
+    bilim: "Science",
   },
   footer: {
     developedBy: "This system was developed by the software development team of Ahdevefa Social Solidarity Club.",
@@ -524,10 +529,10 @@ export const en = {
       achievement: "Achievement"
     },
     messages: {
-      borrowing: "{{user}} borrowed a book",
-      return: "{{user}} returned a book",
-      member_added: "New member added: {{user}}",
-      book_added: "New book added: {{book}}"
+      borrowing: '{{user}} borrowed the book "{{book}}"',
+      return: '{{user}} returned the book "{{book}}"',
+      member_added: 'New member added: {{user}}',
+      book_added: 'New book added: "{{book}}"'
     },
     noActivities: "No activities yet",
     noActivitiesDesc: "New activities will appear here"

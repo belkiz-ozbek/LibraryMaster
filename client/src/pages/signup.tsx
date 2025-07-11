@@ -483,7 +483,9 @@ export default function SignupPage() {
                 >
                   <Button 
                     type="submit" 
-                    className="w-full h-11 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-medium rounded-lg shadow-lg transition-all duration-300 transform hover:scale-[1.02] active:scale-[0.98] hover:shadow-xl"
+                    variant="gradient"
+                    size="xl"
+                    className="w-full font-semibold shadow-lg hover:shadow-xl"
                     disabled={isLoading}
                   >
                     {isLoading ? (

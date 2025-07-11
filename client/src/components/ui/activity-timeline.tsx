@@ -172,7 +172,9 @@ export function ActivityTimeline({
                 ease: "easeOut"
               }}
               whileHover={{ 
-                scale: 1.02,
+                scale: 1.035,
+                y: -2,
+                boxShadow: "0 8px 32px 0 rgba(31, 38, 135, 0.10)",
                 transition: { duration: 0.2 }
               }}
               className="relative"
@@ -182,73 +184,66 @@ export function ActivityTimeline({
                 <div className={`absolute left-3 top-8 w-0.5 h-8 bg-gradient-to-b from-border to-transparent ${variant === 'compact' ? 'left-4 top-6 h-6' : ''}`} />
               )}
               
-              <Card className={`relative overflow-hidden transition-all duration-300 hover:shadow-lg ${colors.border} border-l-4`}>
-                <CardContent className={cardPadding}>
-                  <div className="flex items-start gap-3">
-                    {/* Avatar/Icon */}
-                    <div className="flex-shrink-0">
-                      <div className={`${avatarSize} rounded-full flex items-center justify-center ${colors.bg}`}> 
-                        <div className={colors.icon}>
-                          {getActivityIcon(activity.type)}
-                        </div>
+              <Card className={`relative overflow-hidden transition-all duration-300 border-t border-r border-b border-gray-200 shadow-xl rounded-2xl bg-white/70 backdrop-blur-md hover:bg-white/90 group border-l-[6px] ${colors.border}`}> 
+                {/* Gradient Accent */}
+                <div className="absolute inset-0 pointer-events-none bg-gradient-to-br from-white/60 via-transparent to-blue-100/40 group-hover:from-blue-50/80 group-hover:to-purple-100/60 transition-all duration-300" />
+                <CardContent className={`${cardPadding} flex items-start gap-4 relative z-10`}> 
+                  {/* Avatar/Icon */}
+                  <div className="flex-shrink-0">
+                    <div className={`${avatarSize} rounded-full flex items-center justify-center shadow-md bg-gradient-to-br from-white via-${colors.bg.replace('bg-', '')} to-gray-100/60 border border-white/40`}>
+                      <div className={`${colors.icon} drop-shadow-md`}>
+                        {getActivityIcon(activity.type)}
                       </div>
                     </div>
-
-                    {/* Content */}
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-start justify-between gap-2 mb-1">
-                        <div className="flex-1">
-                          <h4 className={`${titleSize} font-medium text-foreground leading-tight`}>
-                            {t(`activity.messages.${activity.type}`, {
-                              user: activity.user?.name || '',
-                              book: activity.book?.title || ''
-                            })}
-                          </h4>
-                          {variant === 'detailed' && (
-                            <p className={`${textSize} text-muted-foreground mt-1`}>
-                              {activity.description}
-                            </p>
-                          )}
+                  </div>
+                  {/* Content */}
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-start justify-between gap-2 mb-1">
+                      <div className="flex-1">
+                        <div className={`font-semibold ${titleSize} text-gray-900 truncate`}>
+                          {t(`activity.messages.${activity.type}`, {
+                            user: activity.user?.name,
+                            book: activity.book?.title
+                          }) || activity.title}
                         </div>
-                        
-                        {/* Status Icon */}
-                        {activity.status && StatusIcon && (
-                          <StatusIcon 
-                            size={iconSize} 
-                            className={`flex-shrink-0 ${statusColors[activity.status]}`} 
-                          />
+                        {(variant === 'detailed') && (
+                          <div className={`mt-1 text-gray-700 font-normal text-xs`}>
+                            {t(`activity.messages.${activity.type}`, {
+                              user: activity.user?.name,
+                              book: activity.book?.title
+                            }) || activity.description}
+                          </div>
+                        )}
+                        {(variant !== 'detailed') && (
+                          <div className={`text-xs text-gray-500 truncate mt-0.5`}>
+                            {t(`activity.messages.${activity.type}`, {
+                              user: activity.user?.name,
+                              book: activity.book?.title
+                            }) || activity.description}
+                          </div>
                         )}
                       </div>
-
-                      {/* Metadata */}
-                      <div className="flex items-center gap-2 flex-wrap">
-                        {/* Activity Type Badge */}
-                        <Badge 
-                          variant="secondary" 
-                          className={`${textSize} ${colors.badge}`}
-                        >
-                          {t(`activity.types.${activity.type}`, activity.type)}
-                        </Badge>
-
-                        {/* Time */}
-                        <span className={`${textSize} text-muted-foreground flex items-center gap-1`}>
-                          <Clock size={iconSize - 2} />
-                          {getTimeAgo(activity.date)}
-                        </span>
-                      </div>
-
-                      {/* Additional Info */}
-                      {variant === 'detailed' && activity.metadata && (
-                        <div className="mt-3 pt-3 border-t border-border/50">
-                          {Object.entries(activity.metadata).map(([key, value]) => (
-                            <div key={key} className="flex items-center gap-2 text-xs text-muted-foreground">
-                              <span className="font-medium">{key}:</span>
-                              <span>{String(value)}</span>
-                            </div>
-                          ))}
-                        </div>
+                      {StatusIcon && (
+                        <StatusIcon className={`w-4 h-4 ml-2 ${statusColors[activity.status!]}`} />
                       )}
                     </div>
+                    <div className="flex items-center gap-2 mt-1">
+                      {/* Badge */}
+                      <Badge className={`rounded-full px-2 py-0.5 text-xs font-medium shadow ${colors.badge} border-0`}>{t(`activity.types.${activity.type}`)}</Badge>
+                      {/* Time */}
+                      <span className={`text-[11px] text-gray-400 font-normal ml-1`}>{getTimeAgo(activity.date)}</span>
+                    </div>
+                    {/* Metadata kutucukları sadece detailed'da göster */}
+                    {variant === 'detailed' && activity.metadata && (
+                      <div className="flex flex-wrap gap-2 mt-3">
+                        {Object.entries(activity.metadata).map(([key, value]) => (
+                          <div key={key} className="bg-gray-100 rounded-md px-2 py-1 text-xs text-gray-600 border border-gray-200">
+                            <span className="font-medium text-gray-700 mr-1">{key}:</span>
+                            <span>{String(value)}</span>
+                          </div>
+                        ))}
+                      </div>
+                    )}
                   </div>
                 </CardContent>
               </Card>

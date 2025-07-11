@@ -362,6 +362,7 @@ export const tr = {
     action: "İşlem",
     mostBorrowedBooks: "En Çok Ödünç Alınan Kitaplar",
     borrowCount: "{{count}} ödünç",
+    borrowCountShort: "ödünç",
     avgDays: "son 30 güne göre",
     requiresAttention: "ilgi gerektiriyor",
     booksBorrowed: "Ödünç Alınan Kitaplar",

@@ -262,10 +262,22 @@ export function BorrowForm({ borrowing, onSuccess, onCancel }: BorrowFormProps) 
       </div>
 
       <div className="flex justify-end space-x-3 pt-6">
-        <Button type="button" variant="outline" onClick={onCancel} className="rounded-lg px-6 py-2 text-base">
+        <Button 
+          type="button" 
+          variant="outline" 
+          onClick={onCancel} 
+          size="lg"
+          className="font-medium shadow-sm hover:shadow-md"
+        >
           {t('common.cancel')}
         </Button>
-        <Button type="submit" disabled={mutation.isPending} className="rounded-lg px-6 py-2 text-base">
+        <Button 
+          type="submit" 
+          variant="gradientOrange"
+          disabled={mutation.isPending} 
+          size="lg"
+          className="font-semibold shadow-lg hover:shadow-xl"
+        >
           {mutation.isPending ? t('common.saving') : isEditing ? t('borrowing.updateBorrowing') : t('borrowing.createBorrowing')}
         </Button>
       </div>

@@ -232,17 +232,19 @@ export default function Members() {
           {user?.isAdmin && (
             <>
               <Button
-                variant="ghost"
+                variant="modern"
                 size="sm"
                 onClick={() => { setSelectedMember(row); setIsFormOpen(true); }}
+                className="text-blue-600 hover:text-blue-700 hover:bg-blue-50"
               >
                 <Edit size={16} />
               </Button>
               <Button
-                variant="ghost"
+                variant="modern"
                 size="sm"
                 onClick={e => { e.stopPropagation(); setDeleteDialogOpenMember(row); }}
                 disabled={deleteMemberMutation.isPending || row.id === user?.id}
+                className="text-red-600 hover:text-red-700 hover:bg-red-50"
               >
                 <Trash2 size={16} />
               </Button>
@@ -283,8 +285,13 @@ export default function Members() {
             </SelectContent>
           </Select>
         </div>
-        <Button onClick={() => { setSelectedMember(null); setIsFormOpen(true); }}>
-          <Plus size={16} className="mr-2" />
+        <Button 
+          variant="gradientGreen" 
+          size="lg"
+          onClick={() => { setSelectedMember(null); setIsFormOpen(true); }}
+          className="font-semibold shadow-lg hover:shadow-xl"
+        >
+          <Plus size={18} className="mr-2" />
           {t('members.form.addMember')}
         </Button>
       </motion.div>

@@ -333,63 +333,139 @@ export default function Dashboard() {
         variants={containerVariants}
       >
         <motion.div variants={itemVariants}>
-          <div className="mb-6">
-            <div className="flex items-center gap-2 mb-4">
-              <div className="w-1.5 h-1.5 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full animate-pulse"></div>
-              <h3 className="text-base font-semibold text-gray-800">{t("dashboard.quickActions")}</h3>
+          <div className="mb-8">
+            <div className="flex items-center justify-between mb-6">
+              <div className="flex items-center gap-3">
+                <div className="w-1 h-6 bg-gradient-to-b from-blue-500 to-purple-600 rounded-full"></div>
+                <h3 className="text-lg font-semibold text-gray-800">{t("dashboard.quickActions")}</h3>
+              </div>
+              <div className="text-sm text-gray-500">Hızlı erişim</div>
             </div>
-            <div className="flex flex-wrap gap-3">
-              <Link to="/books?action=add" className="flex-1 min-w-[140px]">
-                <div className="group relative overflow-hidden rounded-xl bg-gradient-to-br from-blue-50 to-blue-100/50 hover:from-blue-100 hover:to-blue-200/50 border border-blue-200/30 hover:border-blue-300/50 transition-all duration-300 hover:shadow-lg hover:shadow-blue-500/20 hover:-translate-y-1">
-                  <div className="absolute inset-0 bg-gradient-to-br from-blue-500/10 to-purple-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                  <div className="relative p-4 text-center">
-                    <div className="inline-flex items-center justify-center w-10 h-10 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl mb-3 shadow-lg shadow-blue-500/30 group-hover:scale-110 transition-transform duration-300">
-                      <Plus className="h-5 w-5 text-white" />
+            
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              {/* Kitap Ekle */}
+              <motion.div
+                whileHover={{ y: -4, scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                transition={{ duration: 0.2 }}
+              >
+                <Link to="/books?action=add" className="block">
+                  <div className="group relative bg-white rounded-2xl p-6 border border-gray-100 hover:border-blue-200 transition-all duration-300 hover:shadow-lg hover:shadow-blue-500/20">
+                    <div className="flex items-center gap-4">
+                      <div className="relative">
+                        <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center shadow-lg shadow-blue-500/30 group-hover:shadow-blue-500/50 transition-all duration-300">
+                          <Plus className="h-6 w-6 text-white" />
+                        </div>
+                        <motion.div
+                          className="absolute -top-1 -right-1 w-3 h-3 bg-emerald-400 rounded-full"
+                          animate={{
+                            scale: [1, 1.2, 1],
+                            opacity: [0.7, 1, 0.7]
+                          }}
+                          transition={{ duration: 2, repeat: Infinity }}
+                        />
+                      </div>
+                      <div className="flex-1">
+                        <h4 className="font-semibold text-gray-900 text-sm mb-1">{t("books.addBook")}</h4>
+                        <p className="text-xs text-gray-500 leading-tight">Yeni kitap ekle</p>
+                      </div>
                     </div>
-                    <p className="font-semibold text-sm text-gray-800 mb-1">{t("books.addBook")}</p>
-                    <p className="text-xs text-gray-600 leading-tight">{t("dashboard.addBookDesc")}</p>
                   </div>
-                </div>
-              </Link>
-              
-              <Link to="/members?action=add" className="flex-1 min-w-[140px]">
-                <div className="group relative overflow-hidden rounded-xl bg-gradient-to-br from-green-50 to-emerald-100/50 hover:from-green-100 hover:to-emerald-200/50 border border-green-200/30 hover:border-green-300/50 transition-all duration-300 hover:shadow-lg hover:shadow-green-500/20 hover:-translate-y-1">
-                  <div className="absolute inset-0 bg-gradient-to-br from-green-500/10 to-emerald-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                  <div className="relative p-4 text-center">
-                    <div className="inline-flex items-center justify-center w-10 h-10 bg-gradient-to-br from-green-500 to-emerald-600 rounded-xl mb-3 shadow-lg shadow-green-500/30 group-hover:scale-110 transition-transform duration-300">
-                      <UserPlus className="h-5 w-5 text-white" />
+                </Link>
+              </motion.div>
+
+              {/* Üye Ekle */}
+              <motion.div
+                whileHover={{ y: -4, scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                transition={{ duration: 0.2 }}
+              >
+                <Link to="/members?action=add" className="block">
+                  <div className="group relative bg-white rounded-2xl p-6 border border-gray-100 hover:border-green-200 transition-all duration-300 hover:shadow-lg hover:shadow-green-500/20">
+                    <div className="flex items-center gap-4">
+                      <div className="relative">
+                        <div className="w-12 h-12 bg-gradient-to-br from-green-500 to-emerald-600 rounded-xl flex items-center justify-center shadow-lg shadow-green-500/30 group-hover:shadow-green-500/50 transition-all duration-300">
+                          <UserPlus className="h-6 w-6 text-white" />
+                        </div>
+                        <motion.div
+                          className="absolute -top-1 -right-1 w-3 h-3 bg-blue-400 rounded-full"
+                          animate={{
+                            scale: [1, 1.2, 1],
+                            opacity: [0.7, 1, 0.7]
+                          }}
+                          transition={{ duration: 2, repeat: Infinity, delay: 0.5 }}
+                        />
+                      </div>
+                      <div className="flex-1">
+                        <h4 className="font-semibold text-gray-900 text-sm mb-1">{t("members.addMember")}</h4>
+                        <p className="text-xs text-gray-500 leading-tight">Yeni üye kaydet</p>
+                      </div>
                     </div>
-                    <p className="font-semibold text-sm text-gray-800 mb-1">{t("members.addMember")}</p>
-                    <p className="text-xs text-gray-600 leading-tight">{t("dashboard.addMemberDesc")}</p>
                   </div>
-                </div>
-              </Link>
-              
-              <Link to="/borrowing?action=add" className="flex-1 min-w-[140px]">
-                <div className="group relative overflow-hidden rounded-xl bg-gradient-to-br from-orange-50 to-amber-100/50 hover:from-orange-100 hover:to-amber-200/50 border border-orange-200/30 hover:border-orange-300/50 transition-all duration-300 hover:shadow-lg hover:shadow-orange-500/20 hover:-translate-y-1">
-                  <div className="absolute inset-0 bg-gradient-to-br from-orange-500/10 to-amber-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                  <div className="relative p-4 text-center">
-                    <div className="inline-flex items-center justify-center w-10 h-10 bg-gradient-to-br from-orange-500 to-amber-600 rounded-xl mb-3 shadow-lg shadow-orange-500/30 group-hover:scale-110 transition-transform duration-300">
-                      <BarChart3 className="h-5 w-5 text-white" />
+                </Link>
+              </motion.div>
+
+              {/* Hızlı Ödünç */}
+              <motion.div
+                whileHover={{ y: -4, scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                transition={{ duration: 0.2 }}
+              >
+                <Link to="/borrowing?action=add" className="block">
+                  <div className="group relative bg-white rounded-2xl p-6 border border-gray-100 hover:border-orange-200 transition-all duration-300 hover:shadow-lg hover:shadow-orange-500/20">
+                    <div className="flex items-center gap-4">
+                      <div className="relative">
+                        <div className="w-12 h-12 bg-gradient-to-br from-orange-500 to-amber-600 rounded-xl flex items-center justify-center shadow-lg shadow-orange-500/30 group-hover:shadow-orange-500/50 transition-all duration-300">
+                          <BarChart3 className="h-6 w-6 text-white" />
+                        </div>
+                        <motion.div
+                          className="absolute -top-1 -right-1 w-3 h-3 bg-purple-400 rounded-full"
+                          animate={{
+                            scale: [1, 1.2, 1],
+                            opacity: [0.7, 1, 0.7]
+                          }}
+                          transition={{ duration: 2, repeat: Infinity, delay: 1 }}
+                        />
+                      </div>
+                      <div className="flex-1">
+                        <h4 className="font-semibold text-gray-900 text-sm mb-1">{t("dashboard.quickBorrow")}</h4>
+                        <p className="text-xs text-gray-500 leading-tight">Kitap ödünç al</p>
+                      </div>
                     </div>
-                    <p className="font-semibold text-sm text-gray-800 mb-1">{t("dashboard.quickBorrow")}</p>
-                    <p className="text-xs text-gray-600 leading-tight">{t("dashboard.quickBorrowDesc")}</p>
                   </div>
-                </div>
-              </Link>
-              
-              <Link to="/returns" className="flex-1 min-w-[140px]">
-                <div className="group relative overflow-hidden rounded-xl bg-gradient-to-br from-red-50 to-pink-100/50 hover:from-red-100 hover:to-pink-200/50 border border-red-200/30 hover:border-red-300/50 transition-all duration-300 hover:shadow-lg hover:shadow-red-500/20 hover:-translate-y-1">
-                  <div className="absolute inset-0 bg-gradient-to-br from-red-500/10 to-pink-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                  <div className="relative p-4 text-center">
-                    <div className="inline-flex items-center justify-center w-10 h-10 bg-gradient-to-br from-red-500 to-pink-600 rounded-xl mb-3 shadow-lg shadow-red-500/30 group-hover:scale-110 transition-transform duration-300">
-                      <Undo2 className="h-5 w-5 text-white" />
+                </Link>
+              </motion.div>
+
+              {/* İade İşlemi */}
+              <motion.div
+                whileHover={{ y: -4, scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                transition={{ duration: 0.2 }}
+              >
+                <Link to="/returns" className="block">
+                  <div className="group relative bg-white rounded-2xl p-6 border border-gray-100 hover:border-red-200 transition-all duration-300 hover:shadow-lg hover:shadow-red-500/20">
+                    <div className="flex items-center gap-4">
+                      <div className="relative">
+                        <div className="w-12 h-12 bg-gradient-to-br from-red-500 to-pink-600 rounded-xl flex items-center justify-center shadow-lg shadow-red-500/30 group-hover:shadow-red-500/50 transition-all duration-300">
+                          <Undo2 className="h-6 w-6 text-white" />
+                        </div>
+                        <motion.div
+                          className="absolute -top-1 -right-1 w-3 h-3 bg-yellow-400 rounded-full"
+                          animate={{
+                            scale: [1, 1.2, 1],
+                            opacity: [0.7, 1, 0.7]
+                          }}
+                          transition={{ duration: 2, repeat: Infinity, delay: 1.5 }}
+                        />
+                      </div>
+                      <div className="flex-1">
+                        <h4 className="font-semibold text-gray-900 text-sm mb-1">{t("dashboard.processReturn")}</h4>
+                        <p className="text-xs text-gray-500 leading-tight">Kitap iade et</p>
+                      </div>
                     </div>
-                    <p className="font-semibold text-sm text-gray-800 mb-1">{t("dashboard.processReturn")}</p>
-                    <p className="text-xs text-gray-600 leading-tight">{t("dashboard.processReturnDesc")}</p>
                   </div>
-                </div>
-              </Link>
+                </Link>
+              </motion.div>
             </div>
           </div>
         </motion.div>
@@ -485,9 +561,12 @@ export default function Dashboard() {
           {/* Weekly Activity Chart */}
           <motion.div variants={itemVariants} className="lg:col-span-3">
             <Card>
-              <CardHeader>
-                <CardTitle>{t("dashboard.weeklyActivity")}</CardTitle>
-                <CardDescription>{t("dashboard.weeklyActivityDesc")}</CardDescription>
+              <CardHeader className="bg-[#fafaff] dark:bg-[#232334] rounded-t-lg px-4 py-4 flex flex-col gap-1 border-b border-transparent">
+                <div className="flex items-center gap-2 mb-1">
+                  <span className="inline-block w-2.5 h-2.5 rounded-full bg-[#a78bfa] shadow-sm"></span>
+                  <CardTitle className="text-lg font-semibold text-gray-900 dark:text-white tracking-tight">{t("dashboard.weeklyActivity")}</CardTitle>
+                </div>
+                <CardDescription className="text-sm text-gray-500 dark:text-gray-300 font-normal leading-snug">{t("dashboard.weeklyActivityDesc")}</CardDescription>
               </CardHeader>
               <CardContent>
                 <ResponsiveContainer width="100%" height={300}>
@@ -551,9 +630,12 @@ export default function Dashboard() {
           {/* Genre Distribution Chart */}
           <motion.div variants={itemVariants} className="lg:col-span-2">
             <Card>
-              <CardHeader>
-                <CardTitle>{t("dashboard.collectionDistribution")}</CardTitle>
-                <CardDescription>{t("dashboard.collectionDistributionDesc")}</CardDescription>
+              <CardHeader className="bg-[#fff7fa] dark:bg-[#2a232a] rounded-t-lg px-4 py-4 flex flex-col gap-1 border-b border-transparent">
+                <div className="flex items-center gap-2 mb-1">
+                  <span className="inline-block w-2.5 h-2.5 rounded-full bg-[#f472b6] shadow-sm"></span>
+                  <CardTitle className="text-lg font-semibold text-gray-900 dark:text-white tracking-tight">{t("dashboard.collectionDistribution")}</CardTitle>
+                </div>
+                <CardDescription className="text-sm text-gray-500 dark:text-gray-300 font-normal leading-snug">{t("dashboard.collectionDistributionDesc")}</CardDescription>
               </CardHeader>
               <CardContent>
                 <ResponsiveContainer width="100%" height={300}>
@@ -566,7 +648,7 @@ export default function Dashboard() {
                       outerRadius={100}
                       paddingAngle={8}
                       dataKey="value"
-                      label={false} // Etiketleri kaldır
+                      label={false}
                       labelLine={false}
                     >
                       {genreDistribution.map((entry, index) => (
@@ -617,54 +699,94 @@ export default function Dashboard() {
           {/* Son Aktiviteler */}
           <motion.div variants={itemVariants}>
             <Card className="h-full">
-            <CardHeader className="flex flex-row items-center justify-between">
-              <CardTitle>{t("dashboard.recentActivity")}</CardTitle>
+              <CardHeader className="flex flex-row items-center justify-between">
+                <CardTitle>{t("dashboard.recentActivity")}</CardTitle>
                 <Button variant="link" size="sm" asChild>
-                  <Link to="/activities">{t("dashboard.viewAll")}</Link>
+                  <Link
+                    to="/activities"
+                    className="group relative text-primary text-sm font-medium transition-colors no-underline inline-block leading-tight"
+                  >
+                    <span className="relative">
+                      {t("dashboard.viewAll")}
+                      <span className="absolute left-0 right-0 bottom-[-2px] h-0.5 bg-primary transition-all duration-300 w-0 group-hover:w-full"></span>
+                    </span>
+                  </Link>
                 </Button>
-            </CardHeader>
-            <CardContent className="h-full">
-              <ActivityTimeline 
-                activities={transformedActivities}
-                maxItems={5}
-                showAvatars={true}
-                variant="compact"
-              />
-            </CardContent>
-          </Card>
+              </CardHeader>
+              <CardContent className="h-full">
+                <ActivityTimeline 
+                  activities={transformedActivities}
+                  maxItems={5}
+                  showAvatars={true}
+                  variant="compact"
+                />
+              </CardContent>
+            </Card>
           </motion.div>
 
           {/* En Çok Ödünç Alınan Kitaplar */}
           <motion.div variants={itemVariants}>
-            <Card className="h-full">
-            <CardHeader className="flex flex-row items-center justify-between">
-              <CardTitle>{t("dashboard.mostBorrowedBooks")}</CardTitle>
+            <Card className="h-full bg-white/60 dark:bg-slate-900/60 backdrop-blur-md shadow-xl border-0">
+              <CardHeader className="flex flex-row items-center justify-between">
+                <CardTitle>{t("dashboard.mostBorrowedBooks")}</CardTitle>
                 <Button variant="link" size="sm" asChild>
-                  <Link to="/statistics">{t("dashboard.viewAll")}</Link>
+                  <Link
+                    to="/statistics"
+                    className="group relative text-primary text-sm font-medium transition-colors no-underline inline-block leading-tight"
+                  >
+                    <span className="relative">
+                      {t("dashboard.viewAll")}
+                      <span className="absolute left-0 right-0 bottom-[-2px] h-0.5 bg-primary transition-all duration-300 w-0 group-hover:w-full"></span>
+                    </span>
+                  </Link>
                 </Button>
-            </CardHeader>
-            <CardContent className="h-full">
-                <ul className="space-y-4">
-                  {popularBooks?.slice(0,6).map((book, index) => (
-                    <li key={book.id} className="flex items-center">
-                      <div className="w-8 h-8 bg-blue-100 dark:bg-blue-900/30 rounded-full flex items-center justify-center mr-3 flex-shrink-0">
-                        <span className="text-sm font-bold text-blue-600 dark:text-blue-400">{index + 1}</span>
+              </CardHeader>
+              <CardContent className="h-full">
+                <ul className="flex flex-col gap-2">
+                  {popularBooks?.slice(0,7).map((book, index) => (
+                    <motion.li
+                      key={book.id}
+                      initial={{ opacity: 0, y: 16 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: index * 0.06 }}
+                      className="flex items-center rounded-xl bg-gradient-to-br from-blue-50/70 via-white/60 to-purple-50/60 dark:from-blue-900/30 dark:via-slate-900/60 dark:to-purple-900/30 shadow px-2 py-2 group hover:scale-[1.018] hover:shadow-md transition-all border border-blue-100/40 dark:border-blue-900/30 min-h-[48px]"
+                    >
+                      {/* Rank badge */}
+                      <div className="w-7 h-7 flex items-center justify-center rounded-full bg-gradient-to-br from-blue-400/80 to-purple-400/80 shadow text-white font-bold text-sm mr-2 border-2 border-white dark:border-slate-900">
+                        {index + 1}
                       </div>
+                      {/* Book icon */}
+                      <div className="w-7 h-10 flex items-center justify-center rounded-lg bg-gradient-to-br from-blue-100/80 to-purple-100/80 dark:from-blue-900/40 dark:to-purple-900/40 mr-2">
+                        <Book className="w-5 h-5 text-blue-400 dark:text-blue-300 opacity-80" />
+                      </div>
+                      {/* Book info */}
                       <div className="flex-1 min-w-0">
-                        <p className="font-medium text-foreground truncate">{capitalizeWords(book.title)}</p>
-                        <p className="text-sm text-muted-foreground">{capitalizeWords(book.author)}</p>
+                        <p className="font-semibold text-[15px] text-gray-900 dark:text-white truncate">
+                          {capitalizeWords(book.title)}
+                        </p>
+                        <p className="text-xs text-gray-500 dark:text-gray-400 truncate">
+                          {capitalizeWords(book.author)}
+                        </p>
                       </div>
-                      <div className="w-28 text-right ml-4">
-                        <span className="text-sm font-semibold text-foreground mr-2">
-                          {t('dashboard.borrowCount', {count: book.borrowCount})}
+                      {/* Borrow count and progress */}
+                      <div className="flex flex-col items-end w-20 ml-2">
+                        <span className="text-sm font-bold text-blue-600 dark:text-blue-300 mb-0.5">
+                          {book.borrowCount} <span className="text-xs font-medium text-gray-400">{t('dashboard.borrowCountShort')}</span>
                         </span>
-                        <Progress value={(book.borrowCount / (popularBooks[0]?.borrowCount || 1)) * 100} className="h-2 mt-1" />
+                        <div className="w-full h-1.5 bg-gray-200 dark:bg-slate-800 rounded-full overflow-hidden">
+                          <motion.div
+                            className="h-1.5 rounded-full bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400"
+                            initial={{ width: 0 }}
+                            animate={{ width: `${(book.borrowCount / (popularBooks[0]?.borrowCount || 1)) * 100}%` }}
+                            transition={{ duration: 0.6, delay: 0.1 + index * 0.06 }}
+                          />
+                        </div>
                       </div>
-                    </li>
+                    </motion.li>
                   ))}
                 </ul>
-            </CardContent>
-          </Card>
+              </CardContent>
+            </Card>
           </motion.div>
         </div>
 
@@ -678,9 +800,15 @@ export default function Dashboard() {
                   <Badge variant="destructive">{t("dashboard.itemCount", { count: overdueBorrowingsResponse.data.length })}</Badge>
                 )}
               </div>
-              <Button variant="link" size="sm" asChild>
-                <Link to="/borrowing?filter=overdue">{t("dashboard.viewAll")}</Link>
-              </Button>
+              <Link
+                to="/borrowing?filter=overdue"
+                className="group relative text-primary text-sm font-medium transition-colors no-underline inline-block leading-tight"
+              >
+                <span className="relative">
+                  {t("dashboard.viewAll")}
+                  <span className="absolute left-0 right-0 bottom-[-2px] h-0.5 bg-primary transition-all duration-300 w-0 group-hover:w-full"></span>
+                </span>
+              </Link>
             </CardHeader>
             <CardContent>
               {overdueBorrowingsResponse && overdueBorrowingsResponse.data && overdueBorrowingsResponse.data.length > 0 ? (

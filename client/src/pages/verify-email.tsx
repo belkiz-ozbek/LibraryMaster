@@ -274,7 +274,9 @@ export default function VerifyEmailPage() {
                   >
                     <Button 
                       onClick={handleGoToLogin} 
-                      className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-medium relative overflow-hidden group"
+                      variant="gradient"
+                      size="xl"
+                      className="w-full font-semibold relative overflow-hidden group"
                     >
                       <motion.div
                         className="absolute inset-0 bg-gradient-to-r from-white/20 to-transparent"

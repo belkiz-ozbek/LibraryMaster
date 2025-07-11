@@ -150,10 +150,10 @@ export default function Activities() {
         <div className="flex items-center justify-end">
           <Button 
             onClick={handleRefresh}
-            variant="default"
-            size="sm"
-            className={`bg-primary text-white transition-colors rounded-full shadow-md flex items-center gap-2 px-4 py-2 font-medium
-              ${isRefreshing ? 'bg-blue-100 text-blue-700 cursor-wait' : ''}`}
+            variant="modern"
+            size="lg"
+            className={`font-semibold shadow-lg hover:shadow-xl transition-all duration-200
+              ${isRefreshing ? 'bg-gray-100 text-gray-500 cursor-wait' : ''}`}
             disabled={isRefreshing}
           >
             {isRefreshing ? (

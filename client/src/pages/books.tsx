@@ -220,17 +220,19 @@ export default function Books() {
           {user?.isAdmin && (
             <>
               <Button
-                variant="ghost"
+                variant="modern"
                 size="sm"
                 onClick={() => handleEdit(row)}
+                className="text-blue-600 hover:text-blue-700 hover:bg-blue-50"
               >
                 <Edit size={16} />
               </Button>
               <Button
-                variant="ghost"
+                variant="modern"
                 size="sm"
                 onClick={() => handleDelete(row)}
                 disabled={deleteBookMutation.isPending}
+                className="text-red-600 hover:text-red-700 hover:bg-red-50"
               >
                 <Trash2 size={16} />
               </Button>
@@ -257,8 +259,13 @@ export default function Books() {
         {user?.isAdmin && (
           <Dialog open={isFormOpen} onOpenChange={setIsFormOpen}>
             <DialogTrigger asChild>
-              <Button onClick={() => setSelectedBook(null)}>
-                <Plus size={16} className="mr-2" />
+              <Button 
+                variant="gradient" 
+                size="lg"
+                onClick={() => setSelectedBook(null)}
+                className="font-semibold shadow-lg hover:shadow-xl"
+              >
+                <Plus size={18} className="mr-2" />
                 {t("books.addBook")}
               </Button>
             </DialogTrigger>
@@ -403,17 +410,21 @@ export default function Books() {
             <div className="flex justify-end space-x-2">
               <Button
                 variant="outline"
+                size="lg"
                 onClick={() => {
                   setBookToDelete(null);
                   setDeleteError(null);
                 }}
+                className="font-medium shadow-sm hover:shadow-md"
               >
                 {t("common.cancel")}
               </Button>
               <Button
                 onClick={confirmDelete}
                 variant="destructive"
+                size="lg"
                 disabled={deleteBookMutation.isPending}
+                className="font-semibold shadow-lg hover:shadow-xl"
               >
                 {deleteBookMutation.isPending ? t("common.loading") : t("common.delete")}
               </Button>

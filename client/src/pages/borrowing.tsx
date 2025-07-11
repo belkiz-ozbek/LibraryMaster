@@ -27,7 +27,7 @@ import type { BorrowingWithDetails } from "@shared/schema";
 import { useTranslation } from "react-i18next";
 import { motion } from "framer-motion";
 import { useSearch, useLocation } from "wouter";
-import { Link } from "react-router-dom";
+import { Link } from "wouter";
 import { capitalizeWords } from "@/lib/utils";
 import LoadingScreen from "@/components/ui/loading-screen";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -501,8 +501,13 @@ export default function Borrowing() {
         </div>
         <Dialog open={isFormOpen} onOpenChange={setIsFormOpen}>
           <DialogTrigger asChild>
-            <Button onClick={() => setSelectedBorrowing(null)}>
-              <Plus size={16} className="mr-2" />
+            <Button 
+              variant="gradientOrange" 
+              size="lg"
+              onClick={() => setSelectedBorrowing(null)}
+              className="font-semibold shadow-lg hover:shadow-xl"
+            >
+              <Plus size={18} className="mr-2" />
               {t("borrowing.newBorrowing")}
             </Button>
           </DialogTrigger>
