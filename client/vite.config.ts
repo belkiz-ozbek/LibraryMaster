@@ -15,4 +15,8 @@ export default defineConfig({
       '/api': process.env.VITE_API_URL || 'http://localhost:3000',
     },
   },
+  build: {
+    outDir: '../dist/public',
+    emptyOutDir: true,
+  },
 }); 
