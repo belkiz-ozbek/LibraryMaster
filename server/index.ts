@@ -59,7 +59,7 @@ app.use((req, res, next) => {
 
   // Production ortamında statik dosya ve SPA fallback
   if (app.get("env") !== "development") {
-    const distPath = path.resolve(__dirname, "..", "public");
+    const distPath = path.resolve(__dirname, "public");
     app.use(express.static(distPath));
     app.get("*", (req, res) => {
       res.sendFile(path.join(distPath, "index.html"));
