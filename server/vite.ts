@@ -70,28 +70,25 @@ export async function setupVite(app: Express, server: Server): Promise<void> {
 }
 
 export function serveStatic(app: Express) {
-  // Try multiple possible paths for the public directory
-  const possiblePaths = [
-    path.resolve(__dirname, "public"),
-    path.resolve(__dirname, "..", "dist", "public"),
-    path.resolve(process.cwd(), "dist", "public"),
-    "/app/dist/public" // Docker container path
-  ];
+  // Use process.cwd() to get the project root directory
+  const projectRoot = process.cwd();
+  const distPath = path.join(projectRoot, "dist", "public");
 
-  let distPath: string | null = null;
-  
-  for (const possiblePath of possiblePaths) {
-    if (fs.existsSync(possiblePath)) {
-      distPath = possiblePath;
-      break;
+  console.log(`Project root: ${projectRoot}`);
+  console.log(`Looking for static files at: ${distPath}`);
+
+  if (!fs.existsSync(distPath)) {
+    console.error(`Static files directory not found: ${distPath}`);
+    console.error(`Current working directory: ${process.cwd()}`);
+    console.error(`Available files in project root:`);
+    try {
+      const files = fs.readdirSync(projectRoot);
+      files.forEach(file => console.error(`  - ${file}`));
+    } catch (e) {
+      console.error(`Cannot read project root directory: ${e}`);
     }
-  }
-
-  if (!distPath) {
-    console.error("Tried the following paths:");
-    possiblePaths.forEach(p => console.error(`  - ${p} (exists: ${fs.existsSync(p)})`));
     throw new Error(
-      `Could not find the build directory. Tried: ${possiblePaths.join(", ")}. Make sure to build the client first.`,
+      `Could not find the build directory: ${distPath}. Make sure to build the client first.`,
     );
   }
 
@@ -100,6 +97,6 @@ export function serveStatic(app: Express) {
 
   // fall through to index.html if the file doesn't exist
   app.use("*", (_req, res) => {
-    res.sendFile(path.resolve(distPath!, "index.html"));
+    res.sendFile(path.resolve(distPath, "index.html"));
   });
 }
