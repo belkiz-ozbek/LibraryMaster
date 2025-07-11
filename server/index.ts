@@ -5,6 +5,7 @@ import { setupVite, serveStatic, log } from "./vite";
 import cors from "cors";
 import path from "path";
 import { fileURLToPath } from "url";
+import fs from "fs";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
@@ -59,10 +60,35 @@ app.use((req, res, next) => {
 
   // Production ortamında statik dosya ve SPA fallback
   if (app.get("env") !== "development") {
-    const distPath = path.resolve(__dirname, "public");
+    // Try multiple possible paths for the public directory
+    const possiblePaths = [
+      path.resolve(__dirname, "public"),
+      path.resolve(__dirname, "..", "dist", "public"),
+      path.resolve(process.cwd(), "dist", "public"),
+      "/app/dist/public" // Docker container path
+    ];
+
+    let distPath: string | null = null;
+    
+    for (const possiblePath of possiblePaths) {
+      if (fs.existsSync(possiblePath)) {
+        distPath = possiblePath;
+        break;
+      }
+    }
+
+    if (!distPath) {
+      console.error("Tried the following paths:");
+      possiblePaths.forEach(p => console.error(`  - ${p} (exists: ${fs.existsSync(p)})`));
+      throw new Error(
+        `Could not find the build directory. Tried: ${possiblePaths.join(", ")}. Make sure to build the client first.`,
+      );
+    }
+
+    console.log(`Using static files from: ${distPath}`);
     app.use(express.static(distPath));
     app.get("*", (req, res) => {
-      res.sendFile(path.join(distPath, "index.html"));
+      res.sendFile(path.join(distPath!, "index.html"));
     });
   }
 
