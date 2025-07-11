@@ -262,6 +262,7 @@ export const tr = {
     selectBook: "Kitap seçin...",
     notes: "Notlar",
     notesPlaceholder: "Bu ödünç alma hakkında ek notlar...",
+    noBorrowingsYet: "Henüz ödünç kaydı yok."
   },
   statistics: {
     title: "İstatistikler",
