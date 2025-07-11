@@ -345,6 +345,12 @@
 @media (min-width: 768px) {
   html {
     zoom: 0.9;
+    height: 100%;
+  }
+  body {
+    min-height: 100vh;
+    height: 100%;
+    overflow-x: auto;
   }
 }
 
