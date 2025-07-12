@@ -1,281 +1,287 @@
-# 📚 LibraryMaster - Modern Library Management System
+# 📚 LibraryMaster - Modern Kütüphane Yönetim Sistemi
 
-A full-stack library management system built with React, TypeScript, Express.js, and PostgreSQL. Features a modern UI with real-time updates, multi-language support, and comprehensive library operations.
+Modern React, TypeScript ve Express.js ile geliştirilmiş tam kapsamlı kütüphane yönetim sistemi. Gerçek zamanlı güncellemeler, çoklu dil desteği ve kapsamlı kütüphane operasyonları ile birlikte gelir.
 
 ![LibraryMaster](https://img.shields.io/badge/LibraryMaster-v1.0.0-blue)
 ![TypeScript](https://img.shields.io/badge/TypeScript-5.6.3-blue)
 ![React](https://img.shields.io/badge/React-18.3.1-blue)
 ![Express](https://img.shields.io/badge/Express-4.21.2-green)
 ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-Neon-blue)
+![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-3.4.0-38B2AC)
 
-## ✨ Features
+## ✨ Özellikler
 
-### 📖 Book Management
-- Add, edit, and delete books with detailed information
-- ISBN validation and duplicate prevention
-- Track available and total copies
-- Search and filter books by title, author, genre, or ISBN
-- Book categorization and shelf management
+### 📖 Kitap Yönetimi
+- Detaylı bilgilerle kitap ekleme, düzenleme ve silme
+- ISBN doğrulama ve mükerrer önleme
+- Mevcut ve toplam kopya takibi
+- Başlık, yazar, tür veya ISBN ile arama ve filtreleme
+- Kitap kategorilendirme ve raf yönetimi
 
-### 👥 Member Management
-- Complete member registration and profile management
-- Membership date tracking
-- Admin ratings and notes for members
-- Member borrowing history
-- Member search and filtering
+### 👥 Üye Yönetimi
+- Tam üye kaydı ve profil yönetimi
+- Üyelik tarihi takibi
+- Üyeler için admin değerlendirmeleri ve notlar
+- Üye ödünç alma geçmişi
+- Üye arama ve filtreleme
 
-### 🔄 Borrowing System
-- Check-out and check-in books
-- Automatic due date calculation
-- Extension request functionality
-- Overdue book tracking
-- Return date management
+### 🔄 Ödünç Alma Sistemi
+- Kitap ödünç alma ve iade
+- Otomatik son teslim tarihi hesaplama
+- Uzatma talebi işlevselliği
+- Gecikmiş kitap takibi
+- İade tarihi yönetimi
 
-### 📊 Statistics & Analytics
-- Real-time dashboard with key metrics
-- Borrowing statistics and trends
-- Member activity reports
-- Book popularity analytics
-- Overdue book reports
+### 📊 İstatistikler ve Analitik
+- Anahtar metriklerle gerçek zamanlı dashboard
+- Ödünç alma istatistikleri ve trendler
+- Üye aktivite raporları
+- Kitap popülerlik analitikleri
+- Gecikmiş kitap raporları
 
-### 🌐 Multi-language Support
-- Turkish and English language support
-- Dynamic language switching
-- Localized UI components
+### 🌐 Çoklu Dil Desteği
+- Türkçe ve İngilizce dil desteği
+- Dinamik dil değiştirme
+- Yerelleştirilmiş UI bileşenleri
 
-### 🔐 Authentication & Security
-- Secure login system
-- Session management
-- Admin role management
-- Password encryption with bcrypt
+### 🔐 Kimlik Doğrulama ve Güvenlik
+- Güvenli giriş sistemi
+- Oturum yönetimi
+- Admin rol yönetimi
+- Bcrypt ile şifre şifreleme
 
 ### 🎨 Modern UI/UX
-- Responsive design with Tailwind CSS
-- Dark/light theme support
-- Interactive components with Radix UI
-- Real-time notifications
-- Smooth animations with Framer Motion
+- Tailwind CSS ile responsive tasarım
+- Karanlık/aydınlık tema desteği
+- Radix UI ile etkileşimli bileşenler
+- Gerçek zamanlı bildirimler
+- Framer Motion ile akıcı animasyonlar
 
-## 🚀 Tech Stack
+## 🚀 Teknoloji Yığını
 
 ### Frontend
 - **React 18** - UI framework
-- **TypeScript** - Type safety
-- **Vite** - Build tool and dev server
+- **TypeScript** - Tip güvenliği
+- **Vite** - Build tool ve dev server
 - **Tailwind CSS** - Styling
-- **Radix UI** - Accessible components
-- **React Query** - Data fetching and caching
-- **React Router** - Navigation
-- **Framer Motion** - Animations
-- **i18next** - Internationalization
+- **Radix UI** - Erişilebilir bileşenler
+- **React Query** - Veri çekme ve önbellekleme
+- **React Router** - Navigasyon
+- **Framer Motion** - Animasyonlar
+- **i18next** - Uluslararasılaştırma
 
 ### Backend
 - **Express.js** - Web framework
-- **TypeScript** - Type safety
-- **Drizzle ORM** - Database ORM
-- **PostgreSQL** - Database (Neon)
-- **Passport.js** - Authentication
-- **Express Session** - Session management
-- **Zod** - Schema validation
+- **TypeScript** - Tip güvenliği
+- **Drizzle ORM** - Veritabanı ORM
+- **PostgreSQL** - Veritabanı (Neon)
+- **Passport.js** - Kimlik doğrulama
+- **Express Session** - Oturum yönetimi
+- **Zod** - Şema doğrulama
 
-### Database
-- **PostgreSQL** hosted on Neon
-- **Drizzle Kit** - Database migrations
-- **Relations** - Proper foreign key relationships
+### Veritabanı
+- **PostgreSQL** Neon üzerinde barındırılıyor
+- **Drizzle Kit** - Veritabanı migrasyonları
+- **Relations** - Uygun foreign key ilişkileri
 
-## 📦 Installation
+## 📦 Kurulum
 
-### Prerequisites
-- Node.js 18+ 
-- npm or yarn
-- PostgreSQL database (Neon recommended)
+### Ön Gereksinimler
+- Node.js 18+
+- npm veya yarn
+- PostgreSQL veritabanı (Neon önerilir)
 
-### Setup
+### Kurulum Adımları
 
-1. **Clone the repository**
+1. **Repository'yi klonlayın**
    ```bash
    git clone https://github.com/yourusername/LibraryMaster.git
    cd LibraryMaster
    ```
 
-2. **Install dependencies**
+2. **Bağımlılıkları yükleyin**
    ```bash
    npm install
    ```
 
-3. **Environment Setup**
-   Create a `.env` file in the root directory:
+3. **Ortam Değişkenlerini Ayarlayın**
+   Root dizinde `.env` dosyası oluşturun:
    ```env
    DATABASE_URL=postgresql://username:password@host:port/database?sslmode=require
    SESSION_SECRET=your-super-secret-session-key
    ```
 
-4. **Database Setup**
+4. **Veritabanını Ayarlayın**
    ```bash
-   # Push database schema
+   # Veritabanı şemasını push edin
    npm run db:push
    ```
 
-5. **Start Development Server**
+5. **Geliştirme Sunucusunu Başlatın**
    ```bash
    npm run dev
    ```
 
-   The application will be available at `http://localhost:3000`
+   Uygulama `http://localhost:3000` adresinde erişilebilir olacak
 
-## 🏗️ Project Structure
+## 🏗️ Proje Yapısı
 
 ```
 LibraryMaster/
-├── client/                 # Frontend React application
+├── client/                 # Frontend React uygulaması
 │   ├── src/
-│   │   ├── components/     # Reusable UI components
-│   │   ├── pages/         # Page components
-│   │   ├── hooks/         # Custom React hooks
-│   │   ├── lib/           # Utilities and configurations
-│   │   └── assets/        # Static assets
-├── server/                # Backend Express application
-│   ├── index.ts          # Server entry point
-│   ├── routes.ts         # API routes
-│   ├── db.ts            # Database configuration
-│   └── types.ts         # TypeScript types
-├── shared/               # Shared code between frontend and backend
-│   └── schema.ts        # Database schema and types
-├── migrations/           # Database migrations
-└── uploads/             # File uploads directory
+│   │   ├── components/     # Yeniden kullanılabilir UI bileşenleri
+│   │   │   ├── forms/     # Form bileşenleri
+│   │   │   ├── layout/    # Layout bileşenleri
+│   │   │   └── ui/        # UI bileşenleri
+│   │   ├── pages/         # Sayfa bileşenleri
+│   │   ├── hooks/         # Özel React hook'ları
+│   │   ├── lib/           # Yardımcı fonksiyonlar ve konfigürasyonlar
+│   │   └── assets/        # Statik dosyalar
+├── server/                # Backend Express uygulaması
+│   ├── index.ts          # Sunucu giriş noktası
+│   ├── routes.ts         # API rotaları
+│   ├── db.ts            # Veritabanı konfigürasyonu
+│   └── types.ts         # TypeScript tipleri
+├── shared/               # Frontend ve backend arasında paylaşılan kod
+│   └── schema.ts        # Veritabanı şeması ve tipleri
+├── uploads/             # Dosya yükleme dizini
+└── drizzle.config.ts    # Drizzle konfigürasyonu
 ```
 
-## 🗄️ Database Schema
+## 🗄️ Veritabanı Şeması
 
-### Users Table
+### Users Tablosu
 - `id` - Primary key
-- `name` - User's full name
-- `email` - Email address
-- `password` - Encrypted password
-- `isAdmin` - Admin role flag
-- `membershipDate` - When user joined
-- `adminRating` - Admin-assigned rating
-- `adminNotes` - Admin notes
+- `name` - Kullanıcının tam adı
+- `email` - E-posta adresi
+- `password` - Şifrelenmiş parola
+- `isAdmin` - Admin rol bayrağı
+- `membershipDate` - Üyelik tarihi
+- `adminRating` - Admin tarafından atanan puan
+- `adminNotes` - Admin notları
 
-### Books Table
+### Books Tablosu
 - `id` - Primary key
-- `title` - Book title
-- `author` - Book author
-- `isbn` - Unique ISBN
-- `genre` - Book genre
-- `publishYear` - Publication year
-- `shelfNumber` - Physical location
-- `availableCopies` - Available copies
-- `totalCopies` - Total copies owned
-- `pageCount` - Number of pages
-- `createdAt` - When added to system
+- `title` - Kitap başlığı
+- `author` - Kitap yazarı
+- `isbn` - Benzersiz ISBN
+- `genre` - Kitap türü
+- `publishYear` - Yayın yılı
+- `shelfNumber` - Fiziksel konum
+- `availableCopies` - Mevcut kopyalar
+- `totalCopies` - Toplam sahip olunan kopyalar
+- `pageCount` - Sayfa sayısı
+- `createdAt` - Sisteme eklenme tarihi
 
-### Borrowings Table
+### Borrowings Tablosu
 - `id` - Primary key
-- `bookId` - Reference to book
-- `userId` - Reference to user
-- `borrowDate` - When borrowed
-- `dueDate` - When due
-- `returnDate` - When returned
-- `status` - borrowed/returned/overdue
-- `extensionRequested` - Extension flag
-- `notes` - Additional notes
+- `bookId` - Kitap referansı
+- `userId` - Kullanıcı referansı
+- `borrowDate` - Ödünç alma tarihi
+- `dueDate` - Son teslim tarihi
+- `returnDate` - İade tarihi
+- `status` - ödünç_alındı/iade_edildi/gecikti
+- `extensionRequested` - Uzatma talebi bayrağı
+- `notes` - Ek notlar
 
-## 🚀 Available Scripts
+## 🚀 Mevcut Scriptler
 
 ```bash
-# Development
-npm run dev          # Start development server
-npm run build        # Build for production
-npm run start        # Start production server
+# Geliştirme
+npm run dev          # Geliştirme sunucusunu başlat
+npm run build        # Production için build
+npm run start        # Production sunucusunu başlat
 
-# Database
-npm run db:push      # Push schema to database
+# Veritabanı
+npm run db:push      # Şemayı veritabanına push et
 
-# Type checking
-npm run check        # TypeScript type checking
+# Tip kontrolü
+npm run check        # TypeScript tip kontrolü
 ```
 
-## 🌍 Environment Variables
+## 🌍 Ortam Değişkenleri
 
-| Variable | Description | Required |
-|----------|-------------|----------|
-| `DATABASE_URL` | PostgreSQL connection string | Yes |
-| `SESSION_SECRET` | Secret for session encryption | Yes |
+| Değişken | Açıklama | Gerekli |
+|----------|----------|---------|
+| `DATABASE_URL` | PostgreSQL bağlantı stringi | Evet |
+| `SESSION_SECRET` | Oturum şifreleme için gizli anahtar | Evet |
 
-## 🔧 Configuration
+## 🔧 Konfigürasyon
 
-### Database Configuration
-The application uses Drizzle ORM with PostgreSQL. Database migrations are handled automatically with `drizzle-kit`.
+### Veritabanı Konfigürasyonu
+Uygulama PostgreSQL ile Drizzle ORM kullanır. Veritabanı migrasyonları `drizzle-kit` ile otomatik olarak yönetilir.
 
-### Authentication
-- Session-based authentication
-- Password encryption with bcrypt
-- Admin role management
-- Secure session storage
+### Kimlik Doğrulama
+- Oturum tabanlı kimlik doğrulama
+- Bcrypt ile parola şifreleme
+- Admin rol yönetimi
+- Güvenli oturum depolama
 
-### Internationalization
-- Turkish and English support
-- Dynamic language switching
-- Localized date and number formatting
+### Uluslararasılaştırma
+- Türkçe ve İngilizce desteği
+- Dinamik dil değiştirme
+- Yerelleştirilmiş tarih ve sayı formatlaması
 
-## 📱 Features in Detail
+## 📱 Detaylı Özellikler
 
 ### Dashboard
-- Real-time statistics
-- Recent activities
-- Quick actions
-- System overview
+- Gerçek zamanlı istatistikler
+- Son aktiviteler
+- Hızlı işlemler
+- Sistem genel bakışı
 
-### Book Management
-- CRUD operations for books
-- Advanced search and filtering
-- Bulk operations
-- ISBN validation
+### Kitap Yönetimi
+- Kitaplar için CRUD işlemleri
+- Gelişmiş arama ve filtreleme
+- Toplu işlemler
+- ISBN doğrulama
 
-### Member Management
-- Member registration
-- Profile management
-- Borrowing history
-- Admin notes and ratings
+### Üye Yönetimi
+- Üye kaydı
+- Profil yönetimi
+- Ödünç alma geçmişi
+- Admin notları ve puanları
 
-### Borrowing System
-- Check-out process
-- Due date management
-- Extension requests
-- Return processing
+### Ödünç Alma Sistemi
+- Ödünç alma süreci
+- Son teslim tarihi yönetimi
+- Uzatma talepleri
+- İade işlemi
 
-### Reports & Analytics
-- Statistical overview
-- Trend analysis
-- Export functionality
-- Custom date ranges
+### Raporlar ve Analitik
+- İstatistiksel genel bakış
+- Trend analizi
+- Üye aktivite raporları
+- Kitap popülerlik analizi
 
-## 🤝 Contributing
+## 🤝 Katkıda Bulunma
 
-1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
+1. Bu repository'yi fork edin
+2. Feature branch oluşturun (`git checkout -b feature/amazing-feature`)
+3. Değişikliklerinizi commit edin (`git commit -m 'Add some amazing feature'`)
+4. Branch'inizi push edin (`git push origin feature/amazing-feature`)
+5. Pull Request oluşturun
 
-## 📄 License
+## 📄 Lisans
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+Bu proje MIT lisansı altında lisanslanmıştır. Detaylar için `LICENSE` dosyasına bakın.
 
-## 🙏 Acknowledgments
+## 📞 İletişim
 
-- [Radix UI](https://www.radix-ui.com/) for accessible components
-- [Tailwind CSS](https://tailwindcss.com/) for styling
-- [Drizzle ORM](https://orm.drizzle.team/) for database management
-- [Neon](https://neon.tech/) for PostgreSQL hosting
+Proje Sahibi - [@yourusername](https://github.com/yourusername)
 
-## 📞 Support
+Proje Linki: [https://github.com/yourusername/LibraryMaster](https://github.com/yourusername/LibraryMaster)
 
-For support and questions:
-- Create an issue on GitHub
-- Contact: [ceng.belkiz@gmail.com]
+## 🙏 Teşekkürler
+
+- [React](https://reactjs.org/) - UI framework
+- [Express.js](https://expressjs.com/) - Web framework
+- [Tailwind CSS](https://tailwindcss.com/) - CSS framework
+- [Radix UI](https://www.radix-ui.com/) - UI bileşenleri
+- [Drizzle ORM](https://orm.drizzle.team/) - Veritabanı ORM
+- [Neon](https://neon.tech/) - PostgreSQL hosting
 
 ---
 
-**LibraryMaster** - Modern library management made simple! 📚✨ 
+⭐ Bu projeyi beğendiyseniz yıldız vermeyi unutmayın! 
