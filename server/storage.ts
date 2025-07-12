@@ -178,7 +178,10 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getAllUsers(): Promise<User[]> {
-    return await db.select().from(users).orderBy(asc(users.name));
+    console.log("[Storage] Getting all users...");
+    const result = await db.select().from(users).orderBy(asc(users.name));
+    console.log("[Storage] All users fetched, count:", result.length);
+    return result;
   }
 
   async getAllUsersPaginated(params: PaginationParams): Promise<PaginatedResponse<User>> {
@@ -338,7 +341,10 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getAllBooks(): Promise<Book[]> {
-    return await db.select().from(books).orderBy(asc(books.title));
+    console.log("[Storage] Getting all books...");
+    const result = await db.select().from(books).orderBy(asc(books.title));
+    console.log("[Storage] All books fetched, count:", result.length);
+    return result;
   }
 
   async getAllBooksPaginated(params: PaginationParams): Promise<PaginatedResponse<Book>> {
@@ -856,17 +862,28 @@ export class DatabaseStorage implements IStorage {
     totalUsersChangePercent: number;
     avgBorrowDays: number;
   }> {
+    console.log("[Storage] Getting stats...");
     const today = new Date().toISOString().split('T')[0];
     const now = new Date();
     const startOfThisMonth = new Date(now.getFullYear(), now.getMonth(), 1);
     const startOfLastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1);
     const endOfLastMonth = new Date(now.getFullYear(), now.getMonth(), 0);
 
+    console.log("[Storage] Querying books count...");
     const [booksCount] = await db.select({ count: count() }).from(books);
+    console.log("[Storage] Books count:", booksCount.count);
+    
+    console.log("[Storage] Querying users count...");
     const [usersCount] = await db.select({ count: count() }).from(users);
+    console.log("[Storage] Users count:", usersCount.count);
+    
+    console.log("[Storage] Querying active borrowings count...");
     const [activeBorrowingsCount] = await db.select({ count: count() })
       .from(borrowings)
       .where(eq(borrowings.status, 'borrowed'));
+    console.log("[Storage] Active borrowings count:", activeBorrowingsCount.count);
+    
+    console.log("[Storage] Querying overdue borrowings count...");
     const [overdueBorrowingsCount] = await db.select({ count: count() })
       .from(borrowings)
       .where(
@@ -875,6 +892,7 @@ export class DatabaseStorage implements IStorage {
           lt(borrowings.dueDate, today)
         )
       );
+    console.log("[Storage] Overdue borrowings count:", overdueBorrowingsCount.count);
 
     // Bu ay eklenen kitap sayısı
     const [booksThisMonth] = await db.select({ count: count() })

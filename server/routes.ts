@@ -442,6 +442,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // User routes
   app.get("/api/users", requireAuth, async (req, res) => {
     try {
+      console.log("[Users] Fetching users for user:", req.user?.name);
       const { page, limit } = req.query;
       
       if (page || limit) {
@@ -452,14 +453,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
         };
         
         const result = await storage.getAllUsersPaginated(paginationParams);
+        console.log("[Users] Paginated users fetched, count:", result.data?.length || 0);
         res.json(result);
       } else {
         // Non-paginated response (backward compatibility)
         const users = await storage.getAllUsers();
         const usersWithoutPasswords = users.map(({ password, ...user }) => user);
+        console.log("[Users] All users fetched, count:", usersWithoutPasswords.length);
         res.json(usersWithoutPasswords);
       }
     } catch (error) {
+      console.error("[Users] Error fetching users:", error);
       res.status(500).json({ message: "Failed to fetch users" });
     }
   });
@@ -701,6 +705,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Book routes
   app.get("/api/books", requireAuth, async (req, res) => {
     try {
+      console.log("[Books] Fetching books for user:", req.user?.name);
       const { page, limit } = req.query;
       
       if (page || limit) {
@@ -711,13 +716,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
         };
         
         const result = await storage.getAllBooksPaginated(paginationParams);
+        console.log("[Books] Paginated books fetched, count:", result.data?.length || 0);
         res.json(result);
       } else {
         // Non-paginated response (backward compatibility)
         const books = await storage.getAllBooks();
+        console.log("[Books] All books fetched, count:", books.length);
         res.json(books);
       }
     } catch (error) {
+      console.error("[Books] Error fetching books:", error);
       res.status(500).json({ message: "Failed to fetch books" });
     }
   });
@@ -1022,9 +1030,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Statistics routes
   app.get("/api/stats", requireAuth, async (req, res) => {
     try {
+      console.log("[Stats] Fetching statistics for user:", req.user?.name);
       const stats = await storage.getStats();
+      console.log("[Stats] Statistics fetched successfully:", stats);
       res.json(stats);
     } catch (error) {
+      console.error("[Stats] Error fetching statistics:", error);
       res.status(500).json({ message: "Failed to fetch statistics" });
     }
   });

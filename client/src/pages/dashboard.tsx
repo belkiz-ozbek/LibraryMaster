@@ -307,13 +307,93 @@ export default function Dashboard() {
     <div>
       {/* Temporary debug button for production testing */}
       <div className="mb-4 p-4 bg-yellow-100 border border-yellow-300 rounded-lg">
-        <Button 
-          onClick={testSession}
-          variant="outline"
-          className="text-yellow-800 border-yellow-400 hover:bg-yellow-200"
-        >
-          Test Session (Debug)
-        </Button>
+        <div className="flex gap-2 flex-wrap">
+          <Button 
+            onClick={testSession}
+            variant="outline"
+            className="text-yellow-800 border-yellow-400 hover:bg-yellow-200"
+          >
+            Test Session (Debug)
+          </Button>
+          <Button 
+            onClick={async () => {
+              try {
+                console.log("[Debug] Testing /api/stats endpoint...");
+                const response = await fetch("/api/stats", { credentials: "include" });
+                console.log("[Debug] /api/stats response:", {
+                  status: response.status,
+                  statusText: response.statusText,
+                  headers: Object.fromEntries(response.headers.entries())
+                });
+                if (response.ok) {
+                  const data = await response.json();
+                  console.log("[Debug] /api/stats data:", data);
+                } else {
+                  const errorText = await response.text();
+                  console.log("[Debug] /api/stats error:", errorText);
+                }
+              } catch (error) {
+                console.error("[Debug] /api/stats error:", error);
+              }
+            }}
+            variant="outline"
+            className="text-blue-800 border-blue-400 hover:bg-blue-200"
+          >
+            Test Stats API
+          </Button>
+          <Button 
+            onClick={async () => {
+              try {
+                console.log("[Debug] Testing /api/books endpoint...");
+                const response = await fetch("/api/books", { credentials: "include" });
+                console.log("[Debug] /api/books response:", {
+                  status: response.status,
+                  statusText: response.statusText,
+                  headers: Object.fromEntries(response.headers.entries())
+                });
+                if (response.ok) {
+                  const data = await response.json();
+                  console.log("[Debug] /api/books data length:", data.length || data.data?.length);
+                } else {
+                  const errorText = await response.text();
+                  console.log("[Debug] /api/books error:", errorText);
+                }
+              } catch (error) {
+                console.error("[Debug] /api/books error:", error);
+              }
+            }}
+            variant="outline"
+            className="text-green-800 border-green-400 hover:bg-green-200"
+          >
+            Test Books API
+          </Button>
+          <Button 
+            onClick={async () => {
+              try {
+                console.log("[Debug] Testing /api/users endpoint...");
+                const response = await fetch("/api/users", { credentials: "include" });
+                console.log("[Debug] /api/users response:", {
+                  status: response.status,
+                  statusText: response.statusText,
+                  headers: Object.fromEntries(response.headers.entries())
+                });
+                if (response.ok) {
+                  const data = await response.json();
+                  console.log("[Debug] /api/users data length:", data.length || data.data?.length);
+                } else {
+                  const errorText = await response.text();
+                  console.log("[Debug] /api/users error:", errorText);
+                }
+              } catch (error) {
+                console.error("[Debug] /api/users error:", error);
+              }
+            }}
+            variant="outline"
+            className="text-purple-800 border-purple-400 hover:bg-purple-200"
+          >
+            Test Users API
+          </Button>
+        </div>
       </div>
       
       <motion.div
