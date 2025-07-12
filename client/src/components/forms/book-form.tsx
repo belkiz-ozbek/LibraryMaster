@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { apiRequest } from "@/lib/queryClient";
 import { insertBookSchema, type Book, type InsertBook } from "@shared/schema";
 import { z } from "zod";
@@ -23,6 +24,21 @@ interface BookFormProps {
   onSuccess: () => void;
   onCancel: () => void;
 }
+
+// Genre seçenekleri
+const genreOptions = [
+  { value: "kurgu", label: "Kurgu" },
+  { value: "distopya", label: "Distopya" },
+  { value: "fantastik", label: "Fantastik" },
+  { value: "bilimkurgu", label: "Bilim Kurgu" },
+  { value: "roman", label: "Roman" },
+  { value: "cocuk", label: "Çocuk" },
+  { value: "klasik", label: "Klasik" },
+  { value: "novella", label: "Novella" },
+  { value: "felsefe", label: "Felsefe" },
+  { value: "tiyatro", label: "Tiyatro" },
+  { value: "bilim", label: "Bilim" },
+];
 
 export function BookForm({ book, onSuccess, onCancel }: BookFormProps) {
   const isEditing = !!book;
@@ -94,12 +110,18 @@ export function BookForm({ book, onSuccess, onCancel }: BookFormProps) {
         </div>
         <div className="flex flex-col gap-2">
           <Label htmlFor="genre" className="font-semibold text-gray-800">{t("books.genre")} *</Label>
-          <Input
-            id="genre"
-            {...form.register("genre")}
-            placeholder={t("books.genre") + ", Bilim, Tarih vb."}
-            className="rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition"
-          />
+          <Select value={form.watch("genre")} onValueChange={(value) => form.setValue("genre", value)}>
+            <SelectTrigger className="rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition">
+              <SelectValue placeholder={t("books.genre")} />
+            </SelectTrigger>
+            <SelectContent>
+              {genreOptions.map((option) => (
+                <SelectItem key={option.value} value={option.value}>
+                  {t(`genres.${option.value}`)}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
           {form.formState.errors.genre && <p className="text-xs text-red-500 mt-0.5">{form.formState.errors.genre.message}</p>}
         </div>
       </div>

@@ -13,6 +13,35 @@ import Select, { SingleValue } from 'react-select';
 import { useTranslation } from "react-i18next";
 import { useState } from "react";
 
+// Genre çeviri fonksiyonu
+const translateGenre = (genre: string, t: any) => {
+  if (!genre) return "";
+  
+  // Virgülle ayrılmış türleri böl ve her birini çevir
+  const genres = genre.split(',').map(g => g.trim());
+  const translatedGenres = genres.map(g => {
+    // Türkçe karakterleri normalize et
+    const normalizedGenre = g
+      .toLowerCase()
+      .replace(/ç/g, 'c')
+      .replace(/ı/g, 'i')
+      .replace(/ş/g, 's')
+      .replace(/ü/g, 'u')
+      .replace(/ö/g, 'o')
+      .replace(/ğ/g, 'g')
+      .replace(/\s+/g, '');
+    
+    // Çeviri anahtarını oluştur
+    const translationKey = `genres.${normalizedGenre}`;
+    const translated = t(translationKey);
+    
+    // Eğer çeviri bulunamazsa orijinal değeri döndür
+    return translated !== translationKey ? translated : g;
+  });
+  
+  return translatedGenres.join(', ');
+};
+
 const borrowFormSchema = insertBorrowingSchema.extend({
   borrowDate: z.string({ required_error: "Lütfen ödünç alma tarihi giriniz" }),
   dueDate: z.string({ required_error: "Lütfen son iade tarihi giriniz" }),
@@ -132,7 +161,7 @@ export function BorrowForm({ borrowing, onSuccess, onCancel }: BorrowFormProps) 
   type BookOptionType = { value: number; label: string; isDisabled: boolean };
   const bookOptions: BookOptionType[] = books.map((book) => ({
     value: book.id,
-    label: `${book.title} - ${book.author} (${book.availableCopies}/${book.totalCopies} ${t('books.availableCopies')})`,
+    label: `${book.title} - ${book.author} - ${translateGenre(book.genre, t)} (${book.availableCopies}/${book.totalCopies} ${t('books.availableCopies')})`,
     isDisabled: book.availableCopies === 0,
   }));
 

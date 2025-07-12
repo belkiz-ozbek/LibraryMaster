@@ -1,5 +1,5 @@
-import { useState, useEffect } from "react";
-import { useQuery, useMutation } from "@tanstack/react-query";
+import { useState, useEffect, useMemo } from "react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { DataTable, ServerDataTable, type PaginatedResponse } from "@/components/ui/data-table";
@@ -67,6 +67,35 @@ function getFriendlyDeleteErrorMessage(error: string) {
   // Diğer tüm durumlar için:
   return "Kitap silinemedi. Lütfen daha sonra tekrar deneyin.";
 }
+
+// Genre çeviri fonksiyonu
+const translateGenre = (genre: string, t: any) => {
+  if (!genre) return "";
+  
+  // Virgülle ayrılmış türleri böl ve her birini çevir
+  const genres = genre.split(',').map(g => g.trim());
+  const translatedGenres = genres.map(g => {
+    // Türkçe karakterleri normalize et
+    const normalizedGenre = g
+      .toLowerCase()
+      .replace(/ç/g, 'c')
+      .replace(/ı/g, 'i')
+      .replace(/ş/g, 's')
+      .replace(/ü/g, 'u')
+      .replace(/ö/g, 'o')
+      .replace(/ğ/g, 'g')
+      .replace(/\s+/g, '');
+    
+    // Çeviri anahtarını oluştur
+    const translationKey = `genres.${normalizedGenre}`;
+    const translated = t(translationKey);
+    
+    // Eğer çeviri bulunamazsa orijinal değeri döndür
+    return translated !== translationKey ? translated : g;
+  });
+  
+  return translatedGenres.join(', ');
+};
 
 export default function Books() {
   const [searchQuery, setSearchQuery] = useState("");
@@ -186,7 +215,7 @@ export default function Books() {
       title: t("books.genre"),
       sortable: true,
       render: (value: string) => (
-        <Badge variant="secondary">{value}</Badge>
+        <Badge variant="secondary">{translateGenre(value, t)}</Badge>
       ),
     },
     {

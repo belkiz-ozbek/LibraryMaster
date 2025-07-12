@@ -26,6 +26,35 @@ import { Link } from "react-router-dom";
 import { capitalizeWords } from "@/lib/utils";
 import LoadingScreen from "@/components/ui/loading-screen";
 
+// Genre çeviri fonksiyonu
+const translateGenre = (genre: string, t: any) => {
+  if (!genre) return "";
+  
+  // Virgülle ayrılmış türleri böl ve her birini çevir
+  const genres = genre.split(',').map(g => g.trim());
+  const translatedGenres = genres.map(g => {
+    // Türkçe karakterleri normalize et
+    const normalizedGenre = g
+      .toLowerCase()
+      .replace(/ç/g, 'c')
+      .replace(/ı/g, 'i')
+      .replace(/ş/g, 's')
+      .replace(/ü/g, 'u')
+      .replace(/ö/g, 'o')
+      .replace(/ğ/g, 'g')
+      .replace(/\s+/g, '');
+    
+    // Çeviri anahtarını oluştur
+    const translationKey = `genres.${normalizedGenre}`;
+    const translated = t(translationKey);
+    
+    // Eğer çeviri bulunamazsa orijinal değeri döndür
+    return translated !== translationKey ? translated : g;
+  });
+  
+  return translatedGenres.join(', ');
+};
+
 interface Stats {
   totalBooks: number;
   totalUsers: number;
@@ -143,7 +172,7 @@ export default function Statistics() {
       key: "genre",
       title: t("books.genre"),
       render: (value: string) => (
-        <Badge variant="secondary">{value}</Badge>
+        <Badge variant="secondary">{translateGenre(value, t)}</Badge>
       ),
     },
     {

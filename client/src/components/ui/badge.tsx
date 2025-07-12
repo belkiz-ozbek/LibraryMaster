@@ -29,7 +29,15 @@ export interface BadgeProps
 
 function Badge({ className, variant, ...props }: BadgeProps) {
   return (
-    <div className={cn(badgeVariants({ variant }), className)} {...props} />
+    <div
+      className={cn(
+        badgeVariants({ variant }),
+        // Uzun yazılar için tek satırda tut, taşarsa üç nokta ile göster
+        "whitespace-nowrap overflow-hidden text-ellipsis min-w-[64px] max-w-[120px] text-[11px] px-3 py-0.5",
+        className
+      )}
+      {...props}
+    />
   )
 }
 
