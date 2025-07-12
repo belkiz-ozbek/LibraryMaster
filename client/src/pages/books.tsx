@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -82,6 +82,7 @@ export default function Books() {
   // Server-side pagination
   const { data: paginatedBooks, isLoading } = useQuery<PaginatedResponse<Book>>({
     queryKey: ["/api/books", { page: currentPage, limit: 10 }],
+    enabled: searchQuery.length === 0,
     queryFn: async () => {
       const res = await fetch(`/api/books?page=${currentPage}&limit=10`, { credentials: "include" });
       if (!res.ok) throw new Error("Kitaplar yüklenemedi");
@@ -91,7 +92,7 @@ export default function Books() {
 
   // Arama yapılıyorsa eski client-side arama ile devam
   const { data: searchResults = [] } = useQuery<Book[]>({
-    queryKey: [`/api/books/search?q=${encodeURIComponent(searchQuery)}`],
+    queryKey: [`/api/books/search?q=${encodeURIComponent(searchQuery)}`, { page: currentPage }],
     enabled: searchQuery.length > 0,
   });
 
@@ -101,6 +102,11 @@ export default function Books() {
   console.log('Search Query:', searchQuery);
   console.log('Search Results:', searchResults);
   console.log('Display Books:', displayBooks);
+
+  // Search query değiştiğinde currentPage'i sıfırla
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchQuery]);
 
   const deleteBookMutation = useMutation({
     mutationFn: async (id: number) => {

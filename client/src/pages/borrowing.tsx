@@ -83,10 +83,15 @@ export default function Borrowing() {
     // eslint-disable-next-line
   }, [filter]);
 
+  // statusFilter değiştiğinde currentPage'i sıfırla
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [statusFilter]);
+
   // Server-side pagination queries
   const { data: allBorrowingsData, isLoading: isLoadingAll } = useQuery<PaginatedResponse<BorrowingWithDetails>>({
-    queryKey: ["/api/borrowings", { page: currentPage, limit: 10 }],
-    enabled: !filter,
+    queryKey: ["/api/borrowings", { page: currentPage, limit: 10, filter: "all" }],
+    enabled: !filter || filter === "all",
     queryFn: async () => {
       const response = await apiRequest("GET", `/api/borrowings?page=${currentPage}&limit=10`);
       const data = await response.json();
@@ -108,7 +113,7 @@ export default function Borrowing() {
   });
 
   const { data: activeBorrowingsData, isLoading: isLoadingActive } = useQuery<PaginatedResponse<BorrowingWithDetails>>({
-    queryKey: ["/api/borrowings/active", { page: currentPage, limit: 10 }],
+    queryKey: ["/api/borrowings/active", { page: currentPage, limit: 10, filter: "active" }],
     enabled: filter === "active",
     queryFn: async () => {
       const response = await apiRequest("GET", `/api/borrowings/active?page=${currentPage}&limit=10`);
@@ -131,7 +136,7 @@ export default function Borrowing() {
   });
 
   const { data: overdueBorrowingsData, isLoading: isLoadingOverdue } = useQuery<PaginatedResponse<BorrowingWithDetails>>({
-    queryKey: ["/api/borrowings/overdue", { page: currentPage, limit: 10 }],
+    queryKey: ["/api/borrowings/overdue", { page: currentPage, limit: 10, filter: "overdue" }],
     enabled: filter === "overdue",
     queryFn: async () => {
       const response = await apiRequest("GET", `/api/borrowings/overdue?page=${currentPage}&limit=10`);
@@ -154,7 +159,7 @@ export default function Borrowing() {
   });
 
   const { data: returnedBorrowingsData, isLoading: isLoadingReturned } = useQuery<PaginatedResponse<BorrowingWithDetails>>({
-    queryKey: ["/api/borrowings/returned", { page: currentPage, limit: 10 }],
+    queryKey: ["/api/borrowings/returned", { page: currentPage, limit: 10, filter: "returned" }],
     enabled: filter === "returned",
     queryFn: async () => {
       const response = await apiRequest("GET", `/api/borrowings/returned?page=${currentPage}&limit=10`);
@@ -195,7 +200,7 @@ export default function Borrowing() {
   // borrowingsData seçiminde statusFilter === 'returned' ise returnedBorrowingsData kullan
   const borrowingsData = filter === "overdue" ? overdueBorrowingsData : (filter === "active" ? activeBorrowingsData : (filter === "returned" ? returnedBorrowingsData : allBorrowingsData));
   const borrowings = filter === "overdue" ? overdueBorrowings : (filter === "active" ? activeBorrowings : allBorrowings);
-  const isLoading = isLoadingAll || isLoadingActive || isLoadingOverdue || isLoadingAllLegacy || isLoadingActiveLegacy || isLoadingOverdueLegacy;
+  const isLoading = isLoadingAll || isLoadingActive || isLoadingOverdue || isLoadingReturned || isLoadingAllLegacy || isLoadingActiveLegacy || isLoadingOverdueLegacy;
 
   // Always-enabled queries for summary cards
   const { data: allActiveBorrowings = [] } = useQuery<BorrowingWithDetails[]>({
@@ -213,6 +218,7 @@ export default function Borrowing() {
       queryClient.invalidateQueries({ queryKey: ["/api/borrowings"] });
       queryClient.invalidateQueries({ queryKey: ["/api/borrowings/active"] });
       queryClient.invalidateQueries({ queryKey: ["/api/borrowings/overdue"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/borrowings/returned"] });
       queryClient.invalidateQueries({ queryKey: ["/api/stats"] });
       queryClient.invalidateQueries({ queryKey: ["/api/books"] });
       toast({
@@ -229,24 +235,6 @@ export default function Borrowing() {
     },
   });
 
-  const filteredBorrowings = borrowings.filter((borrowing: BorrowingWithDetails) => 
-    searchQuery.length === 0 ||
-    borrowing.user.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    (borrowing.user.email && borrowing.user.email.toLowerCase().includes(searchQuery.toLowerCase())) ||
-    borrowing.book.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    borrowing.book.author.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    (borrowing.book.isbn?.toLowerCase() ?? "").includes(searchQuery.toLowerCase())
-  );
-
-  const statusFilteredBorrowings = statusFilter === "all"
-    ? filteredBorrowings
-    : filteredBorrowings.filter(b => {
-        if (statusFilter === "active") return b.status === "borrowed";
-        if (statusFilter === "overdue") return b.status === "overdue" || (b.status === "borrowed" && new Date(b.dueDate) < new Date() && !b.returnDate);
-        if (statusFilter === "returned") return b.status === "returned";
-        return true;
-      });
-
   // Server-side search (kitaplar mantığı)
   const { data: searchResults = [] } = useQuery<BorrowingWithDetails[]>({
     queryKey: ["/api/borrowings/search", { q: searchQuery }],
@@ -258,7 +246,7 @@ export default function Borrowing() {
     },
   });
 
-  // Tabloya verilecek veri
+  // Tabloya verilecek veri - search yapılıyorsa searchResults, yoksa borrowingsData
   const displayBorrowings: BorrowingWithDetails[] = searchQuery.length > 0 ? searchResults : (borrowingsData?.data ?? []);
 
   // Arama kutusu değişince sayfayı sıfırla
@@ -589,7 +577,7 @@ export default function Borrowing() {
               <div>
                 <CardTitle>{t("borrowing.allBorrowings")}</CardTitle>
                 <CardDescription>
-                  {statusFilteredBorrowings.length} {t("borrowing.borrowingRecords")}
+                  {displayBorrowings.length} {t("borrowing.borrowingRecords")}
                 </CardDescription>
               </div>
               <div className="w-80">
@@ -615,7 +603,7 @@ export default function Borrowing() {
               />
             ) : (
               <ServerDataTable
-                data={borrowingsData && borrowingsData.pagination ? borrowingsData : { data: borrowings ?? [], pagination: { page: 1, limit: 10, total: (borrowings ?? []).length, totalPages: 1, hasNext: false, hasPrev: false } }}
+                data={borrowingsData || { data: [], pagination: { page: 1, limit: 10, total: 0, totalPages: 1, hasNext: false, hasPrev: false } }}
                 columns={columns}
                 loading={isLoading}
                 emptyMessage={t("borrowing.noBorrowingsYet")}

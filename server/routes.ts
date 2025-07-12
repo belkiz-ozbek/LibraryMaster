@@ -608,8 +608,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get("/api/borrowings/overdue", requireAuth, async (req, res) => {
     try {
-      const overdueBorrowings = await storage.getOverdueBorrowings();
-      res.json(overdueBorrowings);
+      const { page, limit } = req.query;
+      if (page || limit) {
+        // Paginated response
+        const paginationParams = {
+          page: page ? parseInt(page as string) : 1,
+          limit: limit ? parseInt(limit as string) : 10,
+        };
+        const result = await storage.getOverdueBorrowingsPaginated(paginationParams);
+        res.json(result);
+      } else {
+        // Non-paginated response (backward compatibility)
+        const overdueBorrowings = await storage.getOverdueBorrowings();
+        res.json(overdueBorrowings);
+      }
     } catch (error) {
       res.status(500).json({ message: "Failed to fetch overdue borrowings" });
     }

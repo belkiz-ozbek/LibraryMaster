@@ -176,39 +176,16 @@ export default function Dashboard() {
     queryKey: ["/api/stats/active-users"],
   });
 
-  const [overduePage, setOverduePage] = useState(1);
-  const overduePageSize = 5;
-
+  // Overdue sadece 5 kayıt için
   const { data: overdueBorrowingsResponse } = useQuery<PaginatedResponse<OverdueBorrowing>>({
-    queryKey: ["/api/borrowings/overdue", overduePage, overduePageSize],
+    queryKey: ["/api/borrowings/overdue", 1, 5],
     queryFn: async () => {
-      const response = await apiRequest("GET", `/api/borrowings/overdue?page=${overduePage}&limit=${overduePageSize}`);
-      const data = await response.json();
-      if (Array.isArray(data)) {
-        return {
-          data,
-          pagination: {
-            page: 1,
-            limit: data.length,
-            total: data.length,
-            totalPages: 1,
-            hasNext: false,
-            hasPrev: false,
-          }
-        };
-      }
-      return data;
+      const response = await apiRequest("GET", `/api/borrowings/overdue?page=1&limit=5`);
+      return response.json();
     },
   });
 
-  // Debug log
-  console.log('overduePage', overduePage, 'overdueBorrowingsResponse', overdueBorrowingsResponse);
-  console.log('overdueBorrowingsResponse.data', overdueBorrowingsResponse?.data);
-
   const overdueBorrowings = overdueBorrowingsResponse?.data || [];
-  const overduePagination = overdueBorrowingsResponse?.pagination;
-
-  // Tabloya doğrudan overdueBorrowingsResponse ver
   const normalizedOverdueData = overdueBorrowingsResponse;
 
   const { data: recentActivities } = useQuery<RecentActivity[]>({
@@ -813,10 +790,19 @@ export default function Dashboard() {
             <CardContent>
               {overdueBorrowingsResponse && overdueBorrowingsResponse.data && overdueBorrowingsResponse.data.length > 0 ? (
                 <ServerDataTable
+                  data={{
+                    data: overdueBorrowingsResponse?.data?.slice(0, 5) || [],
+                    pagination: {
+                      page: 1,
+                      limit: 5,
+                      total: 5,
+                      totalPages: 1,
+                      hasNext: false,
+                      hasPrev: false,
+                    }
+                  }}
                   columns={overdueColumns}
-                  data={normalizedOverdueData || { data: [], pagination: { page: 1, limit: 5, total: 0, totalPages: 1, hasNext: false, hasPrev: false } }}
                   emptyMessage={t("dashboard.noOverdueItems")}
-                  onPageChange={setOverduePage}
                 />
               ) : (
                 <div className="text-center py-10">

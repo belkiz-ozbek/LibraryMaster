@@ -85,7 +85,7 @@ export default function Members() {
 
   // Server-side pagination
   const { data: paginatedMembers, isLoading } = useQuery<PaginatedResponse<User>>({
-    queryKey: ["/api/users", { page: currentPage, limit: 10 }],
+    queryKey: ["/api/users", { page: currentPage, limit: 10, filter: statusFilter }],
     enabled: searchQuery.length === 0,
     queryFn: async () => {
       const res = await fetch(`/api/users?page=${currentPage}&limit=10`, { credentials: "include" });
@@ -96,7 +96,7 @@ export default function Members() {
 
   // Server-side search with pagination
   const { data: searchResults = { data: [], pagination: { page: 1, limit: 10, total: 0, totalPages: 1, hasNext: false, hasPrev: false } } } = useQuery<PaginatedResponse<User>>({
-    queryKey: ["/api/users/search", { q: searchQuery, page: currentPage }],
+    queryKey: ["/api/users/search", { q: searchQuery, page: currentPage, filter: statusFilter }],
     enabled: searchQuery.length > 0,
     queryFn: async () => {
       const res = await fetch(`/api/users/search?q=${encodeURIComponent(searchQuery)}&page=${currentPage}&limit=10`, { credentials: "include" });
