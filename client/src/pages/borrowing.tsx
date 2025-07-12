@@ -615,7 +615,7 @@ export default function Borrowing() {
               />
             ) : (
               <ServerDataTable
-                data={borrowingsData!}
+                data={borrowingsData && borrowingsData.pagination ? borrowingsData : { data: borrowings ?? [], pagination: { page: 1, limit: 10, total: (borrowings ?? []).length, totalPages: 1, hasNext: false, hasPrev: false } }}
                 columns={columns}
                 loading={isLoading}
                 emptyMessage={t("borrowing.noBorrowingsYet")}
