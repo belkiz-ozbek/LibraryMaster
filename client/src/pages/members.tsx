@@ -296,6 +296,51 @@ export default function Members() {
         </Button>
       </motion.div>
 
+      {/* Quick Stats - üstte */}
+      <motion.div variants={itemVariants} className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <Card>
+          <CardContent className="min-h-[60px] sm:min-h-[90px] p-2 sm:p-4">
+            <div className="flex items-center">
+              <Users className="h-7 w-7 sm:h-8 sm:w-8 text-primary mr-2 sm:mr-3" />
+              <div>
+                <p className="text-lg sm:text-2xl font-bold text-on-surface">
+                  {(Array.isArray(displayMembers) ? displayMembers : []).filter(member => !member.isAdmin).length}
+                </p>
+                <p className="text-xs sm:text-sm text-text-muted">{t("members.activeMembers")}</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardContent className="min-h-[60px] sm:min-h-[90px] p-2 sm:p-4">
+            <div className="flex items-center">
+              <Users className="h-7 w-7 sm:h-8 sm:w-8 text-secondary mr-2 sm:mr-3" />
+              <div>
+                <p className="text-lg sm:text-2xl font-bold text-on-surface">
+                  {(Array.isArray(displayMembers) ? displayMembers : []).filter(member => member.isAdmin).length}
+                </p>
+                <p className="text-xs sm:text-sm text-text-muted">{t("members.administrators")}</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardContent className="min-h-[60px] sm:min-h-[90px] p-2 sm:p-4">
+            <div className="flex items-center">
+              <Star className="h-7 w-7 sm:h-8 sm:w-8 text-accent mr-2 sm:mr-3" />
+              <div>
+                <p className="text-lg sm:text-2xl font-bold text-on-surface">
+                  {(Array.isArray(displayMembers) ? displayMembers : []).filter(member => member.adminRating && member.adminRating >= 4).length}
+                </p>
+                <p className="text-xs sm:text-sm text-text-muted">{t("members.highlyRated")}</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </motion.div>
+
       {/* Ortak Dialog (Ekle/Düzenle) */}
       <Dialog open={isFormOpen} onOpenChange={setIsFormOpen}>
         <DialogContent className="max-w-lg w-full">
@@ -356,51 +401,6 @@ export default function Members() {
               }
               onPageChange={setCurrentPage}
             />
-          </CardContent>
-        </Card>
-      </motion.div>
-
-      {/* Quick Stats */}
-      <motion.div variants={itemVariants} className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <Card>
-          <CardContent className="min-h-[60px] sm:min-h-[90px] p-2 sm:p-4">
-            <div className="flex items-center">
-              <Users className="h-7 w-7 sm:h-8 sm:w-8 text-primary mr-2 sm:mr-3" />
-              <div>
-                <p className="text-lg sm:text-2xl font-bold text-on-surface">
-                  {(Array.isArray(displayMembers) ? displayMembers : []).filter(member => !member.isAdmin).length}
-                </p>
-                <p className="text-xs sm:text-sm text-text-muted">{t("members.activeMembers")}</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardContent className="min-h-[60px] sm:min-h-[90px] p-2 sm:p-4">
-            <div className="flex items-center">
-              <Users className="h-7 w-7 sm:h-8 sm:w-8 text-secondary mr-2 sm:mr-3" />
-              <div>
-                <p className="text-lg sm:text-2xl font-bold text-on-surface">
-                  {(Array.isArray(displayMembers) ? displayMembers : []).filter(member => member.isAdmin).length}
-                </p>
-                <p className="text-xs sm:text-sm text-text-muted">{t("members.administrators")}</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardContent className="min-h-[60px] sm:min-h-[90px] p-2 sm:p-4">
-            <div className="flex items-center">
-              <Star className="h-7 w-7 sm:h-8 sm:w-8 text-accent mr-2 sm:mr-3" />
-              <div>
-                <p className="text-lg sm:text-2xl font-bold text-on-surface">
-                  {(Array.isArray(displayMembers) ? displayMembers : []).filter(member => member.adminRating && member.adminRating >= 4).length}
-                </p>
-                <p className="text-xs sm:text-sm text-text-muted">{t("members.highlyRated")}</p>
-              </div>
-            </div>
           </CardContent>
         </Card>
       </motion.div>
