@@ -95,7 +95,7 @@ Modern React, TypeScript ve Express.js ile geliştirilmiş tam kapsamlı kütüp
 
 1. **Repository'yi klonlayın**
    ```bash
-   git clone https://github.com/yourusername/LibraryMaster.git
+   git clone https://github.com/belkiz-ozbek/LibraryMaster.git
    cd LibraryMaster
    ```
 
@@ -269,9 +269,9 @@ Bu proje MIT lisansı altında lisanslanmıştır. Detaylar için `LICENSE` dosy
 
 ## 📞 İletişim
 
-Proje Sahibi - (https://github.com/belkiz-ozbek)
+Proje Sahibi - [@belkiz-ozbek](https://github.com/belkiz-ozbek)
 
-Proje Linki: (https://github.com/belkiz-ozbek/LibraryMaster)
+Proje Linki: [https://github.com/belkiz-ozbek/LibraryMaster](https://github.com/belkiz-ozbek/LibraryMaster)
 
 ## 🙏 Teşekkürler
 
