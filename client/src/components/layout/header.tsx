@@ -1,4 +1,4 @@
-import { useState, useRef, useMemo, useCallback } from "react";
+import { useState, useRef, useMemo, useCallback, useEffect } from "react";
 import { useLocation } from "wouter";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -38,7 +38,8 @@ const SearchBox = ({
   searchLoading, 
   showDropdown, 
   searchResults, 
-  onResultClick 
+  onResultClick,
+  setShowDropdown
 }: {
   searchQuery: string;
   onSearch: (e: React.FormEvent) => void;
@@ -47,10 +48,29 @@ const SearchBox = ({
   showDropdown: boolean;
   searchResults: SearchResults;
   onResultClick: (type: string, id: number) => void;
+  setShowDropdown: (show: boolean) => void;
 }) => {
   const { t } = useTranslation();
+  const searchRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (searchRef.current && !searchRef.current.contains(event.target as Node)) {
+        setShowDropdown(false);
+      }
+    };
+
+    if (showDropdown) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [showDropdown, setShowDropdown]);
+
   return (
-    <div className="relative">
+    <div className="relative" ref={searchRef}>
       <form onSubmit={onSearch} autoComplete="off">
         <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={16} />
         <Input
@@ -58,12 +78,12 @@ const SearchBox = ({
           placeholder={t("header.searchMember")}
           value={searchQuery}
           onChange={onInputChange}
-          onFocus={() => searchQuery.length >= 2 && onResultClick('', 0)}
+          onFocus={() => searchQuery.length >= 1 && setShowDropdown(true)}
           className="w-60 sm:w-80 pl-9 pr-3 py-2 rounded-lg bg-white border border-gray-200 focus:ring-2 focus:ring-blue-200 text-sm placeholder-gray-400"
         />
       </form>
-      {showDropdown && (searchQuery.length >= 2) && (
-        <div className="absolute z-50 mt-2 w-full sm:w-96 bg-white border border-gray-200 rounded-xl shadow-2xl max-h-96 overflow-auto">
+      {showDropdown && (searchQuery.length >= 1) && (
+        <div className="absolute z-50 mt-2 w-full bg-white/80 backdrop-blur-md border border-gray-200 shadow-lg shadow-blue-100/40 border-t-2 border-blue-100 rounded-2xl max-h-96 overflow-auto transition-all">
           {searchLoading ? (
             <div className="p-4 text-center text-gray-500 text-sm">Aranıyor...</div>
           ) : (
@@ -71,25 +91,31 @@ const SearchBox = ({
               {searchResults.users.length > 0 && (
                 <div>
                   <div className="px-6 pt-3 pb-2 text-xs font-semibold text-gray-400 uppercase tracking-wider">Üyeler</div>
-                  {searchResults.users.map((user: SearchResult) => (
-                    <div
-                      key={user.id}
-                      className="flex items-center gap-4 px-6 py-3 cursor-pointer hover:bg-blue-50 transition-colors rounded-lg mb-1"
-                      onClick={() => onResultClick('user', user.id)}
-                    >
-                      <div className="flex-shrink-0 w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 font-bold text-lg uppercase shadow-sm">
-                        {user.name?.[0] || '?'}
+                  <div className="h-px bg-blue-50 mx-4 my-2 rounded" />
+                  {searchResults.users.map((user: SearchResult, idx: number) => (
+                    <>
+                      <div
+                        key={user.id}
+                        className="flex items-center gap-3 px-5 py-2.5 cursor-pointer bg-transparent border border-transparent hover:bg-blue-50/60 hover:text-blue-700 hover:scale-[1.03] hover:shadow-md transition-all duration-150 rounded-xl"
+                        onClick={() => onResultClick('user', user.id)}
+                      >
+                        <div className="flex-shrink-0 w-10 h-10 rounded-full bg-gradient-to-br from-blue-200 to-blue-100 flex items-center justify-center text-blue-600 font-bold text-lg">
+                          {user.name?.[0] || '?'}
+                        </div>
+                        <div className="flex flex-col min-w-0 flex-1">
+                          <span className="font-normal text-gray-800 text-base truncate group-hover:text-blue-700">{user.name}</span>
+                          <span className="text-xs text-gray-400 truncate group-hover:text-blue-500">{user.email}</span>
+                        </div>
                       </div>
-                      <div className="flex flex-col min-w-0">
-                        <span className="font-medium text-gray-900 text-base truncate">{user.name}</span>
-                        <span className="text-xs text-gray-500 truncate">{user.email}</span>
-                      </div>
-                    </div>
+                      {idx < searchResults.users.length - 1 && (
+                        <div className="h-px bg-blue-50 mx-8 my-1 rounded" />
+                      )}
+                    </>
                   ))}
                 </div>
               )}
-              {searchResults.users.length === 0 && (
-                <div className="p-6 text-center text-gray-500 text-sm">Sonuç bulunamadı</div>
+              {searchResults.users.length === 0 && searchQuery.length >= 1 && (
+                <div className="p-8 text-center text-gray-400 text-base font-medium">Sonuç bulunamadı</div>
               )}
             </>
           )}
@@ -199,17 +225,29 @@ export default function Header() {
     if (searchQuery.length < 2) return;
     setSearchLoading(true);
     try {
+      console.log('Searching for:', searchQuery);
       const [booksRes, usersRes] = await Promise.all([
         fetch(`/api/books/search?q=${encodeURIComponent(searchQuery)}`),
         fetch(`/api/users/search?q=${encodeURIComponent(searchQuery)}`),
       ]);
+      
+      console.log('Books response status:', booksRes.status);
+      console.log('Users response status:', usersRes.status);
+      
+      if (!booksRes.ok || !usersRes.ok) {
+        throw new Error('Search request failed');
+      }
+      
       const [books, users] = await Promise.all([
         booksRes.json(),
         usersRes.json(),
       ]);
-      setSearchResults({ books, users });
+      
+      console.log('Search results:', { books, users });
+      setSearchResults({ books: books.data ?? books, users: users.data ?? users });
       setShowDropdown(true);
     } catch (err) {
+      console.error('Search error:', err);
       setSearchResults({ books: [], users: [] });
     } finally {
       setSearchLoading(false);
@@ -217,15 +255,38 @@ export default function Header() {
   }, [searchQuery]);
 
   const handleInputChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value;
-    setSearchQuery(value);
-    if (value.length >= 2) {
-      handleSearch(new Event('submit') as any);
-    } else {
+    setSearchQuery(e.target.value);
+  }, []);
+
+  // Debounced search effect
+  useEffect(() => {
+    if (searchQuery.length < 1) {
       setShowDropdown(false);
       setSearchResults({ books: [], users: [] });
+      return;
     }
-  }, [handleSearch]);
+    setSearchLoading(true);
+    const timeoutId = setTimeout(async () => {
+      try {
+        const [booksRes, usersRes] = await Promise.all([
+          fetch(`/api/books/search?q=${encodeURIComponent(searchQuery)}`),
+          fetch(`/api/users/search?q=${encodeURIComponent(searchQuery)}`),
+        ]);
+        if (!booksRes.ok || !usersRes.ok) throw new Error('Search request failed');
+        const [books, users] = await Promise.all([
+          booksRes.json(),
+          usersRes.json(),
+        ]);
+        setSearchResults({ books: books.data ?? books, users: users.data ?? users });
+        setShowDropdown(true);
+      } catch (err) {
+        setSearchResults({ books: [], users: [] });
+      } finally {
+        setSearchLoading(false);
+      }
+    }, 300);
+    return () => clearTimeout(timeoutId);
+  }, [searchQuery]);
 
   const handleResultClick = useCallback((type: string, id: number) => {
     setShowDropdown(false);
@@ -264,6 +325,7 @@ export default function Header() {
             showDropdown={showDropdown}
             searchResults={searchResults}
             onResultClick={handleResultClick}
+            setShowDropdown={setShowDropdown}
           />
           
           <LanguageSelector i18n={i18n} changeLanguage={changeLanguage} />
