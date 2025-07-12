@@ -265,7 +265,7 @@ Uygulama PostgreSQL ile Drizzle ORM kullanır. Veritabanı migrasyonları `drizz
 
 ## 📄 Lisans
 
-Bu proje MIT lisansı altında lisanslanmıştır. Detaylar için `LICENSE` dosyasına bakın.
+Bu proje MIT lisansı altında lisanslanmıştır. Detaylar için [LICENSE] dosyasına bakın.
 
 ## 📞 İletişim
 
