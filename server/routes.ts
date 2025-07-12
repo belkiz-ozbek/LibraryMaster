@@ -30,18 +30,29 @@ const __dirname = path.dirname(__filename);
 
 // Auth middleware
 function requireAuth(req: any, res: any, next: any) {
+  console.log("[Auth Middleware] Session:", req.session);
+  console.log("[Auth Middleware] Session ID:", req.sessionID);
+  console.log("[Auth Middleware] User ID:", req.session?.userId);
+  
   if (!req.session.userId) {
+    console.log("[Auth Middleware] No userId in session");
     return res.status(401).json({ message: "Not authenticated" });
   }
+  
   storage.getUser(req.session.userId)
     .then(user => {
       if (!user) {
+        console.log("[Auth Middleware] User not found in database");
         return res.status(401).json({ message: "Not authenticated" });
       }
+      console.log("[Auth Middleware] User authenticated:", user.name);
       req.user = user;
       next();
     })
-    .catch(next);
+    .catch(error => {
+      console.error("[Auth Middleware] Error:", error);
+      next(error);
+    });
 }
 
 const requireAdmin = async (req: any, res: any, next: any) => {
@@ -55,22 +66,28 @@ export async function registerRoutes(app: Express): Promise<Server> {
     secret: process.env.SESSION_SECRET || 'library-management-secret',
     resave: true,
     saveUninitialized: false,
+    name: 'libraryms.sid', // Custom session name
     cookie: {
       secure: process.env.NODE_ENV === 'production', // production'da true
       httpOnly: true,
       maxAge: 24 * 60 * 60 * 1000, // 24 hours
       sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax', // cross-site ise 'none'
-      domain: process.env.NODE_ENV === 'production' ? '.railway.app' : undefined // production'da domain ekle
-    }
+      // domain: process.env.NODE_ENV === 'production' ? '.railway.app' : undefined // production'da domain ekle
+    },
+    // Add rolling sessions for better security
+    rolling: true
   }));
 
   // Auth routes
   app.post("/api/auth/login", async (req, res) => {
     try {
       const { identifier, password } = req.body;
+      console.log("[Login] Attempting login for:", identifier);
+      
       if (!identifier || !password) {
         return res.status(400).json({ message: "Kullanıcı adı/e-posta ve şifre zorunlu" });
       }
+      
       // Kullanıcıyı username veya email ile bul
       let user = null;
       if (identifier.includes("@")) {
@@ -78,23 +95,43 @@ export async function registerRoutes(app: Express): Promise<Server> {
       } else {
         user = await storage.getUserByUsername(identifier);
       }
+      
       if (!user) {
+        console.log("[Login] User not found:", identifier);
         return res.status(401).json({ message: "Geçersiz kullanıcı adı/e-posta veya şifre" });
       }
+      
       const validPassword = await bcrypt.compare(password, user.password || '');
       if (!validPassword) {
+        console.log("[Login] Invalid password for user:", identifier);
         return res.status(401).json({ message: "Geçersiz kullanıcı adı/e-posta veya şifre" });
       }
+      
       if (!user.emailVerified) {
+        console.log("[Login] Email not verified for user:", identifier);
         return res.status(401).json({ 
           message: "Lütfen e-posta adresinizi doğrulayın. Gelen kutunuzu kontrol edin.",
           emailNotVerified: true 
         });
       }
+      
+      // Set session
       req.session.userId = user.id;
-      const { password: _, ...userWithoutPassword } = user;
-      res.json({ user: userWithoutPassword });
+      console.log("[Login] Session set for user:", user.id, "Session ID:", req.sessionID);
+      
+      // Save session explicitly
+      req.session.save((err) => {
+        if (err) {
+          console.error("[Login] Session save error:", err);
+          return res.status(500).json({ message: "Session save failed" });
+        }
+        
+        console.log("[Login] Session saved successfully");
+        const { password: _, ...userWithoutPassword } = user;
+        res.json({ user: userWithoutPassword });
+      });
     } catch (error) {
+      console.error("[Login] Error:", error);
       res.status(500).json({ message: "Giriş başarısız" });
     }
   });
@@ -306,6 +343,40 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       res.json({ message: "Logged out successfully" });
     });
+  });
+
+  // Debug endpoint for production troubleshooting
+  app.get("/api/debug/auth", (req, res) => {
+    res.json({
+      session: req.session,
+      sessionID: req.sessionID,
+      userId: req.session?.userId,
+      cookies: req.headers.cookie,
+      userAgent: req.headers['user-agent'],
+      timestamp: new Date().toISOString(),
+      env: process.env.NODE_ENV
+    });
+  });
+
+  // Test endpoint to set session
+  app.post("/api/debug/set-session", (req, res) => {
+    const { userId } = req.body;
+    if (userId) {
+      req.session.userId = userId;
+      req.session.save((err) => {
+        if (err) {
+          console.error("[Debug] Session save error:", err);
+          return res.status(500).json({ error: "Session save failed" });
+        }
+        res.json({ 
+          message: "Session set successfully",
+          session: req.session,
+          sessionID: req.sessionID
+        });
+      });
+    } else {
+      res.status(400).json({ error: "userId required" });
+    }
   });
 
   app.get("/api/auth/me", requireAuth, (req, res) => {

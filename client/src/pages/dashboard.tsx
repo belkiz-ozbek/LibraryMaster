@@ -30,6 +30,7 @@ import { tr, enUS } from "date-fns/locale";
 import { Progress } from "@/components/ui/progress";
 import { capitalizeWords } from "@/lib/utils";
 import LoadingScreen from "@/components/ui/loading-screen";
+import { useAuth } from "@/lib/auth";
 
 interface Stats {
   totalBooks: number;
@@ -163,6 +164,7 @@ const pieColors = [
 
 export default function Dashboard() {
   const { t, i18n } = useTranslation();
+  const { testSession } = useAuth();
 
   const { data: stats } = useQuery<Stats>({
     queryKey: ["/api/stats"],
@@ -303,6 +305,17 @@ export default function Dashboard() {
 
   return (
     <div>
+      {/* Temporary debug button for production testing */}
+      <div className="mb-4 p-4 bg-yellow-100 border border-yellow-300 rounded-lg">
+        <Button 
+          onClick={testSession}
+          variant="outline"
+          className="text-yellow-800 border-yellow-400 hover:bg-yellow-200"
+        >
+          Test Session (Debug)
+        </Button>
+      </div>
+      
       <motion.div
         className="space-y-6"
         initial="hidden"

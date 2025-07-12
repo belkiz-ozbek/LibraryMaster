@@ -15,6 +15,7 @@ interface AuthContextType {
   logout: () => Promise<void>;
   isLoading: boolean;
   checkAuth: () => Promise<void>;
+  testSession: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -62,6 +63,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     
     try {
       setIsLoading(true);
+      
+      console.log("[Auth] Checking authentication...");
+      
+      // First, let's check the debug endpoint
+      try {
+        const debugResponse = await fetch("/api/debug/auth", {
+          credentials: "include",
+        });
+        const debugData = await debugResponse.json();
+        console.log("[Auth] Debug info:", debugData);
+      } catch (debugError) {
+        console.log("[Auth] Debug endpoint failed:", debugError);
+      }
     
       const response = await fetch("/api/auth/me", {
         credentials: "include",
@@ -70,12 +84,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         },
       });
       
+      console.log("[Auth] /api/auth/me response:", {
+        status: response.status,
+        statusText: response.statusText,
+        headers: Object.fromEntries(response.headers.entries())
+      });
+      
       if (response.ok) {
         const data = await response.json();
+        console.log("[Auth] User data received:", data);
         setUser(data.user);
         // Store user in localStorage
         localStorage.setItem(USER_STORAGE_KEY, JSON.stringify(data.user));
       } else {
+        console.log("[Auth] Authentication failed, status:", response.status);
         setUser(null);
         // Clear user from localStorage
         localStorage.removeItem(USER_STORAGE_KEY);
@@ -154,8 +176,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   }, []);
 
+  const testSession = useCallback(async () => {
+    try {
+      console.log("[TestSession] Testing session...");
+      const response = await fetch("/api/debug/auth", {
+        credentials: "include",
+      });
+      const data = await response.json();
+      console.log("[TestSession] Debug data:", data);
+    } catch (error) {
+      console.error("[TestSession] Error:", error);
+    }
+  }, []);
+
   return (
-    <AuthContext.Provider value={{ user, login, signup, logout, isLoading, checkAuth }}>
+    <AuthContext.Provider value={{ user, login, signup, logout, isLoading, checkAuth, testSession }}>
       {children}
     </AuthContext.Provider>
   );
