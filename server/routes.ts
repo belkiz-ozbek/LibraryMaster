@@ -71,8 +71,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       secure: true,
       httpOnly: true,
       maxAge: 24 * 60 * 60 * 1000, // 24 hours
-      sameSite: 'none',
-      domain: '.railway.app'
+      sameSite: 'none'
     },
     rolling: true
   }));
