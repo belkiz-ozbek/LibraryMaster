@@ -245,6 +245,14 @@ export const en = {
           overdue: "Overdue",
         },
         lateReturn: "Late Return",
+      },
+      overdue: {
+        "title": "Overdue Loans",
+        "description": "List of overdue books borrowed by this member."
+      },
+      currentlyBorrowed: {
+        title: "Currently Borrowed",
+        description: "List of books currently borrowed by this member."
       }
     },
     filters: {

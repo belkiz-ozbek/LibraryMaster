@@ -217,6 +217,14 @@ export const tr = {
           overdue: "Gecikmiş",
         },
         lateReturn: "Geç İade",
+      },
+      overdue: {
+        title: "Gecikmiş Ödünçler",
+        description: "Bu üyeye ait gecikmiş ödünç kitaplar listelenir."
+      },
+      currentlyBorrowed: {
+        title: "Aktif Ödünçler",
+        description: "Bu üyeye ait şu anda aktif olan ödünç kitaplar listelenir."
       }
     },
     filters: {
@@ -225,7 +233,7 @@ export const tr = {
       normalMembers: "Normal Üyeler",
       administrators: "Yöneticiler"
     },
-    addMember: "Üye Ekle"
+    addMember: "Üye Ekle",
   },
   borrowing: {
     title: "Kitap ödünç işlemlerini yönet",
@@ -262,7 +270,8 @@ export const tr = {
     selectBook: "Kitap seçin...",
     notes: "Notlar",
     notesPlaceholder: "Bu ödünç alma hakkında ek notlar...",
-    noBorrowingsYet: "Henüz ödünç kaydı yok."
+    noBorrowingsYet: "Henüz ödünç kaydı yok.",
+    returnBook: "Kitabı İade Et"
   },
   statistics: {
     title: "İstatistikler",
