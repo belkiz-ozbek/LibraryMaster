@@ -303,42 +303,42 @@ export default function Books() {
       {/* Quick Stats */}
       <motion.div variants={itemVariants} className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <Card>
-          <CardContent className="p-6">
+          <CardContent className="min-h-[60px] sm:min-h-[90px] p-2 sm:p-4">
             <div className="flex items-center">
-              <BookIcon className="h-8 w-8 text-primary mr-3" />
+              <BookIcon className="h-7 w-7 sm:h-8 sm:w-8 text-primary mr-2 sm:mr-3" />
               <div>
-                <p className="text-2xl font-bold text-on-surface">
+                <p className="text-lg sm:text-2xl font-bold text-on-surface">
                   {paginatedBooks?.pagination?.total ?? 0}
                 </p>
-                <p className="text-sm text-text-muted">{t("books.totalBooks")}</p>
+                <p className="text-xs sm:text-sm text-text-muted">{t("books.totalBooks")}</p>
               </div>
             </div>
           </CardContent>
         </Card>
 
         <Card>
-          <CardContent className="p-6">
+          <CardContent className="min-h-[60px] sm:min-h-[90px] p-2 sm:p-4">
             <div className="flex items-center">
-              <BookIcon className="h-8 w-8 text-secondary mr-3" />
+              <BookIcon className="h-7 w-7 sm:h-8 sm:w-8 text-secondary mr-2 sm:mr-3" />
               <div>
-                <p className="text-2xl font-bold text-on-surface">
+                <p className="text-lg sm:text-2xl font-bold text-on-surface">
                   {paginatedBooks?.data?.reduce((sum, book) => sum + (book.availableCopies || 0), 0) ?? 0}
                 </p>
-                <p className="text-sm text-text-muted">{t("books.availableCopiesTotal")}</p>
+                <p className="text-xs sm:text-sm text-text-muted">{t("books.availableCopiesTotal")}</p>
               </div>
             </div>
           </CardContent>
         </Card>
 
         <Card>
-          <CardContent className="p-6">
+          <CardContent className="min-h-[60px] sm:min-h-[90px] p-2 sm:p-4">
             <div className="flex items-center">
-              <BookIcon className="h-8 w-8 text-accent mr-3" />
+              <BookIcon className="h-7 w-7 sm:h-8 sm:w-8 text-accent mr-2 sm:mr-3" />
               <div>
-                <p className="text-2xl font-bold text-on-surface">
+                <p className="text-lg sm:text-2xl font-bold text-on-surface">
                   {paginatedBooks?.data ? new Set(paginatedBooks.data.flatMap(book => book.genre.split(',').map(g => g.trim()))).size : 0}
                 </p>
-                <p className="text-sm text-text-muted">{t("books.uniqueGenres")}</p>
+                <p className="text-xs sm:text-sm text-text-muted">{t("books.uniqueGenres")}</p>
               </div>
             </div>
           </CardContent>

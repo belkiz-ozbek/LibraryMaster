@@ -103,18 +103,18 @@ export function DataTable<T extends Record<string, any>>({
 
   return (
     <div className="space-y-4">
-      <div className="rounded-md border">
+      <div className="rounded-md border overflow-x-auto">
         <Table>
           <TableHeader>
             <TableRow>
               {columns.map((column) => (
                 <TableHead
                   key={String(column.key)}
-                  className={`h-12 ${column.sortable ? "cursor-pointer hover:bg-muted/50" : ""}`}
+                  className={`h-12 min-w-[120px] ${column.sortable ? "cursor-pointer hover:bg-muted/50" : ""}`}
                   onClick={column.sortable ? () => handleSort(String(column.key)) : undefined}
                 >
                   <div className="flex items-center space-x-1 font-medium">
-                    <span>{column.title}</span>
+                    <span className="text-sm sm:text-base">{column.title}</span>
                     {column.sortable && sortColumn === column.key && (
                       <span className="text-xs">
                         {sortDirection === "asc" ? "↑" : "↓"}
@@ -136,7 +136,7 @@ export function DataTable<T extends Record<string, any>>({
               paginatedData.map((row, index) => (
                 <TableRow key={index} className="hover:bg-muted/50 data-[state=selected]:bg-muted">
                   {columns.map((column) => (
-                    <TableCell key={String(column.key)} className="py-3">
+                    <TableCell key={String(column.key)} className="py-3 min-w-[120px]">
                       {column.render 
                         ? column.render(getValue(row, String(column.key)), row, index)
                         : getValue(row, String(column.key))
@@ -152,8 +152,8 @@ export function DataTable<T extends Record<string, any>>({
 
       {/* Pagination */}
       {totalPages > 1 && (
-        <div className="flex items-center justify-between">
-          <p className="text-sm text-text-muted">
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+          <p className="text-sm text-text-muted text-center sm:text-left">
             {t("pagination.showing", {
               start: startIndex + 1,
               end: Math.min(startIndex + pageSize, data.length),
@@ -166,9 +166,19 @@ export function DataTable<T extends Record<string, any>>({
               size="sm"
               onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
               disabled={currentPage === 1}
+              className="hidden sm:flex"
             >
               <ChevronLeft size={16} />
               {t("pagination.previous")}
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+              disabled={currentPage === 1}
+              className="sm:hidden"
+            >
+              <ChevronLeft size={16} />
             </Button>
             <div className="flex items-center space-x-1">
               {Array.from({ length: totalPages }, (_, i) => i + 1)
@@ -186,6 +196,7 @@ export function DataTable<T extends Record<string, any>>({
                       variant={currentPage === page ? "default" : "outline"}
                       size="sm"
                       onClick={() => setCurrentPage(page)}
+                      className="min-w-[40px]"
                     >
                       {page}
                     </Button>
@@ -198,8 +209,18 @@ export function DataTable<T extends Record<string, any>>({
               size="sm"
               onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
               disabled={currentPage === totalPages}
+              className="hidden sm:flex"
             >
               {t("pagination.next")}
+              <ChevronRight size={16} />
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+              disabled={currentPage === totalPages}
+              className="sm:hidden"
+            >
               <ChevronRight size={16} />
             </Button>
           </div>
@@ -271,17 +292,17 @@ export function ServerDataTable<T extends Record<string, any>>({
 
   return (
     <div className="space-y-4">
-      <div className="rounded-md border">
+      <div className="rounded-md border overflow-x-auto">
         <Table>
           <TableHeader>
             <TableRow>
               {columns.map((column) => (
                 <TableHead
                   key={String(column.key)}
-                  className="h-12"
+                  className="h-12 min-w-[120px]"
                 >
                   <div className="flex items-center space-x-1 font-medium">
-                    <span>{column.title}</span>
+                    <span className="text-sm sm:text-base">{column.title}</span>
                   </div>
                 </TableHead>
               ))}
@@ -298,7 +319,7 @@ export function ServerDataTable<T extends Record<string, any>>({
               tableData.map((row, index) => (
                 <TableRow key={index} className="hover:bg-muted/50 data-[state=selected]:bg-muted">
                   {columns.map((column) => (
-                    <TableCell key={String(column.key)} className="py-3">
+                    <TableCell key={String(column.key)} className="py-3 min-w-[120px]">
                       {column.render 
                         ? column.render(getValue(row, String(column.key)), row, index)
                         : getValue(row, String(column.key))
@@ -314,8 +335,8 @@ export function ServerDataTable<T extends Record<string, any>>({
 
       {/* Server-side Pagination */}
       {pagination.totalPages > 1 && (
-        <div className="flex items-center justify-between">
-          <p className="text-sm text-text-muted">
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+          <p className="text-sm text-text-muted text-center sm:text-left">
             {t("pagination.showing", {
               start: ((pagination.page - 1) * pagination.limit) + 1,
               end: Math.min(pagination.page * pagination.limit, pagination.total),
@@ -328,9 +349,19 @@ export function ServerDataTable<T extends Record<string, any>>({
               size="sm"
               onClick={() => onPageChange?.(pagination.page - 1)}
               disabled={!pagination.hasPrev}
+              className="hidden sm:flex"
             >
               <ChevronLeft size={16} />
               {t("pagination.previous")}
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => onPageChange?.(pagination.page - 1)}
+              disabled={!pagination.hasPrev}
+              className="sm:hidden"
+            >
+              <ChevronLeft size={16} />
             </Button>
             <div className="flex items-center space-x-1">
               {Array.from({ length: pagination.totalPages }, (_, i) => i + 1)
@@ -348,6 +379,7 @@ export function ServerDataTable<T extends Record<string, any>>({
                       variant={pagination.page === page ? "default" : "outline"}
                       size="sm"
                       onClick={() => onPageChange?.(page)}
+                      className="min-w-[40px]"
                     >
                       {page}
                     </Button>
@@ -360,8 +392,18 @@ export function ServerDataTable<T extends Record<string, any>>({
               size="sm"
               onClick={() => onPageChange?.(pagination.page + 1)}
               disabled={!pagination.hasNext}
+              className="hidden sm:flex"
             >
               {t("pagination.next")}
+              <ChevronRight size={16} />
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => onPageChange?.(pagination.page + 1)}
+              disabled={!pagination.hasNext}
+              className="sm:hidden"
+            >
               <ChevronRight size={16} />
             </Button>
           </div>

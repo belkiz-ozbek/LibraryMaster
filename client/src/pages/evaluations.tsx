@@ -259,56 +259,56 @@ export default function Evaluations() {
       {/* Quick Stats */}
       <motion.div variants={itemVariants} className="grid grid-cols-1 md:grid-cols-4 gap-6">
         <Card>
-          <CardContent className="p-6">
+          <CardContent className="min-h-[60px] sm:min-h-[90px] p-2 sm:p-4">
             <div className="flex items-center">
-              <Users className="h-8 w-8 text-primary mr-3" />
+              <Users className="h-7 w-7 sm:h-8 sm:w-8 text-primary mr-2 sm:mr-3" />
               <div>
-                <p className="text-2xl font-bold text-on-surface">
+                <p className="text-lg sm:text-2xl font-bold text-on-surface">
                   {stats.totalMembers}
                 </p>
-                <p className="text-sm text-text-muted">{t("evaluations.totalMembers")}</p>
+                <p className="text-xs sm:text-sm text-text-muted">{t("evaluations.totalMembers")}</p>
               </div>
             </div>
           </CardContent>
         </Card>
 
         <Card>
-          <CardContent className="p-6">
+          <CardContent className="min-h-[60px] sm:min-h-[90px] p-2 sm:p-4">
             <div className="flex items-center">
-              <Star className="h-8 w-8 text-accent mr-3" />
+              <Star className="h-7 w-7 sm:h-8 sm:w-8 text-accent mr-2 sm:mr-3" />
               <div>
-                <p className="text-2xl font-bold text-on-surface">
+                <p className="text-lg sm:text-2xl font-bold text-on-surface">
                   {stats.ratedMembers}
                 </p>
-                <p className="text-sm text-text-muted">{t("evaluations.ratedMembers")}</p>
+                <p className="text-xs sm:text-sm text-text-muted">{t("evaluations.ratedMembers")}</p>
               </div>
             </div>
           </CardContent>
         </Card>
 
         <Card>
-          <CardContent className="p-6">
+          <CardContent className="min-h-[60px] sm:min-h-[90px] p-2 sm:p-4">
             <div className="flex items-center">
-              <Award className="h-8 w-8 text-secondary mr-3" />
+              <Award className="h-7 w-7 sm:h-8 sm:w-8 text-secondary mr-2 sm:mr-3" />
               <div>
-                <p className="text-2xl font-bold text-on-surface">
+                <p className="text-lg sm:text-2xl font-bold text-on-surface">
                   {stats.excellentMembers}
                 </p>
-                <p className="text-sm text-text-muted">{t("evaluations.excellentMembers")}</p>
+                <p className="text-xs sm:text-sm text-text-muted">{t("evaluations.excellentMembers")}</p>
               </div>
             </div>
           </CardContent>
         </Card>
 
         <Card>
-          <CardContent className="p-6">
+          <CardContent className="min-h-[60px] sm:min-h-[90px] p-2 sm:p-4">
             <div className="flex items-center">
-              <TrendingUp className="h-8 w-8 text-primary mr-3" />
+              <TrendingUp className="h-7 w-7 sm:h-8 sm:w-8 text-primary mr-2 sm:mr-3" />
               <div>
-                <p className="text-2xl font-bold text-on-surface">
+                <p className="text-lg sm:text-2xl font-bold text-on-surface">
                   {stats.averageRating.toFixed(1)}
                 </p>
-                <p className="text-sm text-text-muted">{t("evaluations.averageRating")}</p>
+                <p className="text-xs sm:text-sm text-text-muted">{t("evaluations.averageRating")}</p>
               </div>
             </div>
           </CardContent>

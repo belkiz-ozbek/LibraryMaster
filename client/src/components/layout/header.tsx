@@ -59,11 +59,11 @@ const SearchBox = ({
           value={searchQuery}
           onChange={onInputChange}
           onFocus={() => searchQuery.length >= 2 && onResultClick('', 0)}
-          className="w-80 pl-9 pr-3 py-2 rounded-lg bg-white border border-gray-200 focus:ring-2 focus:ring-blue-200 text-sm placeholder-gray-400"
+          className="w-60 sm:w-80 pl-9 pr-3 py-2 rounded-lg bg-white border border-gray-200 focus:ring-2 focus:ring-blue-200 text-sm placeholder-gray-400"
         />
       </form>
       {showDropdown && (searchQuery.length >= 2) && (
-        <div className="absolute z-50 mt-2 w-96 bg-white border border-gray-200 rounded-xl shadow-2xl max-h-96 overflow-auto">
+        <div className="absolute z-50 mt-2 w-full sm:w-96 bg-white border border-gray-200 rounded-xl shadow-2xl max-h-96 overflow-auto">
           {searchLoading ? (
             <div className="p-4 text-center text-gray-500 text-sm">Aranıyor...</div>
           ) : (
@@ -80,9 +80,9 @@ const SearchBox = ({
                       <div className="flex-shrink-0 w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 font-bold text-lg uppercase shadow-sm">
                         {user.name?.[0] || '?'}
                       </div>
-                      <div className="flex flex-col">
-                        <span className="font-medium text-gray-900 text-base">{user.name}</span>
-                        <span className="text-xs text-gray-500">{user.email}</span>
+                      <div className="flex flex-col min-w-0">
+                        <span className="font-medium text-gray-900 text-base truncate">{user.name}</span>
+                        <span className="text-xs text-gray-500 truncate">{user.email}</span>
                       </div>
                     </div>
                   ))}
@@ -242,20 +242,20 @@ export default function Header() {
   }, [i18n]);
 
   return (
-    <header className="bg-white border-b border-gray-100 px-8 py-5 transition-all duration-300" style={{ padding: '12px 32px' }}>
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-xl font-semibold text-gray-900 tracking-tight">
+    <header className="bg-white border-b border-gray-100 px-4 sm:px-8 py-3 sm:py-5 transition-all duration-300">
+      <div className="flex items-center justify-between gap-4">
+        <div className="min-w-0 flex-1">
+          <h1 className="text-lg sm:text-xl font-semibold text-gray-900 tracking-tight truncate">
             {currentPageInfo.title}
           </h1>
           {currentPageInfo.description && (
-            <p className="text-xs text-gray-400 font-normal mt-0.5">
+            <p className="text-xs text-gray-400 font-normal mt-0.5 truncate">
               {currentPageInfo.description}
             </p>
           )}
         </div>
         
-        <div className="flex items-center space-x-6">
+        <div className="flex items-center space-x-2 sm:space-x-6 flex-shrink-0">
           <SearchBox 
             searchQuery={searchQuery}
             onSearch={handleSearch}
@@ -271,9 +271,9 @@ export default function Header() {
           <Button 
             variant="ghost" 
             onClick={logout} 
-            className="rounded-full px-3 py-1.5 text-gray-500 hover:text-red-500 hover:bg-red-50 transition-colors font-normal flex items-center gap-2 text-sm"
+            className="rounded-full px-2 sm:px-3 py-1.5 text-gray-500 hover:text-red-500 hover:bg-red-50 transition-colors font-normal flex items-center gap-1 sm:gap-2 text-sm"
           >
-            {t('auth.logout')}
+            <span className="hidden sm:inline">{t('auth.logout')}</span>
             <LogOut size={16} />
           </Button>
         </div>

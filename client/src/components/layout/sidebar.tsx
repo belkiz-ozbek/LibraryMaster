@@ -150,7 +150,7 @@ const SidebarHeader = ({ isCollapsed, t }: { isCollapsed: boolean; t: (key: stri
   </div>
 );
 
-export default function Sidebar() {
+export default function Sidebar({ isDrawer = false }: { isDrawer?: boolean } = {}) {
   const [location] = useLocation();
   const { user, logout } = useAuth();
   const { t } = useTranslation();
@@ -199,17 +199,23 @@ export default function Sidebar() {
   }, [location]);
 
   return (
-    <aside className={`relative bg-white/90 backdrop-blur-md flex flex-col border-r border-gray-100 shadow-lg transition-all duration-300 ${isCollapsed ? 'w-24' : 'w-60'} h-screen overflow-visible`}>
-      {/* Collapse/Expand Button */}
-      <button
-        className="absolute top-16 -right-6 z-10 w-9 h-9 flex items-center justify-center rounded-full overflow-visible bg-white/80 border border-gray-200 shadow-sm hover:bg-blue-50 transition-all duration-300"
-        onClick={toggleCollapse}
-        type="button"
-        tabIndex={0}
-        aria-label={isCollapsed ? 'Menüyü genişlet' : 'Menüyü daralt'}
-      >
-        {isCollapsed ? <ChevronRight size={20} /> : <ChevronLeft size={20} />}
-      </button>
+    <aside className={
+      isDrawer
+        ? 'bg-white flex flex-col w-full h-full overflow-y-auto'
+        : 'relative bg-white/90 backdrop-blur-md flex flex-col border-r border-gray-100 shadow-lg transition-all duration-300 ' + (isCollapsed ? 'w-24' : 'w-60') + ' h-screen overflow-visible'
+    }>
+      {/* Collapse/Expand Button (sadece desktop) */}
+      {!isDrawer && (
+        <button
+          className="absolute top-16 -right-6 z-10 w-9 h-9 flex items-center justify-center rounded-full overflow-visible bg-white/80 border border-gray-200 shadow-sm hover:bg-blue-50 transition-all duration-300"
+          onClick={toggleCollapse}
+          type="button"
+          tabIndex={0}
+          aria-label={isCollapsed ? 'Menüyü genişlet' : 'Menüyü daralt'}
+        >
+          {isCollapsed ? <ChevronRight size={20} /> : <ChevronLeft size={20} />}
+        </button>
+      )}
       
       <TooltipProvider>
         <SidebarHeader isCollapsed={isCollapsed} t={t} />

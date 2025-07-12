@@ -58,8 +58,8 @@ export function BookForm({ book, onSuccess, onCancel }: BookFormProps) {
   };
 
   return (
-    <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6 p-2">
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+    <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 sm:space-y-6 p-2">
+      <div className="grid grid-cols-1 gap-4 sm:gap-6">
         <div className="flex flex-col gap-2">
           <Label htmlFor="title" className="font-semibold text-gray-800">{t("books.name")} *</Label>
           <Input
@@ -82,7 +82,7 @@ export function BookForm({ book, onSuccess, onCancel }: BookFormProps) {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 gap-4 sm:gap-6">
         <div className="flex flex-col gap-2">
           <Label htmlFor="isbn" className="font-semibold text-gray-800">{t("books.isbn")}</Label>
           <Input
@@ -104,7 +104,7 @@ export function BookForm({ book, onSuccess, onCancel }: BookFormProps) {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6">
         <div className="flex flex-col gap-2">
           <Label htmlFor="publishYear" className="font-semibold text-gray-800">{t("books.publishYear")} *</Label>
           <Input
@@ -142,37 +142,38 @@ export function BookForm({ book, onSuccess, onCancel }: BookFormProps) {
         </div>
       </div>
 
-      <div className="flex flex-col gap-2">
-        <Label htmlFor="availableCopies" className="font-semibold text-gray-800">{t("books.availableCopies")} *</Label>
-        <Input
-          id="availableCopies"
-          type="number"
-          min="0"
-          {...form.register("availableCopies", { valueAsNumber: true })}
-          placeholder={t("books.availableCopies")}
-          className="rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition"
-        />
-        {form.formState.errors.availableCopies && <p className="text-xs text-red-500 mt-0.5">{form.formState.errors.availableCopies.message}</p>}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
+        <div className="flex flex-col gap-2">
+          <Label htmlFor="availableCopies" className="font-semibold text-gray-800">{t("books.availableCopies")} *</Label>
+          <Input
+            id="availableCopies"
+            type="number"
+            min="0"
+            {...form.register("availableCopies", { valueAsNumber: true })}
+            placeholder={t("books.availableCopies")}
+            className="rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition"
+          />
+          {form.formState.errors.availableCopies && <p className="text-xs text-red-500 mt-0.5">{form.formState.errors.availableCopies.message}</p>}
+        </div>
+        <div className="flex flex-col gap-2">
+          <Label htmlFor="shelfNumber" className="font-semibold text-gray-800">{t("books.shelfNumber")} *</Label>
+          <Input
+            id="shelfNumber"
+            {...form.register("shelfNumber")}
+            placeholder={t("books.shelfNumber") + ", A1, B2, C3 vb."}
+            className="rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition"
+          />
+          {form.formState.errors.shelfNumber && <p className="text-xs text-red-500 mt-0.5">{form.formState.errors.shelfNumber.message}</p>}
+        </div>
       </div>
 
-      <div className="flex flex-col gap-2">
-        <Label htmlFor="shelfNumber" className="font-semibold text-gray-800">{t("books.shelfNumber")} *</Label>
-        <Input
-          id="shelfNumber"
-          {...form.register("shelfNumber")}
-          placeholder={t("books.shelfNumber") + ", A1, B2, C3 vb."}
-          className="rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition"
-        />
-        {form.formState.errors.shelfNumber && <p className="text-xs text-red-500 mt-0.5">{form.formState.errors.shelfNumber.message}</p>}
-      </div>
-
-      <div className="flex justify-end space-x-3 pt-6">
+      <div className="flex flex-col sm:flex-row justify-end space-y-2 sm:space-y-0 sm:space-x-3 pt-6">
         <Button 
           type="button" 
           variant="outline" 
           onClick={onCancel} 
           size="lg"
-          className="font-medium shadow-sm hover:shadow-md"
+          className="font-medium shadow-sm hover:shadow-md w-full sm:w-auto"
         >
           {t("common.cancel")}
         </Button>
@@ -181,7 +182,7 @@ export function BookForm({ book, onSuccess, onCancel }: BookFormProps) {
           variant="gradient"
           disabled={mutation.isPending} 
           size="lg"
-          className="font-semibold shadow-lg hover:shadow-xl"
+          className="font-semibold shadow-lg hover:shadow-xl w-full sm:w-auto"
         >
           {mutation.isPending ? t("common.saving", "Kaydediliyor...") : isEditing ? t("books.editBook") : t("books.addBook")}
         </Button>

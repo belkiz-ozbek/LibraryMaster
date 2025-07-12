@@ -348,6 +348,7 @@
 }
 
 /* Responsive utilities */
+/* Mobile touch-friendly improvements */
 @media (max-width: 768px) {
   .mobile-hide {
     @apply hidden;
@@ -355,6 +356,54 @@
   
   .mobile-full {
     @apply w-full;
+  }
+  
+  .mobile-text-sm {
+    @apply text-sm;
+  }
+  
+  .mobile-p-4 {
+    @apply p-4;
+  }
+  
+  .mobile-gap-4 {
+    @apply gap-4;
+  }
+  
+  /* Touch-friendly buttons */
+  button, [role="button"] {
+    min-height: 44px;
+    min-width: 44px;
+  }
+  
+  /* Better spacing for mobile */
+  .mobile-space-y-4 > * + * {
+    margin-top: 1rem;
+  }
+  
+  /* Improved form spacing */
+  .mobile-form-space > * + * {
+    margin-top: 1.5rem;
+  }
+}
+
+@media (max-width: 640px) {
+  .sm-hide {
+    @apply hidden;
+  }
+  
+  .sm-text-xs {
+    @apply text-xs;
+  }
+  
+  .sm-p-2 {
+    @apply p-2;
+  }
+  
+  /* Even smaller touch targets for very small screens */
+  button, [role="button"] {
+    min-height: 40px;
+    min-width: 40px;
   }
 }
 

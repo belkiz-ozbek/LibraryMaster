@@ -526,20 +526,20 @@ export default function Borrowing() {
       {/* Quick Stats */}
       <motion.div variants={itemVariants} className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <Card>
-          <CardContent className="p-6">
+          <CardContent className="min-h-[60px] sm:min-h-[90px] p-2 sm:p-4">
             <div className="flex items-center">
-              <HandHeart className="h-8 w-8 text-primary mr-3" />
+              <HandHeart className="h-7 w-7 sm:h-8 sm:w-8 text-primary mr-2 sm:mr-3" />
               <div>
-                <p className="text-2xl font-bold text-on-surface">
+                <p className="text-lg sm:text-2xl font-bold text-on-surface">
                   {allActiveBorrowings.length}
                 </p>
-                <p className="text-sm text-text-muted">{t("borrowing.activeBorrowings")}</p>
+                <p className="text-xs sm:text-sm text-text-muted">{t("borrowing.activeBorrowings")}</p>
               </div>
             </div>
           </CardContent>
         </Card>
         <Card>
-          <CardContent className="p-6">
+          <CardContent className="min-h-[60px] sm:min-h-[90px] p-2 sm:p-4">
             <div className="flex items-center">
               <Clock className="h-8 w-8 text-accent mr-3" />
               <div>
@@ -555,7 +555,7 @@ export default function Borrowing() {
           </CardContent>
         </Card>
         <Card>
-          <CardContent className="p-6">
+          <CardContent className="min-h-[60px] sm:min-h-[90px] p-2 sm:p-4">
             <div className="flex items-center">
               <AlertTriangle className="h-8 w-8 text-destructive mr-3" />
               <div>

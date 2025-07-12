@@ -445,8 +445,8 @@ export default function Statistics() {
       </motion.div>
 
       {/* Main Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <motion.div variants={itemVariants} className="h-full">
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 sm:gap-6">
+        <motion.div variants={itemVariants} className="h-full w-full">
           <StatsCard
             title={t("statistics.totalBooks")}
             value={statsData.totalBooks}
@@ -456,7 +456,7 @@ export default function Statistics() {
             iconColor="bg-primary/10 text-primary"
           />
         </motion.div>
-        <motion.div variants={itemVariants} className="h-full">
+        <motion.div variants={itemVariants} className="h-full w-full">
           <StatsCard
             title={t("statistics.activeMembers")}
             value={statsData.totalUsers}
@@ -466,7 +466,7 @@ export default function Statistics() {
             iconColor="bg-secondary/10 text-secondary"
           />
         </motion.div>
-        <motion.div variants={itemVariants}>
+        <motion.div variants={itemVariants} className="h-full w-full">
           <StatsCard
             title={t("statistics.activeBorrowings")}
             value={statsData.activeBorrowings}
@@ -476,7 +476,7 @@ export default function Statistics() {
             iconColor="bg-accent/10 text-accent"
           />
         </motion.div>
-        <motion.div variants={itemVariants} className="h-full">
+        <motion.div variants={itemVariants} className="h-full w-full">
           <StatsCard
             title={t("statistics.onTimeReturns")}
             value={`${onTimeRate.toFixed(0)}%`}
@@ -491,7 +491,7 @@ export default function Statistics() {
       {/* Additional Metrics */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <Card className="h-full">
-          <CardContent className="p-6 h-full flex items-center">
+          <CardContent className="min-h-[60px] sm:min-h-[90px] p-2 sm:p-4 h-full flex items-center">
             <div className="flex items-center w-full">
               <TrendingUp className="h-8 w-8 text-accent mr-3 flex-shrink-0" />
               <div>
@@ -504,7 +504,7 @@ export default function Statistics() {
           </CardContent>
         </Card>
         <Card className="h-full">
-          <CardContent className="p-6 h-full flex items-center">
+          <CardContent className="min-h-[60px] sm:min-h-[90px] p-2 sm:p-4 h-full flex items-center">
             <div className="flex items-center w-full">
               <Star className="h-8 w-8 text-accent mr-3 flex-shrink-0" />
               <div>
@@ -517,7 +517,7 @@ export default function Statistics() {
           </CardContent>
         </Card>
         <Card className="h-full">
-          <CardContent className="p-6 h-full flex items-center">
+          <CardContent className="min-h-[60px] sm:min-h-[90px] p-2 sm:p-4 h-full flex items-center">
             <div className="flex items-center w-full">
               <Award className="h-8 w-8 text-secondary mr-3 flex-shrink-0" />
               <div>

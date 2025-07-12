@@ -326,15 +326,15 @@ export default function Dashboard() {
                 whileTap={{ scale: 0.98 }}
                 transition={{ duration: 0.2 }}
               >
-                <Link to="/books?action=add" className="block">
-                  <div className="group relative bg-white rounded-2xl p-6 border border-gray-100 hover:border-blue-200 transition-all duration-300 hover:shadow-lg hover:shadow-blue-500/20">
-                    <div className="flex items-center gap-4">
+                <Link to="/books?action=add" className="block h-full">
+                  <div className="group relative bg-white rounded-2xl border border-gray-100 hover:border-blue-200 transition-all duration-300 hover:shadow-lg hover:shadow-blue-500/20 min-h-[70px] sm:min-h-[90px] h-full flex flex-col justify-center p-2 sm:p-4">
+                    <div className="flex items-center gap-2 sm:gap-3">
                       <div className="relative">
-                        <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center shadow-lg shadow-blue-500/30 group-hover:shadow-blue-500/50 transition-all duration-300">
-                          <Plus className="h-6 w-6 text-white" />
+                        <div className="w-8 h-8 sm:w-10 sm:h-10 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center shadow-lg shadow-blue-500/30 group-hover:shadow-blue-500/50 transition-all duration-300">
+                          <Plus className="h-4 w-4 sm:h-5 sm:w-5 text-white" />
                         </div>
                         <motion.div
-                          className="absolute -top-1 -right-1 w-3 h-3 bg-emerald-400 rounded-full"
+                          className="absolute -top-1 -right-1 w-2 h-2 sm:w-2.5 sm:h-2.5 bg-emerald-400 rounded-full"
                           animate={{
                             scale: [1, 1.2, 1],
                             opacity: [0.7, 1, 0.7]
@@ -343,8 +343,8 @@ export default function Dashboard() {
                         />
                       </div>
                       <div className="flex-1">
-                        <h4 className="font-semibold text-gray-900 text-sm mb-1">{t("books.addBook")}</h4>
-                        <p className="text-xs text-gray-500 leading-tight">Yeni kitap ekle</p>
+                        <h4 className="font-semibold text-gray-900 text-xs sm:text-sm mb-0.5">{t("books.addBook")}</h4>
+                        <p className="text-[10px] sm:text-xs text-gray-500 leading-tight">Yeni kitap ekle</p>
                       </div>
                     </div>
                   </div>
@@ -357,15 +357,15 @@ export default function Dashboard() {
                 whileTap={{ scale: 0.98 }}
                 transition={{ duration: 0.2 }}
               >
-                <Link to="/members?action=add" className="block">
-                  <div className="group relative bg-white rounded-2xl p-6 border border-gray-100 hover:border-green-200 transition-all duration-300 hover:shadow-lg hover:shadow-green-500/20">
-                    <div className="flex items-center gap-4">
+                <Link to="/members?action=add" className="block h-full">
+                  <div className="group relative bg-white rounded-2xl border border-gray-100 hover:border-green-200 transition-all duration-300 hover:shadow-lg hover:shadow-green-500/20 min-h-[70px] sm:min-h-[90px] h-full flex flex-col justify-center p-2 sm:p-4">
+                    <div className="flex items-center gap-2 sm:gap-3">
                       <div className="relative">
-                        <div className="w-12 h-12 bg-gradient-to-br from-green-500 to-emerald-600 rounded-xl flex items-center justify-center shadow-lg shadow-green-500/30 group-hover:shadow-green-500/50 transition-all duration-300">
-                          <UserPlus className="h-6 w-6 text-white" />
+                        <div className="w-8 h-8 sm:w-10 sm:h-10 bg-gradient-to-br from-green-500 to-emerald-600 rounded-xl flex items-center justify-center shadow-lg shadow-green-500/30 group-hover:shadow-green-500/50 transition-all duration-300">
+                          <UserPlus className="h-4 w-4 sm:h-5 sm:w-5 text-white" />
                         </div>
                         <motion.div
-                          className="absolute -top-1 -right-1 w-3 h-3 bg-blue-400 rounded-full"
+                          className="absolute -top-1 -right-1 w-2 h-2 sm:w-2.5 sm:h-2.5 bg-blue-400 rounded-full"
                           animate={{
                             scale: [1, 1.2, 1],
                             opacity: [0.7, 1, 0.7]
@@ -374,8 +374,8 @@ export default function Dashboard() {
                         />
                       </div>
                       <div className="flex-1">
-                        <h4 className="font-semibold text-gray-900 text-sm mb-1">{t("members.addMember")}</h4>
-                        <p className="text-xs text-gray-500 leading-tight">Yeni üye kaydet</p>
+                        <h4 className="font-semibold text-gray-900 text-xs sm:text-sm mb-0.5">{t("members.addMember")}</h4>
+                        <p className="text-[10px] sm:text-xs text-gray-500 leading-tight">Yeni üye kaydet</p>
                       </div>
                     </div>
                   </div>
@@ -388,15 +388,15 @@ export default function Dashboard() {
                 whileTap={{ scale: 0.98 }}
                 transition={{ duration: 0.2 }}
               >
-                <Link to="/borrowing?action=add" className="block">
-                  <div className="group relative bg-white rounded-2xl p-6 border border-gray-100 hover:border-orange-200 transition-all duration-300 hover:shadow-lg hover:shadow-orange-500/20">
-                    <div className="flex items-center gap-4">
+                <Link to="/borrowing?action=add" className="block h-full">
+                  <div className="group relative bg-white rounded-2xl border border-gray-100 hover:border-orange-200 transition-all duration-300 hover:shadow-lg hover:shadow-orange-500/20 min-h-[70px] sm:min-h-[90px] h-full flex flex-col justify-center p-2 sm:p-4">
+                    <div className="flex items-center gap-2 sm:gap-3">
                       <div className="relative">
-                        <div className="w-12 h-12 bg-gradient-to-br from-orange-500 to-amber-600 rounded-xl flex items-center justify-center shadow-lg shadow-orange-500/30 group-hover:shadow-orange-500/50 transition-all duration-300">
-                          <BarChart3 className="h-6 w-6 text-white" />
+                        <div className="w-8 h-8 sm:w-10 sm:h-10 bg-gradient-to-br from-orange-500 to-amber-600 rounded-xl flex items-center justify-center shadow-lg shadow-orange-500/30 group-hover:shadow-orange-500/50 transition-all duration-300">
+                          <BarChart3 className="h-4 w-4 sm:h-5 sm:w-5 text-white" />
                         </div>
                         <motion.div
-                          className="absolute -top-1 -right-1 w-3 h-3 bg-purple-400 rounded-full"
+                          className="absolute -top-1 -right-1 w-2 h-2 sm:w-2.5 sm:h-2.5 bg-purple-400 rounded-full"
                           animate={{
                             scale: [1, 1.2, 1],
                             opacity: [0.7, 1, 0.7]
@@ -405,8 +405,8 @@ export default function Dashboard() {
                         />
                       </div>
                       <div className="flex-1">
-                        <h4 className="font-semibold text-gray-900 text-sm mb-1">{t("dashboard.quickBorrow")}</h4>
-                        <p className="text-xs text-gray-500 leading-tight">Kitap ödünç al</p>
+                        <h4 className="font-semibold text-gray-900 text-xs sm:text-sm mb-0.5">{t("dashboard.quickBorrow")}</h4>
+                        <p className="text-[10px] sm:text-xs text-gray-500 leading-tight">Kitap ödünç al</p>
                       </div>
                     </div>
                   </div>
@@ -419,15 +419,15 @@ export default function Dashboard() {
                 whileTap={{ scale: 0.98 }}
                 transition={{ duration: 0.2 }}
               >
-                <Link to="/returns" className="block">
-                  <div className="group relative bg-white rounded-2xl p-6 border border-gray-100 hover:border-red-200 transition-all duration-300 hover:shadow-lg hover:shadow-red-500/20">
-                    <div className="flex items-center gap-4">
+                <Link to="/returns" className="block h-full">
+                  <div className="group relative bg-white rounded-2xl border border-gray-100 hover:border-red-200 transition-all duration-300 hover:shadow-lg hover:shadow-red-500/20 min-h-[70px] sm:min-h-[90px] h-full flex flex-col justify-center p-2 sm:p-4">
+                    <div className="flex items-center gap-2 sm:gap-3">
                       <div className="relative">
-                        <div className="w-12 h-12 bg-gradient-to-br from-red-500 to-pink-600 rounded-xl flex items-center justify-center shadow-lg shadow-red-500/30 group-hover:shadow-red-500/50 transition-all duration-300">
-                          <Undo2 className="h-6 w-6 text-white" />
+                        <div className="w-8 h-8 sm:w-10 sm:h-10 bg-gradient-to-br from-red-500 to-pink-600 rounded-xl flex items-center justify-center shadow-lg shadow-red-500/30 group-hover:shadow-red-500/50 transition-all duration-300">
+                          <Undo2 className="h-4 w-4 sm:h-5 sm:w-5 text-white" />
                         </div>
                         <motion.div
-                          className="absolute -top-1 -right-1 w-3 h-3 bg-yellow-400 rounded-full"
+                          className="absolute -top-1 -right-1 w-2 h-2 sm:w-2.5 sm:h-2.5 bg-yellow-400 rounded-full"
                           animate={{
                             scale: [1, 1.2, 1],
                             opacity: [0.7, 1, 0.7]
@@ -436,8 +436,8 @@ export default function Dashboard() {
                         />
                       </div>
                       <div className="flex-1">
-                        <h4 className="font-semibold text-gray-900 text-sm mb-1">{t("dashboard.processReturn")}</h4>
-                        <p className="text-xs text-gray-500 leading-tight">Kitap iade et</p>
+                        <h4 className="font-semibold text-gray-900 text-xs sm:text-sm mb-0.5">{t("dashboard.processReturn")}</h4>
+                        <p className="text-[10px] sm:text-xs text-gray-500 leading-tight">Kitap iade et</p>
                       </div>
                     </div>
                   </div>

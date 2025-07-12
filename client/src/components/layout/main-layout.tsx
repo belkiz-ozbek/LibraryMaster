@@ -56,15 +56,15 @@ export default function MainLayout({ children }: MainLayoutProps) {
         <DrawerTrigger asChild>
           <MobileMenuButton onOpen={() => setOpen(true)} />
         </DrawerTrigger>
-        <DrawerContent className="p-0 max-w-xs">
-          <ModernSidebar />
+        <DrawerContent className="p-0 max-w-xs w-full h-full">
+          <ModernSidebar isDrawer={true} />
         </DrawerContent>
       </Drawer>
       
       {/* Main Content */}
       <main className="flex-1 flex flex-col overflow-hidden">
         <Header />
-        <div className="flex-1 overflow-auto p-6">
+        <div className="flex-1 overflow-auto p-4 sm:p-6">
           {children}
         </div>
         <Footer />
