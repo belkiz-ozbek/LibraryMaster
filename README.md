@@ -269,9 +269,9 @@ Bu proje MIT lisansı altında lisanslanmıştır. Detaylar için `LICENSE` dosy
 
 ## 📞 İletişim
 
-Proje Sahibi - [@yourusername](https://github.com/yourusername)
+Proje Sahibi - (https://github.com/belkiz-ozbek)
 
-Proje Linki: [https://github.com/yourusername/LibraryMaster](https://github.com/yourusername/LibraryMaster)
+Proje Linki: (https://github.com/belkiz-ozbek/LibraryMaster)
 
 ## 🙏 Teşekkürler
 
