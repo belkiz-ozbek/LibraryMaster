@@ -68,13 +68,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
     saveUninitialized: false,
     name: 'libraryms.sid', // Custom session name
     cookie: {
-      secure: process.env.NODE_ENV === 'production', // production'da true
+      secure: true,
       httpOnly: true,
       maxAge: 24 * 60 * 60 * 1000, // 24 hours
-      sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax', // cross-site ise 'none'
-      // domain: process.env.NODE_ENV === 'production' ? '.railway.app' : undefined // production'da domain ekle
+      sameSite: 'none',
+      domain: '.railway.app'
     },
-    // Add rolling sessions for better security
     rolling: true
   }));
 
