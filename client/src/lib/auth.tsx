@@ -16,6 +16,7 @@ interface AuthContextType {
   isLoading: boolean;
   checkAuth: () => Promise<void>;
   testSession: () => Promise<void>;
+  token: string | null;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -23,6 +24,7 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 // Local storage keys
 const USER_STORAGE_KEY = 'libraryms_user';
 const AUTH_CHECKED_KEY = 'libraryms_auth_checked';
+const TOKEN_STORAGE_KEY = 'libraryms_token';
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(() => {
@@ -54,63 +56,51 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   });
 
+  const [token, setToken] = useState<string | null>(() => {
+    try {
+      return localStorage.getItem(TOKEN_STORAGE_KEY) || null;
+    } catch {
+      return null;
+    }
+  });
+
   const checkAuth = useCallback(async () => {
     if (hasCheckedAuth) {
-      // If we've already checked auth, don't show loading
       setIsLoading(false);
       return;
     }
-    
     try {
       setIsLoading(true);
-      
-      console.log("[Auth] Checking authentication...");
-      
-      // First, let's check the debug endpoint
-      try {
-        const debugResponse = await fetch("/api/debug/auth", {
-          credentials: "include",
-        });
-        const debugData = await debugResponse.json();
-        console.log("[Auth] Debug info:", debugData);
-      } catch (debugError) {
-        console.log("[Auth] Debug endpoint failed:", debugError);
+      const token = localStorage.getItem(TOKEN_STORAGE_KEY);
+      if (!token) {
+        setUser(null);
+        setIsLoading(false);
+        setHasCheckedAuth(true);
+        localStorage.removeItem(USER_STORAGE_KEY);
+        return;
       }
-    
       const response = await fetch("/api/auth/me", {
-        credentials: "include",
         headers: {
+          "Authorization": `Bearer ${token}`,
           "Content-Type": "application/json",
         },
       });
-      
-      console.log("[Auth] /api/auth/me response:", {
-        status: response.status,
-        statusText: response.statusText,
-        headers: Object.fromEntries(response.headers.entries())
-      });
-      
       if (response.ok) {
         const data = await response.json();
-        console.log("[Auth] User data received:", data);
         setUser(data.user);
-        // Store user in localStorage
         localStorage.setItem(USER_STORAGE_KEY, JSON.stringify(data.user));
       } else {
-        console.log("[Auth] Authentication failed, status:", response.status);
         setUser(null);
-        // Clear user from localStorage
         localStorage.removeItem(USER_STORAGE_KEY);
+        localStorage.removeItem(TOKEN_STORAGE_KEY);
       }
     } catch (error) {
-      console.error("Auth check failed:", error);
       setUser(null);
-      // Clear user from localStorage on error
       localStorage.removeItem(USER_STORAGE_KEY);
+      localStorage.removeItem(TOKEN_STORAGE_KEY);
     } finally {
       setIsLoading(false);
       setHasCheckedAuth(true);
-      // Mark that we've checked auth in this session
       localStorage.setItem(AUTH_CHECKED_KEY, 'true');
     }
   }, [hasCheckedAuth]);
@@ -137,8 +127,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
       const data = await response.json();
       setUser(data.user);
+      setToken(data.token);
       // Store user in localStorage
       localStorage.setItem(USER_STORAGE_KEY, JSON.stringify(data.user));
+      localStorage.setItem(TOKEN_STORAGE_KEY, data.token);
       return data.user;
     } finally {
       setIsLoading(false);
@@ -164,10 +156,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const logout = useCallback(async () => {
     try {
-      await fetch("/api/auth/logout", { method: "POST" });
       setUser(null);
+      setToken(null);
       // Clear user from localStorage
       localStorage.removeItem(USER_STORAGE_KEY);
+      localStorage.removeItem(TOKEN_STORAGE_KEY);
       // Reset auth check flag
       localStorage.removeItem(AUTH_CHECKED_KEY);
       setHasCheckedAuth(false);
@@ -190,7 +183,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   return (
-    <AuthContext.Provider value={{ user, login, signup, logout, isLoading, checkAuth, testSession }}>
+    <AuthContext.Provider value={{ user, login, signup, logout, isLoading, checkAuth, testSession, token }}>
       {children}
     </AuthContext.Provider>
   );

@@ -62,7 +62,7 @@ export default function Returns() {
   const { data: paginatedActiveBorrowings, isLoading: isLoadingActive } = useQuery<PaginatedResponse<BorrowingWithDetails>>({
     queryKey: ["/api/borrowings/active", { page: currentPage, limit: 10 }],
     queryFn: async () => {
-      const res = await fetch(`/api/borrowings/active?page=${currentPage}&limit=10`, { credentials: "include" });
+      const res = await apiRequest("GET", `/api/borrowings/active?page=${currentPage}&limit=10`);
       if (!res.ok) throw new Error("Aktif iadeler yüklenemedi");
       return res.json();
     },
@@ -70,7 +70,7 @@ export default function Returns() {
   const { data: paginatedOverdueBorrowings, isLoading: isLoadingOverdue } = useQuery<PaginatedResponse<BorrowingWithDetails>>({
     queryKey: ["/api/borrowings/overdue", { page: currentPage, limit: 10 }],
     queryFn: async () => {
-      const res = await fetch(`/api/borrowings/overdue?page=${currentPage}&limit=10`, { credentials: "include" });
+      const res = await apiRequest("GET", `/api/borrowings/overdue?page=${currentPage}&limit=10`);
       if (!res.ok) throw new Error("Gecikmiş iadeler yüklenemedi");
       return res.json();
     },

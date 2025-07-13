@@ -1,3 +1,4 @@
+
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import session from "express-session";
@@ -12,6 +13,7 @@ import { books, borrowings, users } from "@shared/schema";
 import { sendVerificationEmail, generateVerificationToken } from "./emailService";
 import path from "path";
 import { fileURLToPath } from "url";
+import jwt from "jsonwebtoken";
 
 // Type declarations for global verification store
 declare global {
@@ -28,31 +30,20 @@ declare global {
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// Auth middleware
+// Auth middleware (JWT)
 function requireAuth(req: any, res: any, next: any) {
-  console.log("[Auth Middleware] Session:", req.session);
-  console.log("[Auth Middleware] Session ID:", req.sessionID);
-  console.log("[Auth Middleware] User ID:", req.session?.userId);
-  
-  if (!req.session.userId) {
-    console.log("[Auth Middleware] No userId in session");
+  const authHeader = req.headers.authorization;
+  if (!authHeader || !authHeader.startsWith("Bearer ")) {
     return res.status(401).json({ message: "Not authenticated" });
   }
-  
-  storage.getUser(req.session.userId)
-    .then(user => {
-      if (!user) {
-        console.log("[Auth Middleware] User not found in database");
-        return res.status(401).json({ message: "Not authenticated" });
-      }
-      console.log("[Auth Middleware] User authenticated:", user.name);
-      req.user = user;
-      next();
-    })
-    .catch(error => {
-      console.error("[Auth Middleware] Error:", error);
-      next(error);
-    });
+  const token = authHeader.split(" ")[1];
+  try {
+    const payload = jwt.verify(token, process.env.JWT_SECRET || 'libraryms-jwt-secret');
+    req.user = payload;
+    next();
+  } catch (err) {
+    return res.status(401).json({ message: "Invalid or expired token" });
+  }
 }
 
 const requireAdmin = async (req: any, res: any, next: any) => {
@@ -113,21 +104,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
       
-      // Set session
-      req.session.userId = user.id;
-      console.log("[Login] Session set for user:", user.id, "Session ID:", req.sessionID);
-      
-      // Save session explicitly
-      req.session.save((err) => {
-        if (err) {
-          console.error("[Login] Session save error:", err);
-          return res.status(500).json({ message: "Session save failed" });
-        }
-        
-        console.log("[Login] Session saved successfully");
-        const { password: _, ...userWithoutPassword } = user;
-        res.json({ user: userWithoutPassword });
-      });
+      // JWT üret
+      const token = jwt.sign(
+        { userId: user.id, email: user.email, name: user.name, isAdmin: user.isAdmin },
+        process.env.JWT_SECRET || 'libraryms-jwt-secret',
+        { expiresIn: "1d" }
+      );
+      const { password: _, ...userWithoutPassword } = user;
+      res.json({ user: userWithoutPassword, token });
     } catch (error) {
       console.error("[Login] Error:", error);
       res.status(500).json({ message: "Giriş başarısız" });

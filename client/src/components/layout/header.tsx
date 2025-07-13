@@ -12,6 +12,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "../ui/dropdown-menu";
+import { apiRequest } from "@/lib/queryClient";
 
 // Types
 interface SearchResult {
@@ -227,8 +228,8 @@ export default function Header() {
     try {
       console.log('Searching for:', searchQuery);
       const [booksRes, usersRes] = await Promise.all([
-        fetch(`/api/books/search?q=${encodeURIComponent(searchQuery)}`),
-        fetch(`/api/users/search?q=${encodeURIComponent(searchQuery)}`),
+        apiRequest("GET", `/api/books/search?q=${encodeURIComponent(searchQuery)}`),
+        apiRequest("GET", `/api/users/search?q=${encodeURIComponent(searchQuery)}`),
       ]);
       
       console.log('Books response status:', booksRes.status);
@@ -269,8 +270,8 @@ export default function Header() {
     const timeoutId = setTimeout(async () => {
       try {
         const [booksRes, usersRes] = await Promise.all([
-          fetch(`/api/books/search?q=${encodeURIComponent(searchQuery)}`),
-          fetch(`/api/users/search?q=${encodeURIComponent(searchQuery)}`),
+          apiRequest("GET", `/api/books/search?q=${encodeURIComponent(searchQuery)}`),
+          apiRequest("GET", `/api/users/search?q=${encodeURIComponent(searchQuery)}`),
         ]);
         if (!booksRes.ok || !usersRes.ok) throw new Error('Search request failed');
         const [books, users] = await Promise.all([

@@ -113,7 +113,7 @@ export default function Books() {
     queryKey: ["/api/books", { page: currentPage, limit: 10 }],
     enabled: searchQuery.length === 0,
     queryFn: async () => {
-      const res = await fetch(`/api/books?page=${currentPage}&limit=10`, { credentials: "include" });
+      const res = await apiRequest("GET", `/api/books?page=${currentPage}&limit=10`);
       if (!res.ok) throw new Error("Kitaplar yüklenemedi");
       return res.json();
     },

@@ -88,7 +88,7 @@ export default function Members() {
     queryKey: ["/api/users", { page: currentPage, limit: 10, filter: statusFilter }],
     enabled: searchQuery.length === 0,
     queryFn: async () => {
-      const res = await fetch(`/api/users?page=${currentPage}&limit=10`, { credentials: "include" });
+      const res = await apiRequest("GET", `/api/users?page=${currentPage}&limit=10`);
       if (!res.ok) throw new Error("Üyeler yüklenemedi");
       return res.json();
     },
@@ -99,7 +99,7 @@ export default function Members() {
     queryKey: ["/api/users/search", { q: searchQuery, page: currentPage, filter: statusFilter }],
     enabled: searchQuery.length > 0,
     queryFn: async () => {
-      const res = await fetch(`/api/users/search?q=${encodeURIComponent(searchQuery)}&page=${currentPage}&limit=10`, { credentials: "include" });
+      const res = await apiRequest("GET", `/api/users/search?q=${encodeURIComponent(searchQuery)}&page=${currentPage}&limit=10`);
       if (!res.ok) throw new Error("Arama başarısız");
       return res.json();
     },
