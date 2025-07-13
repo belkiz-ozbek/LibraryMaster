@@ -285,3 +285,21 @@ Proje Linki: [https://github.com/belkiz-ozbek/LibraryMaster](https://github.com/
 ---
 
 ⭐ Bu projeyi beğendiyseniz yıldız vermeyi unutmayın! 
+
+# Railway Deploy Talimatı
+
+## Build Komutu
+
+```
+cd client && npm install && npm run build && cd .. && npm run build
+```
+
+## Start Komutu
+
+```
+npm start
+```
+
+- Frontend build çıktısı otomatik olarak `dist/public` klasörüne yazılır.
+- Express backend productionda bu klasörü serve eder.
+- Tüm doğrulama ve yönlendirme linklerinde ana domaini kullanın: `https://libraryms-production.up.railway.app` 
