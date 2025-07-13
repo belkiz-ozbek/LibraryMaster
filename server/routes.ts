@@ -318,6 +318,56 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Frontend'den gelen doğrulama isteği için POST endpoint
+  app.post("/api/auth/verify-email", async (req, res) => {
+    try {
+      const { token } = req.body;
+      if (!token || typeof token !== 'string') {
+        return res.status(400).json({ message: "Invalid verification token" });
+      }
+      global.verificationStore = global.verificationStore || new Map();
+      const verificationData = global.verificationStore.get(token);
+      if (!verificationData) {
+        return res.status(400).json({ message: "Invalid or expired verification token" });
+      }
+      if (verificationData.expires < new Date()) {
+        global.verificationStore.delete(token);
+        return res.status(400).json({ message: "Verification token has expired" });
+      }
+      const existingUser = await storage.getUserByEmail(verificationData.email);
+      if (existingUser) {
+        global.verificationStore.delete(token);
+        return res.status(400).json({ message: "Bu e-posta adresi zaten kayıtlı. Lütfen farklı bir e-posta adresi kullanın." });
+      }
+      const existingUserByUsername = await storage.getUserByUsername(verificationData.username);
+      if (existingUserByUsername) {
+        global.verificationStore.delete(token);
+        return res.status(400).json({ message: "This username is already taken" });
+      }
+      const hashedPassword = await bcrypt.hash(verificationData.password, 10);
+      const newUser = await storage.createUser({
+        name: verificationData.name,
+        username: verificationData.username,
+        email: verificationData.email,
+        password: hashedPassword,
+        isAdmin: false,
+        membershipDate: new Date(),
+        emailVerified: true,
+        emailVerificationToken: null,
+        emailVerificationExpires: null
+      });
+      global.verificationStore.delete(token);
+      const { password: _, ...userWithoutPassword } = newUser;
+      res.status(201).json({ 
+        message: "Account created successfully. You can now log in.",
+        user: userWithoutPassword 
+      });
+    } catch (error) {
+      console.error("[API VERIFY-EMAIL] Error:", error);
+      res.status(500).json({ message: "Failed to verify email" });
+    }
+  });
+
   app.post("/api/auth/logout", (req, res) => {
     req.session.destroy((err: any) => {
       if (err) {

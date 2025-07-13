@@ -17,7 +17,7 @@ export function generateVerificationToken(): string {
 
 // Email doğrulama maili gönder
 export async function sendVerificationEmail(email: string, name: string, token: string): Promise<void> {
-  const verificationUrl = `${process.env.BACKEND_URL || 'http://localhost:3000'}/api/auth/verify-email?token=${token}`;
+  const verificationUrl = `${process.env.FRONTEND_URL || 'http://localhost:3000'}/verify-email?token=${token}`;
   
   const mailOptions = {
     from: process.env.EMAIL_USER,

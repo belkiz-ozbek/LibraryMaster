@@ -28,14 +28,44 @@ export default function VerifyEmailPage() {
   useEffect(() => {
     const verifyEmail = async () => {
       const urlParams = new URLSearchParams(window.location.search);
+      const tokenParam = urlParams.get('token');
+      if (tokenParam) {
+        setIsLoading(true);
+        setToken(tokenParam);
+        try {
+          const response = await fetch("/api/auth/verify-email", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ token: tokenParam })
+          });
+          const data = await response.json();
+          if (response.ok) {
+            setIsVerified(true);
+            setError(null);
+            sessionStorage.removeItem('pendingUserData');
+            toast({
+              title: t("verifyEmail.successTitle"),
+              description: t("verifyEmail.successDesc"),
+            });
+          } else {
+            setIsVerified(false);
+            setError(data.message || t("verifyEmail.errorGeneric"));
+            sessionStorage.removeItem('pendingUserData');
+          }
+        } catch (err) {
+          setIsVerified(false);
+          setError(t("verifyEmail.errorServerError"));
+        }
+        setIsLoading(false);
+        return;
+      }
+      
       const successParam = urlParams.get('success');
       const errorParam = urlParams.get('error');
       const emailParam = urlParams.get('email');
       const pendingParam = urlParams.get('pending');
-      const tokenParam = urlParams.get('token');
       
       if (emailParam) setEmail(emailParam);
-      if (tokenParam) setToken(tokenParam);
       
       // Check if this is a pending registration
       if (pendingParam === 'true') {
