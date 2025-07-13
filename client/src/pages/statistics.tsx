@@ -499,7 +499,7 @@ export default function Statistics() {
           <StatsCard
             title={t("statistics.activeBorrowings")}
             value={statsData.activeBorrowings}
-            change={`%${utilizationRate.toFixed(0)} kullanım`}
+            change={t("statistics.utilizationRate", { rate: utilizationRate.toFixed(0) })}
             changeType="neutral"
             icon={<Activity size={20} />}
             iconColor="bg-accent/10 text-accent"

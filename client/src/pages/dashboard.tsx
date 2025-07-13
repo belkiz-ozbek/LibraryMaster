@@ -297,7 +297,7 @@ export default function Dashboard() {
       render: (value: string) => {
         const daysOverdue = Math.floor((Date.now() - new Date(value).getTime()) / (1000 * 60 * 60 * 24));
         return (
-          <span className="font-bold text-destructive text-lg">{daysOverdue}</span>
+          <span className="font-bold text-destructive text-lg">{t("dashboard.days", { count: daysOverdue })}</span>
         );
       },
     },
@@ -319,7 +319,6 @@ export default function Dashboard() {
                 <div className="w-1 h-6 bg-gradient-to-b from-blue-500 to-purple-600 rounded-full"></div>
                 <h3 className="text-lg font-semibold text-gray-800">{t("dashboard.quickActions")}</h3>
               </div>
-              <div className="text-sm text-gray-500">Hızlı erişim</div>
             </div>
             
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
@@ -347,7 +346,7 @@ export default function Dashboard() {
                       </div>
                       <div className="flex-1">
                         <h4 className="font-semibold text-gray-900 text-xs sm:text-sm mb-0.5">{t("books.addBook")}</h4>
-                        <p className="text-[10px] sm:text-xs text-gray-500 leading-tight">Yeni kitap ekle</p>
+                        <p className="text-[10px] sm:text-xs text-gray-500 leading-tight">{t("dashboard.addBookDesc")}</p>
                       </div>
                     </div>
                   </div>
@@ -378,7 +377,7 @@ export default function Dashboard() {
                       </div>
                       <div className="flex-1">
                         <h4 className="font-semibold text-gray-900 text-xs sm:text-sm mb-0.5">{t("members.addMember")}</h4>
-                        <p className="text-[10px] sm:text-xs text-gray-500 leading-tight">Yeni üye kaydet</p>
+                        <p className="text-[10px] sm:text-xs text-gray-500 leading-tight">{t("dashboard.addMemberDesc")}</p>
                       </div>
                     </div>
                   </div>
@@ -409,7 +408,7 @@ export default function Dashboard() {
                       </div>
                       <div className="flex-1">
                         <h4 className="font-semibold text-gray-900 text-xs sm:text-sm mb-0.5">{t("dashboard.quickBorrow")}</h4>
-                        <p className="text-[10px] sm:text-xs text-gray-500 leading-tight">Kitap ödünç al</p>
+                        <p className="text-[10px] sm:text-xs text-gray-500 leading-tight">{t("dashboard.quickBorrowDesc")}</p>
                       </div>
                     </div>
                   </div>
@@ -440,7 +439,7 @@ export default function Dashboard() {
                       </div>
                       <div className="flex-1">
                         <h4 className="font-semibold text-gray-900 text-xs sm:text-sm mb-0.5">{t("dashboard.processReturn")}</h4>
-                        <p className="text-[10px] sm:text-xs text-gray-500 leading-tight">Kitap iade et</p>
+                        <p className="text-[10px] sm:text-xs text-gray-500 leading-tight">{t("dashboard.processReturnDesc")}</p>
                       </div>
                     </div>
                   </div>
@@ -507,7 +506,7 @@ export default function Dashboard() {
             title={t("dashboard.booksBorrowed")}
             value={stats?.activeBorrowings || 0}
             change={typeof stats?.avgBorrowDays === 'number' ? 
-              `${stats.avgBorrowDays} gün` : 
+              t('dashboard.days', { count: stats?.avgBorrowDays }) : 
               t("dashboard.avgDays")
             }
             changeType="neutral"
