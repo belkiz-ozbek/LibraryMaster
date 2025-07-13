@@ -347,7 +347,7 @@ export const en = {
     analyticsDesc: "View library analytics and performance metrics",
     totalCopies: "Total Copies: {{count}}",
     avgRating: "Avg. rating: {{rating}}/5",
-    utilizationRate: "Collection Utilization Rate: %{{rate}}",
+    utilizationRate: "Utilization: %{{rate}}",
     onTimeReturns: "On-Time Returns",
     returnsCount: "{{onTime}}/{{total}} returns",
     collectionUtilization: "Collection Utilization",
