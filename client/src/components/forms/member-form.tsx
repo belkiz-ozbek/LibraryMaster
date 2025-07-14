@@ -118,160 +118,163 @@ export function MemberForm({ member, onSuccess, onCancel }: MemberFormProps) {
   };
 
   return (
-    <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6 p-2">
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div className="flex flex-col gap-2">
-          <Label htmlFor="firstName" className="font-semibold text-gray-800">{t('members.form.firstName')} *</Label>
-          <Input
-            id="firstName"
-            {...form.register("firstName")}
-            onChange={handleFirstNameChange}
-            onBlur={handleFirstNameBlur}
-            className="rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition capitalize"
-          />
-          {form.formState.errors.firstName && <p className="text-xs text-red-500 mt-0.5">{form.formState.errors.firstName.message}</p>}
+    <div className="w-full p-6">
+      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+        {/* First Name and Last Name - Two per row */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+          <div className="flex flex-col gap-2">
+            <Label htmlFor="firstName" className="font-semibold text-gray-800">{t('members.form.firstName')} *</Label>
+            <Input
+              id="firstName"
+              {...form.register("firstName")}
+              onChange={handleFirstNameChange}
+              onBlur={handleFirstNameBlur}
+              className="rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition capitalize"
+            />
+            {form.formState.errors.firstName && <p className="text-xs text-red-500 mt-0.5">{form.formState.errors.firstName.message}</p>}
+          </div>
+          <div className="flex flex-col gap-2">
+            <Label htmlFor="lastName" className="font-semibold text-gray-800">{t('members.form.lastName')} *</Label>
+            <Input
+              id="lastName"
+              {...form.register("lastName")}
+              onChange={handleLastNameChange}
+              onBlur={handleLastNameBlur}
+              className="rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition capitalize"
+            />
+            {form.formState.errors.lastName && <p className="text-xs text-red-500 mt-0.5">{form.formState.errors.lastName.message}</p>}
+          </div>
         </div>
-        <div className="flex flex-col gap-2">
-          <Label htmlFor="lastName" className="font-semibold text-gray-800">{t('members.form.lastName')} *</Label>
-          <Input
-            id="lastName"
-            {...form.register("lastName")}
-            onChange={handleLastNameChange}
-            onBlur={handleLastNameBlur}
-            className="rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition capitalize"
-          />
-          {form.formState.errors.lastName && <p className="text-xs text-red-500 mt-0.5">{form.formState.errors.lastName.message}</p>}
-        </div>
-      </div>
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div className="flex flex-col gap-2">
-          <Label htmlFor="username" className="font-semibold text-gray-800">{t('members.form.username')} *</Label>
-          <Input
-            id="username"
-            {...form.register("username")}
-            className="rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition"
-          />
-          {form.formState.errors.username && <p className="text-xs text-red-500 mt-0.5">{form.formState.errors.username.message}</p>}
-        </div>
-        <div className="flex flex-col gap-2">
-          <Label htmlFor="email" className="font-semibold text-gray-800">
-            {t('members.form.email')} {form.watch('isAdmin') ? '*' : ''}
-          </Label>
-          <Input
-            id="email"
-            type="email"
-            {...form.register("email")}
-            className="rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition"
-          />
-          {form.formState.errors.email && <p className="text-xs text-red-500 mt-0.5">{form.formState.errors.email.message}</p>}
-        </div>
-        {/* Şifre alanı sadece isAdmin ise göster */}
-        {form.watch('isAdmin') && (
-        <div className="flex flex-col gap-2">
-          <Label htmlFor="password" className="font-semibold text-gray-800">
-            {t('members.form.password')} {isEditing ? `(${t('members.form.passwordHint')})` : "*"}
-          </Label>
-          <Input
-            id="password"
-            type="password"
-            {...form.register("password")}
-            className="rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition"
-          />
-          {form.formState.errors.password && <p className="text-xs text-red-500 mt-0.5">{form.formState.errors.password.message}</p>}
-        </div>
-        )}
-        <div className="flex flex-col gap-2">
-          <Label htmlFor="membershipDate" className="font-semibold text-gray-800">{t('members.form.membershipDate')} *</Label>
-          <Input
-            id="membershipDate"
-            type="date"
-            {...form.register("membershipDate")}
-            value={form.watch("membershipDate") || todayStr}
-            onChange={e => form.setValue("membershipDate", e.target.value)}
-            className="rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition"
-          />
-          {form.formState.errors.membershipDate && <p className="text-xs text-red-500 mt-0.5">{form.formState.errors.membershipDate.message}</p>}
-        </div>
-      </div>
 
-      <div className="flex items-center space-x-3 bg-gray-50 rounded-lg px-4 py-2">
-        <Checkbox
-          id="isAdmin"
-          checked={form.watch("isAdmin")}
-          onCheckedChange={(checked) => form.setValue("isAdmin", checked as boolean)}
-        />
-        <Label htmlFor="isAdmin" className="font-medium text-gray-700">{t('members.form.adminPrivileges')}</Label>
-      </div>
+        {/* Username and Email - Two per row */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+          <div className="flex flex-col gap-2">
+            <Label htmlFor="username" className="font-semibold text-gray-800">{t('members.form.username')} *</Label>
+            <Input
+              id="username"
+              {...form.register("username")}
+              className="rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition"
+            />
+            {form.formState.errors.username && <p className="text-xs text-red-500 mt-0.5">{form.formState.errors.username.message}</p>}
+          </div>
+          <div className="flex flex-col gap-2">
+            <Label htmlFor="email" className="font-semibold text-gray-800">
+              {t('members.form.email')} {form.watch('isAdmin') ? '*' : ''}
+            </Label>
+            <Input
+              id="email"
+              type="email"
+              {...form.register("email")}
+              className="rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition"
+            />
+            {form.formState.errors.email && <p className="text-xs text-red-500 mt-0.5">{form.formState.errors.email.message}</p>}
+          </div>
+        </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        {/* Password and Membership Date - Two per row */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+          {/* Şifre alanı sadece isAdmin ise göster */}
+          {form.watch('isAdmin') && (
+            <div className="flex flex-col gap-2">
+              <Label htmlFor="password" className="font-semibold text-gray-800">
+                {t('members.form.password')} {isEditing ? `(${t('members.form.passwordHint')})` : "*"}
+              </Label>
+              <Input
+                id="password"
+                type="password"
+                {...form.register("password")}
+                className="rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition"
+              />
+              {form.formState.errors.password && <p className="text-xs text-red-500 mt-0.5">{form.formState.errors.password.message}</p>}
+            </div>
+          )}
+          <div className="flex flex-col gap-2">
+            <Label htmlFor="membershipDate" className="font-semibold text-gray-800">{t('members.form.membershipDate')} *</Label>
+            <Input
+              id="membershipDate"
+              type="date"
+              {...form.register("membershipDate")}
+              value={form.watch("membershipDate") || todayStr}
+              onChange={e => form.setValue("membershipDate", e.target.value)}
+              className="rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition"
+            />
+            {form.formState.errors.membershipDate && <p className="text-xs text-red-500 mt-0.5">{form.formState.errors.membershipDate.message}</p>}
+          </div>
+        </div>
+
+        {/* Admin Checkbox */}
+        <div className="flex items-center space-x-3 bg-gray-50 rounded-lg px-4 py-3">
+          <Checkbox
+            id="isAdmin"
+            checked={form.watch("isAdmin")}
+            onCheckedChange={(checked) => form.setValue("isAdmin", checked as boolean)}
+          />
+          <Label htmlFor="isAdmin" className="font-medium text-gray-700">{t('members.form.adminPrivileges')}</Label>
+        </div>
+
+        {/* Admin Rating - Single column */}
+        <div className="grid grid-cols-1 gap-6">
+          <div className="flex flex-col gap-2">
+            <Label htmlFor="adminRating" className="font-semibold text-gray-800">{t('members.form.adminRating')}</Label>
+            <Select
+              value={form.watch("adminRating")?.toString() || "0"}
+              onValueChange={(value) => form.setValue("adminRating", value ? parseInt(value) : undefined)}
+            >
+              <SelectTrigger className="rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition">
+                <SelectValue placeholder={t('members.form.selectRating')} />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="0">{t('members.form.noRating')}</SelectItem>
+                <SelectItem value="1">1 - {t('members.form.ratings.poor')}</SelectItem>
+                <SelectItem value="2">2 - {t('members.form.ratings.fair')}</SelectItem>
+                <SelectItem value="3">3 - {t('members.form.ratings.good')}</SelectItem>
+                <SelectItem value="4">4 - {t('members.form.ratings.veryGood')}</SelectItem>
+                <SelectItem value="5">5 - {t('members.form.ratings.excellent')}</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+        </div>
+
+        {/* Admin Notes - Single column */}
         <div className="flex flex-col gap-2">
-          <Label htmlFor="adminRating" className="font-semibold text-gray-800">{t('members.form.adminRating')}</Label>
-          <Select
-            value={form.watch("adminRating")?.toString() || "0"}
-            onValueChange={(value) => form.setValue("adminRating", value ? parseInt(value) : undefined)}
+          <Label htmlFor="adminNotes" className="font-semibold text-gray-800">{t('members.form.adminNotes')}</Label>
+          <Textarea
+            id="adminNotes"
+            {...form.register("adminNotes")}
+            placeholder={t('members.form.adminNotesPlaceholder')}
+            rows={3}
+            className="rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition"
+          />
+        </div>
+
+        {/* Buttons */}
+        <div className="flex flex-col sm:flex-row justify-end space-y-3 sm:space-y-0 sm:space-x-4 pt-8">
+          <Button 
+            type="button" 
+            variant="outline" 
+            onClick={onCancel} 
+            size="lg"
+            className="font-medium shadow-sm hover:shadow-md w-full sm:w-auto"
           >
-            <SelectTrigger className="rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition">
-              <SelectValue placeholder={t('members.form.selectRating')} />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="0">{t('members.form.noRating')}</SelectItem>
-              <SelectItem value="1">1 - {t('members.form.ratings.poor')}</SelectItem>
-              <SelectItem value="2">2 - {t('members.form.ratings.fair')}</SelectItem>
-              <SelectItem value="3">3 - {t('members.form.ratings.good')}</SelectItem>
-              <SelectItem value="4">4 - {t('members.form.ratings.veryGood')}</SelectItem>
-              <SelectItem value="5">5 - {t('members.form.ratings.excellent')}</SelectItem>
-            </SelectContent>
-          </Select>
+            {t('common.cancel')}
+          </Button>
+          <Button 
+            type="submit" 
+            variant="gradient"
+            disabled={mutation.isPending} 
+            size="lg"
+            className="font-semibold shadow-lg hover:shadow-xl w-full sm:w-auto"
+          >
+            {mutation.isPending ? t("common.saving", "Kaydediliyor...") : isEditing ? t("members.editMember") : t("members.addMember")}
+          </Button>
         </div>
-      </div>
 
-      <div className="flex flex-col gap-2">
-        <Label htmlFor="adminNotes" className="font-semibold text-gray-800">{t('members.form.adminNotes')}</Label>
-        <Textarea
-          id="adminNotes"
-          {...form.register("adminNotes")}
-          placeholder={t('members.form.adminNotesPlaceholder')}
-          rows={3}
-          className="rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition"
-        />
-      </div>
-
-      <div className="flex justify-end space-x-3 pt-6">
-        <Button 
-          type="button" 
-          variant="outline" 
-          onClick={onCancel} 
-          size="lg"
-          className="font-medium shadow-sm hover:shadow-md"
-        >
-          {t('common.cancel')}
-        </Button>
-        <Button 
-          type="submit" 
-          variant="gradientGreen"
-          disabled={mutation.isPending} 
-          size="lg"
-          className="font-semibold shadow-lg hover:shadow-xl"
-        >
-          {mutation.isPending ? t('common.saving') : isEditing ? t('members.form.updateMember') : t('members.form.addMember')}
-        </Button>
-      </div>
-
-      {mutation.isError && (
-        <p className="text-sm text-red-600 mt-2 text-center font-medium">
-          {(() => {
-            const errorMessage = mutation.error?.message || '';
-            // Email hatası kontrolü
-            if (errorMessage.includes('Bu e-posta adresi zaten kullanılıyor') || 
-                errorMessage.includes('already in use') ||
-                errorMessage.includes('400:') && errorMessage.includes('email')) {
-              return t('errors.emailAlreadyExists');
-            }
-            // Genel hata mesajları
-            return errorMessage || t(isEditing ? 'errors.memberUpdateFailed' : 'errors.memberCreateFailed');
-          })()}
-        </p>
-      )}
-    </form>
+        {mutation.isError && (
+          <p className="text-sm text-red-600 mt-4 text-center font-medium">
+            {t("errors.serverError")}
+          </p>
+        )}
+      </form>
+    </div>
   );
 }
