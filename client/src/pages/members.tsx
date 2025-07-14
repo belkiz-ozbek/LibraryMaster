@@ -343,7 +343,7 @@ export default function Members() {
 
       {/* Ortak Dialog (Ekle/Düzenle) */}
       <Dialog open={isFormOpen} onOpenChange={setIsFormOpen}>
-        <DialogContent className="max-w-6xl max-h-[90vh] overflow-y-auto">
+        <DialogContent className="max-w-lg w-full">
           <DialogHeader>
             <DialogTitle>
               {selectedMember ? t('members.form.updateMember') : t('members.form.addMember')}
