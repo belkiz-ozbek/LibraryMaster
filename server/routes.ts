@@ -241,7 +241,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const { token } = req.query;
       if (!token || typeof token !== 'string') {
-        const errorPath = path.resolve(__dirname, "error.html");
+        const errorPath = path.join(process.cwd(), "public", "error.html");
         console.log("[VERIFY-EMAIL] error.html path:", errorPath);
         if (!fs.existsSync(errorPath)) {
           console.error("[VERIFY-EMAIL] error.html bulunamadı:", errorPath);
@@ -252,7 +252,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Get verification data from Redis
       const data = await redis.get(`verify:${token}`);
       if (!data) {
-        const errorPath = path.resolve(__dirname, "error.html");
+        const errorPath = path.join(process.cwd(), "public", "error.html");
         console.log("[VERIFY-EMAIL] error.html path:", errorPath);
         if (!fs.existsSync(errorPath)) {
           console.error("[VERIFY-EMAIL] error.html bulunamadı:", errorPath);
@@ -264,7 +264,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Check if token is expired
       if (verificationData.expires < Date.now()) {
         await redis.del(`verify:${token}`);
-        const errorPath = path.resolve(__dirname, "error.html");
+        const errorPath = path.join(process.cwd(), "public", "error.html");
         console.log("[VERIFY-EMAIL] error.html path:", errorPath);
         if (!fs.existsSync(errorPath)) {
           console.error("[VERIFY-EMAIL] error.html bulunamadı:", errorPath);
@@ -276,7 +276,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const existingUser = await storage.getUserByEmail(verificationData.email);
       if (existingUser) {
         await redis.del(`verify:${token}`);
-        const errorPath = path.resolve(__dirname, "error.html");
+        const errorPath = path.join(process.cwd(), "public", "error.html");
         console.log("[VERIFY-EMAIL] error.html path:", errorPath);
         if (!fs.existsSync(errorPath)) {
           console.error("[VERIFY-EMAIL] error.html bulunamadı:", errorPath);
@@ -287,7 +287,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const existingUserByUsername = await storage.getUserByUsername(verificationData.username);
       if (existingUserByUsername) {
         await redis.del(`verify:${token}`);
-        const errorPath = path.resolve(__dirname, "error.html");
+        const errorPath = path.join(process.cwd(), "public", "error.html");
         console.log("[VERIFY-EMAIL] error.html path:", errorPath);
         if (!fs.existsSync(errorPath)) {
           console.error("[VERIFY-EMAIL] error.html bulunamadı:", errorPath);
@@ -310,7 +310,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         emailVerificationExpires: null
       });
       await redis.del(`verify:${token}`);
-      const successPath = path.resolve(__dirname, "success.html");
+      const successPath = path.join(process.cwd(), "public", "success.html");
       console.log("[VERIFY-EMAIL] success.html path:", successPath);
       if (!fs.existsSync(successPath)) {
         console.error("[VERIFY-EMAIL] success.html bulunamadı:", successPath);
@@ -319,7 +319,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       return res.sendFile(successPath);
     } catch (error) {
       console.error("[VERIFY-EMAIL][REDIS] Email verification error:", error);
-      const errorPath = path.resolve(__dirname, "error.html");
+      const errorPath = path.join(process.cwd(), "public", "error.html");
       console.log("[VERIFY-EMAIL] error.html path:", errorPath);
       if (!fs.existsSync(errorPath)) {
         console.error("[VERIFY-EMAIL] error.html bulunamadı:", errorPath);
