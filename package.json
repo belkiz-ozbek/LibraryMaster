@@ -63,6 +63,7 @@
     "i18next": "25.2.1",
     "i18next-browser-languagedetector": "8.1.0",
     "input-otp": "1.4.2",
+    "ioredis": "^5.6.1",
     "jsonwebtoken": "^9.0.2",
     "lottie-react": "2.4.1",
     "lucide-react": "0.453.0",

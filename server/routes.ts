@@ -14,6 +14,7 @@ import { sendVerificationEmail, generateVerificationToken } from "./emailService
 import path from "path";
 import { fileURLToPath } from "url";
 import jwt from "jsonwebtoken";
+import { redis } from "./redis";
 
 // Type declarations for global verification store
 declare global {
@@ -121,30 +122,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/auth/signup", async (req, res) => {
     try {
       const { name, username, email, password } = req.body;
-      
       // Validate required fields
       if (!name || !username || !email || !password) {
         return res.status(400).json({ message: "Name, username, email, and password are required" });
       }
-      
       // Check if email already exists
       const existingUser = await storage.getUserByEmail(email);
       if (existingUser) {
         return res.status(400).json({ message: "Bu e-posta adresi zaten kayıtlı. Lütfen farklı bir e-posta adresi kullanın." });
       }
-      
       // Check if username already exists
       const existingUserByUsername = await storage.getUserByUsername(username);
       if (existingUserByUsername) {
         return res.status(400).json({ message: "This username is already taken" });
       }
-      
       // Generate verification token
       const verificationToken = generateVerificationToken();
-      const verificationExpires = new Date(Date.now() + 15 * 60 * 1000); // 15 dakika
-      
-      // Store verification data temporarily (in memory or temporary storage)
-      // For now, we'll use a simple in-memory store, but in production you might want to use Redis
+      const verificationExpires = Date.now() + 15 * 60 * 1000; // 15 dakika (timestamp)
+      // Store verification data in Redis
       const verificationData = {
         name: name.trim(),
         username: username.trim(),
@@ -153,18 +148,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
         token: verificationToken,
         expires: verificationExpires
       };
-      
-      // Store verification data (in production, use Redis or similar)
-      global.verificationStore = global.verificationStore || new Map();
-      global.verificationStore.set(verificationToken, verificationData);
-      
-      // Clean up expired tokens
-      for (const [token, data] of Array.from(global.verificationStore.entries())) {
-        if (data.expires < new Date()) {
-          global.verificationStore.delete(token);
-        }
-      }
-      
+      await redis.setex(
+        `verify:${verificationToken}`,
+        15 * 60, // 15 dakika saniye cinsinden
+        JSON.stringify(verificationData)
+      );
       // Send verification email
       try {
         await sendVerificationEmail(email, name.trim(), verificationToken);
@@ -174,8 +162,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       } catch (emailError) {
         console.error("Failed to send verification email:", emailError);
-        // Clean up stored data if email fails
-        global.verificationStore.delete(verificationToken);
+        await redis.del(`verify:${verificationToken}`);
         return res.status(500).json({ message: "Failed to send verification email. Please try again." });
       }
     } catch (error) {
@@ -252,46 +239,33 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/auth/verify-email", async (req, res) => {
     try {
       const { token } = req.query;
-      console.log("[VERIFY-EMAIL] Token from URL:", token);
       if (!token || typeof token !== 'string') {
-        console.log("[VERIFY-EMAIL] Invalid token format");
         return res.sendFile(path.join(__dirname, "error.html"));
       }
-      
-      // Get verification data from storage
-      global.verificationStore = global.verificationStore || new Map();
-      const verificationData = global.verificationStore.get(token);
-      
-      if (!verificationData) {
-        console.log("[VERIFY-EMAIL] No verification data found for token");
+      // Get verification data from Redis
+      const data = await redis.get(`verify:${token}`);
+      if (!data) {
         return res.sendFile(path.join(__dirname, "error.html"));
       }
-      
+      const verificationData = JSON.parse(data);
       // Check if token is expired
-      if (verificationData.expires < new Date()) {
-        console.log("[VERIFY-EMAIL] Token expired");
-        global.verificationStore.delete(token);
+      if (verificationData.expires < Date.now()) {
+        await redis.del(`verify:${token}`);
         return res.sendFile(path.join(__dirname, "error.html"));
       }
-      
       // Check if email or username still exists
       const existingUser = await storage.getUserByEmail(verificationData.email);
       if (existingUser) {
-        console.log("[VERIFY-EMAIL] Email already exists");
-        global.verificationStore.delete(token);
+        await redis.del(`verify:${token}`);
         return res.sendFile(path.join(__dirname, "error.html"));
       }
-      
       const existingUserByUsername = await storage.getUserByUsername(verificationData.username);
       if (existingUserByUsername) {
-        console.log("[VERIFY-EMAIL] Username already exists");
-        global.verificationStore.delete(token);
+        await redis.del(`verify:${token}`);
         return res.sendFile(path.join(__dirname, "error.html"));
       }
-      
       // Hash password
       const hashedPassword = await bcrypt.hash(verificationData.password, 10);
-      
       // Create new user
       const newUser = await storage.createUser({
         name: verificationData.name,
@@ -304,16 +278,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
         emailVerificationToken: null,
         emailVerificationExpires: null
       });
-      
-      console.log("[VERIFY-EMAIL] User created successfully:", newUser.id);
-      
-      // Clean up verification data
-      global.verificationStore.delete(token);
-      
-      // Show classic server-side success.html page
+      await redis.del(`verify:${token}`);
       return res.sendFile(path.join(__dirname, "success.html"));
     } catch (error) {
-      console.error("[VERIFY-EMAIL] Email verification error:", error);
+      console.error("[VERIFY-EMAIL][REDIS] Email verification error:", error);
       res.sendFile(path.join(__dirname, "error.html"));
     }
   });
