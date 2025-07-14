@@ -499,7 +499,7 @@ export default function Borrowing() {
               {t("borrowing.newBorrowing")}
             </Button>
           </DialogTrigger>
-          <DialogContent className="max-w-2xl">
+          <DialogContent className="max-w-6xl max-h-[90vh] overflow-y-auto">
             <DialogHeader>
               <DialogTitle>
                 {selectedBorrowing ? t("borrowing.editBorrowing") : t("borrowing.createBorrowing")}
