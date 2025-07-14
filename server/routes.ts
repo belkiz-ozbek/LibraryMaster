@@ -1188,6 +1188,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Basit test endpointi
+  app.get("/ping", (req, res) => {
+    console.log("Ping endpoint hit");
+    res.send("pong");
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }
