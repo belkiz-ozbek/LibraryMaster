@@ -15,6 +15,7 @@ import path from "path";
 import { fileURLToPath } from "url";
 import jwt from "jsonwebtoken";
 import { redis } from "./redis";
+import fs from "fs";
 
 // Type declarations for global verification store
 declare global {
@@ -240,29 +241,59 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const { token } = req.query;
       if (!token || typeof token !== 'string') {
-        return res.sendFile(path.join(__dirname, "error.html"));
+        const errorPath = path.resolve(__dirname, "error.html");
+        console.log("[VERIFY-EMAIL] error.html path:", errorPath);
+        if (!fs.existsSync(errorPath)) {
+          console.error("[VERIFY-EMAIL] error.html bulunamadı:", errorPath);
+          return res.status(500).send("Error page not found!");
+        }
+        return res.sendFile(errorPath);
       }
       // Get verification data from Redis
       const data = await redis.get(`verify:${token}`);
       if (!data) {
-        return res.sendFile(path.join(__dirname, "error.html"));
+        const errorPath = path.resolve(__dirname, "error.html");
+        console.log("[VERIFY-EMAIL] error.html path:", errorPath);
+        if (!fs.existsSync(errorPath)) {
+          console.error("[VERIFY-EMAIL] error.html bulunamadı:", errorPath);
+          return res.status(500).send("Error page not found!");
+        }
+        return res.sendFile(errorPath);
       }
       const verificationData = JSON.parse(data);
       // Check if token is expired
       if (verificationData.expires < Date.now()) {
         await redis.del(`verify:${token}`);
-        return res.sendFile(path.join(__dirname, "error.html"));
+        const errorPath = path.resolve(__dirname, "error.html");
+        console.log("[VERIFY-EMAIL] error.html path:", errorPath);
+        if (!fs.existsSync(errorPath)) {
+          console.error("[VERIFY-EMAIL] error.html bulunamadı:", errorPath);
+          return res.status(500).send("Error page not found!");
+        }
+        return res.sendFile(errorPath);
       }
       // Check if email or username still exists
       const existingUser = await storage.getUserByEmail(verificationData.email);
       if (existingUser) {
         await redis.del(`verify:${token}`);
-        return res.sendFile(path.join(__dirname, "error.html"));
+        const errorPath = path.resolve(__dirname, "error.html");
+        console.log("[VERIFY-EMAIL] error.html path:", errorPath);
+        if (!fs.existsSync(errorPath)) {
+          console.error("[VERIFY-EMAIL] error.html bulunamadı:", errorPath);
+          return res.status(500).send("Error page not found!");
+        }
+        return res.sendFile(errorPath);
       }
       const existingUserByUsername = await storage.getUserByUsername(verificationData.username);
       if (existingUserByUsername) {
         await redis.del(`verify:${token}`);
-        return res.sendFile(path.join(__dirname, "error.html"));
+        const errorPath = path.resolve(__dirname, "error.html");
+        console.log("[VERIFY-EMAIL] error.html path:", errorPath);
+        if (!fs.existsSync(errorPath)) {
+          console.error("[VERIFY-EMAIL] error.html bulunamadı:", errorPath);
+          return res.status(500).send("Error page not found!");
+        }
+        return res.sendFile(errorPath);
       }
       // Hash password
       const hashedPassword = await bcrypt.hash(verificationData.password, 10);
@@ -279,10 +310,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
         emailVerificationExpires: null
       });
       await redis.del(`verify:${token}`);
-      return res.sendFile(path.join(__dirname, "success.html"));
+      const successPath = path.resolve(__dirname, "success.html");
+      console.log("[VERIFY-EMAIL] success.html path:", successPath);
+      if (!fs.existsSync(successPath)) {
+        console.error("[VERIFY-EMAIL] success.html bulunamadı:", successPath);
+        return res.status(500).send("Success page not found!");
+      }
+      return res.sendFile(successPath);
     } catch (error) {
       console.error("[VERIFY-EMAIL][REDIS] Email verification error:", error);
-      res.sendFile(path.join(__dirname, "error.html"));
+      const errorPath = path.resolve(__dirname, "error.html");
+      console.log("[VERIFY-EMAIL] error.html path:", errorPath);
+      if (!fs.existsSync(errorPath)) {
+        console.error("[VERIFY-EMAIL] error.html bulunamadı:", errorPath);
+        return res.status(500).send("Error page not found!");
+      }
+      res.sendFile(errorPath);
     }
   });
 
