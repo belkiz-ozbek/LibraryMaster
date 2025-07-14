@@ -236,18 +236,18 @@ export default function Borrowing() {
   });
 
   // Server-side search (kitaplar mantığı)
-  const { data: searchResults = [] } = useQuery<BorrowingWithDetails[]>({
+  const { data: searchResults = [], isLoading: isSearchLoading } = useQuery<BorrowingWithDetails[]>({
     queryKey: ["/api/borrowings/search", { q: searchQuery }],
-    enabled: searchQuery.length > 0,
+    enabled: searchQuery.length > 2, // En az 3 karakter yazıldığında arama yap
     queryFn: async () => {
-      const res = await fetch(`/api/borrowings/search?q=${encodeURIComponent(searchQuery)}`);
+      const res = await apiRequest("GET", `/api/borrowings/search?q=${encodeURIComponent(searchQuery)}`);
       if (!res.ok) throw new Error("Arama başarısız");
       return res.json();
     },
   });
 
   // Tabloya verilecek veri - search yapılıyorsa searchResults, yoksa borrowingsData
-  const displayBorrowings: BorrowingWithDetails[] = searchQuery.length > 0 ? searchResults : (borrowingsData?.data ?? []);
+  const displayBorrowings: BorrowingWithDetails[] = searchQuery.length > 2 ? searchResults : (borrowingsData?.data ?? borrowings);
 
   // Arama kutusu değişince sayfayı sıfırla
   const handleSearch = (q: string) => {
@@ -458,12 +458,6 @@ export default function Borrowing() {
     return <LoadingScreen />;
   }
 
-  console.log('searchQuery:', searchQuery);
-  console.log('searchResults:', searchResults);
-  console.log('displayBorrowings:', displayBorrowings);
-  console.log('borrowingsData:', borrowingsData);
-  console.log('columns:', columns);
-
   return (
     <motion.div
       className="space-y-6"
@@ -582,20 +576,20 @@ export default function Borrowing() {
               </div>
               <div className="w-80">
                 <SearchInput
-                  placeholder={t("borrowing.searchPlaceholder")}
+                  placeholder={t("borrowing.searchPlaceholder") + " (min. 3 karakter)"}
                   onSearch={handleSearch}
                 />
               </div>
             </div>
           </CardHeader>
           <CardContent>
-            {searchQuery.length > 0 ? (
+            {searchQuery.length > 2 ? (
               <DataTable
                 data={displayBorrowings}
                 columns={columns}
-                loading={isLoading}
+                loading={isSearchLoading}
                 emptyMessage={
-                  searchQuery.length > 0 
+                  searchQuery.length > 2 
                     ? t("borrowing.noBorrowingsFound")
                     : t("borrowing.noBorrowingsYet")
                 }
