@@ -120,7 +120,7 @@ export function MemberForm({ member, onSuccess, onCancel }: MemberFormProps) {
   };
 
   return (
-    <form onSubmit={form.handleSubmit(onSubmit)} className={`space-y-6 p-2 ${isMobile ? 'overflow-y-auto max-h-[calc(100vh-2rem)] pb-20' : ''}`}>
+    <form onSubmit={form.handleSubmit(onSubmit)} className={`space-y-6 p-2 ${isMobile ? 'overflow-y-auto max-h-[calc(100vh-2rem)] pb-20 mx-4' : ''}`}>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div className="flex flex-col gap-2">
           <Label htmlFor="firstName" className="font-semibold text-gray-800">{t('members.form.firstName')} *</Label>
