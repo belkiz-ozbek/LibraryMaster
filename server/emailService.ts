@@ -17,7 +17,8 @@ export function generateVerificationToken(): string {
 
 // Email doğrulama maili gönder
 export async function sendVerificationEmail(email: string, name: string, token: string): Promise<void> {
-  const verificationUrl = `${process.env.FRONTEND_URL || 'http://localhost:3000'}/verify-email?token=${token}`;
+  // FRONTEND_URL yerine BACKEND_URL kullanalım ve doğrudan backend endpointine yönlendirelim
+  const verificationUrl = `${process.env.BACKEND_URL || 'http://localhost:3000'}/api/auth/verify-email?token=${token}`;
   
   const mailOptions = {
     from: process.env.EMAIL_USER,
@@ -37,7 +38,7 @@ export async function sendVerificationEmail(email: string, name: string, token: 
           </p>
           
           <div style="text-align: center; margin: 30px 0;">
-            <a href="${verificationUrl}" 
+            <a href="${verificationUrl}"
                style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); 
                       color: white; 
                       padding: 15px 30px; 
