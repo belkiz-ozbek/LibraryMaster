@@ -1231,10 +1231,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Basit test endpointi
+  // Basit ve sync /ping endpointi, dosyanın en üstünde
   app.get("/ping", (req, res) => {
-    console.log("Ping endpoint hit");
-    res.send("pong");
+    res.status(200).send("pong");
   });
 
   const httpServer = createServer(app);
