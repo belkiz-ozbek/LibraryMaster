@@ -11,6 +11,7 @@ import { insertBookSchema, type Book, type InsertBook } from "@shared/schema";
 import { z } from "zod";
 import { useTranslation } from "react-i18next";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { useState } from "react";
 
 const bookFormSchema = insertBookSchema.extend({
   availableCopies: z.number().min(0, "Available copies must be non-negative"),
@@ -46,6 +47,33 @@ export function BookForm({ book, onSuccess, onCancel }: BookFormProps) {
   const isEditing = !!book;
   const { t } = useTranslation();
   const isMobile = useIsMobile();
+
+  // Özel türler için state
+  const [customGenres, setCustomGenres] = useState<string[]>([]);
+  const [showCustomInput, setShowCustomInput] = useState(false);
+  const [customGenreInput, setCustomGenreInput] = useState("");
+
+  // Tüm türleri birleştir (varsayılan + özel)
+  const allGenreOptions = [
+    ...genreOptions,
+    ...customGenres.map((genre: string) => ({ value: genre, label: genre }))
+  ];
+
+  // Yeni tür ekleme fonksiyonu
+  const addCustomGenre = (newGenre: string) => {
+    if (newGenre.trim() && !customGenres.includes(newGenre.trim())) {
+      setCustomGenres(prev => [...prev, newGenre.trim()]);
+      form.setValue("genre", newGenre.trim());
+      
+      // Development modunda çeviri dosyalarına otomatik ekleme
+      if (process.env.NODE_ENV === 'development') {
+        console.log(`🎯 Yeni tür eklendi: "${newGenre.trim()}"`);
+        console.log(`📝 Bu türü çeviri dosyalarına eklemek için:`);
+        console.log(`   node add-genre-to-translations.js "${newGenre.trim()}"`);
+        console.log(`   komutunu çalıştırın veya manuel olarak ekleyin.`);
+      }
+    }
+  };
 
   const form = useForm<BookFormData>({
     resolver: zodResolver(bookFormSchema),
@@ -113,36 +141,80 @@ export function BookForm({ book, onSuccess, onCancel }: BookFormProps) {
         </div>
         <div className="flex flex-col gap-2">
           <Label htmlFor="genre" className="font-semibold text-gray-800">{t("books.genre")} *</Label>
-          <div className="flex gap-2">
-            <Select 
-              value={form.watch("genre")} 
-              onValueChange={(value) => form.setValue("genre", value)}
-            >
-              <SelectTrigger className="flex-1 rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition">
-                <SelectValue placeholder={t("books.genre")} />
-              </SelectTrigger>
-              <SelectContent>
-                {genreOptions.map((option) => (
-                  <SelectItem key={option.value} value={option.value}>
-                    {t(`genres.${option.value}`)}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => {
-                const customGenre = prompt("Özel tür adını girin:");
-                if (customGenre && customGenre.trim()) {
-                  form.setValue("genre", customGenre.trim());
-                }
-              }}
-              className="px-3 py-2 text-sm"
-            >
-              +
-            </Button>
-          </div>
+          
+          {showCustomInput ? (
+            <div className="flex gap-2">
+              <Input
+                value={customGenreInput}
+                onChange={(e) => setCustomGenreInput(e.target.value)}
+                placeholder="Özel tür adını girin..."
+                className="flex-1 rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition"
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    e.preventDefault();
+                    if (customGenreInput.trim()) {
+                      addCustomGenre(customGenreInput.trim());
+                      setCustomGenreInput("");
+                      setShowCustomInput(false);
+                    }
+                  }
+                }}
+              />
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => {
+                  if (customGenreInput.trim()) {
+                    addCustomGenre(customGenreInput.trim());
+                    setCustomGenreInput("");
+                    setShowCustomInput(false);
+                  }
+                }}
+                className="px-3 py-2 text-sm"
+              >
+                Ekle
+              </Button>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => {
+                  setShowCustomInput(false);
+                  setCustomGenreInput("");
+                }}
+                className="px-3 py-2 text-sm"
+              >
+                İptal
+              </Button>
+            </div>
+          ) : (
+            <div className="flex gap-2">
+              <Select 
+                value={form.watch("genre")} 
+                onValueChange={(value) => form.setValue("genre", value)}
+              >
+                <SelectTrigger className="flex-1 rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition">
+                  <SelectValue placeholder={t("books.genre")} />
+                </SelectTrigger>
+                <SelectContent>
+                  {allGenreOptions.map((option) => (
+                    <SelectItem key={option.value} value={option.value}>
+                      {option.value in t('genres', { returnObjects: true }) 
+                        ? t(`genres.${option.value}`) 
+                        : option.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setShowCustomInput(true)}
+                className="px-3 py-2 text-sm"
+              >
+                +
+              </Button>
+            </div>
+          )}
           {form.formState.errors.genre && <p className="text-xs text-red-500 mt-0.5">{form.formState.errors.genre.message}</p>}
         </div>
       </div>
