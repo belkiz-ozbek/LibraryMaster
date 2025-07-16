@@ -49,7 +49,10 @@ function requireAuth(req: any, res: any, next: any) {
 }
 
 const requireAdmin = async (req: any, res: any, next: any) => {
-  // Temporarily bypass admin check
+  // Check if user is admin
+  if (!req.user || !req.user.isAdmin) {
+    return res.status(403).json({ message: "Admin access required" });
+  }
   next();
 };
 

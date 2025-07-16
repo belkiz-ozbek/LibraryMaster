@@ -139,10 +139,7 @@ export default function Books() {
 
   const deleteBookMutation = useMutation({
     mutationFn: async (id: number) => {
-      const response = await fetch(`/api/books/${id}`, {
-        method: "DELETE",
-        credentials: "include",
-      });
+      const response = await apiRequest("DELETE", `/api/books/${id}`);
       
       if (!response.ok) {
         const errorData = await response.json();
