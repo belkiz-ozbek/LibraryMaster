@@ -52,9 +52,7 @@ Modern React, TypeScript ve Express.js ile geliştirilmiş tam kapsamlı kütüp
 
 ### 🎨 Modern UI/UX
 - Tailwind CSS ile responsive tasarım
-- Karanlık/aydınlık tema desteği
 - Radix UI ile etkileşimli bileşenler
-- Gerçek zamanlı bildirimler
 - Framer Motion ile akıcı animasyonlar
 
 ## 🚀 Teknoloji Yığını
