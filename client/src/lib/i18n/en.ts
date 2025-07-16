@@ -454,6 +454,7 @@ export const en = {
     felsefe: "Philosophy",
     tiyatro: "Theater",
     bilim: "Science",
+    bulmaca: "Puzzle",
   },
   footer: {
     developedBy: "This system was developed by the software development team of Ahdevefa Social Solidarity Club.",

@@ -522,6 +522,7 @@ export const tr = {
     felsefe: "Felsefe",
     tiyatro: "Tiyatro",
     bilim: "Bilim",
+    bulmaca: "Bulmaca",
   },
   footer: {
     developedBy: "Bu sistem, Ahdevefa Sosyal Yardımlaşma Kulübü yazılım geliştirici ekibi tarafından geliştirilmiştir.",

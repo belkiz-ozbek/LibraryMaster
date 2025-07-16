@@ -39,6 +39,7 @@ const genreOptions = [
   { value: "felsefe", label: "Felsefe" },
   { value: "tiyatro", label: "Tiyatro" },
   { value: "bilim", label: "Bilim" },
+  { value: "bulmaca", label: "Bulmaca" },
 ];
 
 export function BookForm({ book, onSuccess, onCancel }: BookFormProps) {
@@ -112,18 +113,36 @@ export function BookForm({ book, onSuccess, onCancel }: BookFormProps) {
         </div>
         <div className="flex flex-col gap-2">
           <Label htmlFor="genre" className="font-semibold text-gray-800">{t("books.genre")} *</Label>
-          <Select value={form.watch("genre")} onValueChange={(value) => form.setValue("genre", value)}>
-            <SelectTrigger className="rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition">
-              <SelectValue placeholder={t("books.genre")} />
-            </SelectTrigger>
-            <SelectContent>
-              {genreOptions.map((option) => (
-                <SelectItem key={option.value} value={option.value}>
-                  {t(`genres.${option.value}`)}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+          <div className="flex gap-2">
+            <Select 
+              value={form.watch("genre")} 
+              onValueChange={(value) => form.setValue("genre", value)}
+            >
+              <SelectTrigger className="flex-1 rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition">
+                <SelectValue placeholder={t("books.genre")} />
+              </SelectTrigger>
+              <SelectContent>
+                {genreOptions.map((option) => (
+                  <SelectItem key={option.value} value={option.value}>
+                    {t(`genres.${option.value}`)}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => {
+                const customGenre = prompt("Özel tür adını girin:");
+                if (customGenre && customGenre.trim()) {
+                  form.setValue("genre", customGenre.trim());
+                }
+              }}
+              className="px-3 py-2 text-sm"
+            >
+              +
+            </Button>
+          </div>
           {form.formState.errors.genre && <p className="text-xs text-red-500 mt-0.5">{form.formState.errors.genre.message}</p>}
         </div>
       </div>
