@@ -17,7 +17,7 @@ import { format } from "date-fns";
 import type { User } from "@shared/schema";
 import { useTranslation } from "react-i18next";
 import { motion } from "framer-motion";
-import { Link } from "react-router-dom";
+import { Link } from "wouter";
 import LoadingScreen from "@/components/ui/loading-screen";
 import type { PaginatedResponse } from "@/components/ui/data-table";
 

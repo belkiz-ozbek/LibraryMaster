@@ -1,6 +1,6 @@
 # 📚 LibraryMaster - Modern Kütüphane Yönetim Sistemi
 
-Modern React, TypeScript ve Express.js ile geliştirilmiş tam kapsamlı kütüphane yönetim sistemi. Gerçek zamanlı güncellemeler, çoklu dil desteği ve kapsamlı kütüphane operasyonları ile birlikte gelir.
+Modern React, TypeScript ve Express.js ile geliştirilmiş tam kapsamlı kütüphane yönetim sistemi. Kapsamlı kütüphane operasyonları, çoklu dil desteği ve gelişmiş analitik özellikleri ile birlikte gelir.
 
 ![LibraryMaster](https://img.shields.io/badge/LibraryMaster-v1.0.0-blue)
 ![TypeScript](https://img.shields.io/badge/TypeScript-5.6.3-blue)
@@ -13,13 +13,15 @@ Modern React, TypeScript ve Express.js ile geliştirilmiş tam kapsamlı kütüp
 
 ### 📖 Kitap Yönetimi
 - Detaylı bilgilerle kitap ekleme, düzenleme ve silme
-- ISBN doğrulama ve mükerrer önleme
+- ISBN doğrulama ve mükerrer önleme (opsiyonel)
 - Mevcut ve toplam kopya takibi
 - Başlık, yazar, tür veya ISBN ile arama ve filtreleme
 - Kitap kategorilendirme ve raf yönetimi
 
 ### 👥 Üye Yönetimi
 - Tam üye kaydı ve profil yönetimi
+- Username ve email ile giriş sistemi
+- E-posta doğrulama sistemi
 - Üyelik tarihi takibi
 - Üyeler için admin değerlendirmeleri ve notlar
 - Üye ödünç alma geçmişi
@@ -31,13 +33,17 @@ Modern React, TypeScript ve Express.js ile geliştirilmiş tam kapsamlı kütüp
 - Uzatma talebi işlevselliği
 - Gecikmiş kitap takibi
 - İade tarihi yönetimi
+- Ödünç alma durumu takibi (borrowed, returned, overdue)
 
 ### 📊 İstatistikler ve Analitik
-- Anahtar metriklerle gerçek zamanlı dashboard
+- Anahtar metriklerle kapsamlı dashboard
 - Ödünç alma istatistikleri ve trendler
 - Üye aktivite raporları
 - Kitap popülerlik analitikleri
 - Gecikmiş kitap raporları
+- En çok ödünç alınan kitaplar
+- En aktif üyeler
+- Aylık en çok okuyan üyeler
 
 ### 🌐 Çoklu Dil Desteği
 - Türkçe ve İngilizce dil desteği
@@ -45,15 +51,18 @@ Modern React, TypeScript ve Express.js ile geliştirilmiş tam kapsamlı kütüp
 - Yerelleştirilmiş UI bileşenleri
 
 ### 🔐 Kimlik Doğrulama ve Güvenlik
-- Güvenli giriş sistemi
+- JWT tabanlı güvenli giriş sistemi
+- E-posta doğrulama sistemi
 - Oturum yönetimi
 - Admin rol yönetimi
 - Bcrypt ile şifre şifreleme
+- Redis ile doğrulama token yönetimi
 
 ### 🎨 Modern UI/UX
 - Tailwind CSS ile responsive tasarım
 - Radix UI ile etkileşimli bileşenler
 - Framer Motion ile akıcı animasyonlar
+- Loading ekranları ve animasyonlar
 
 ## 🚀 Teknoloji Yığını
 
@@ -64,7 +73,7 @@ Modern React, TypeScript ve Express.js ile geliştirilmiş tam kapsamlı kütüp
 - **Tailwind CSS** - Styling
 - **Radix UI** - Erişilebilir bileşenler
 - **React Query** - Veri çekme ve önbellekleme
-- **React Router** - Navigasyon
+- **Wouter** - Navigasyon (React Router yerine)
 - **Framer Motion** - Animasyonlar
 - **i18next** - Uluslararasılaştırma
 
@@ -73,9 +82,11 @@ Modern React, TypeScript ve Express.js ile geliştirilmiş tam kapsamlı kütüp
 - **TypeScript** - Tip güvenliği
 - **Drizzle ORM** - Veritabanı ORM
 - **PostgreSQL** - Veritabanı (Neon)
-- **Passport.js** - Kimlik doğrulama
+- **JWT** - Kimlik doğrulama
 - **Express Session** - Oturum yönetimi
 - **Zod** - Şema doğrulama
+- **Redis** - Doğrulama token yönetimi
+- **Nodemailer** - E-posta gönderimi
 
 ### Veritabanı
 - **PostgreSQL** Neon üzerinde barındırılıyor
@@ -88,6 +99,7 @@ Modern React, TypeScript ve Express.js ile geliştirilmiş tam kapsamlı kütüp
 - Node.js 18+
 - npm veya yarn
 - PostgreSQL veritabanı (Neon önerilir)
+- Redis (doğrulama token'ları için)
 
 ### Kurulum Adımları
 
@@ -107,6 +119,12 @@ Modern React, TypeScript ve Express.js ile geliştirilmiş tam kapsamlı kütüp
    ```env
    DATABASE_URL=postgresql://username:password@host:port/database?sslmode=require
    SESSION_SECRET=your-super-secret-session-key
+   JWT_SECRET=your-jwt-secret-key
+   REDIS_URL=redis://username:password@host:port
+   EMAIL_SERVICE=gmail
+   EMAIL_USER=your-email@gmail.com
+   EMAIL_PASS=your-app-password
+   BACKEND_URL=https://your-app-domain.com
    ```
 
 4. **Veritabanını Ayarlayın**
@@ -140,10 +158,14 @@ LibraryMaster/
 │   ├── index.ts          # Sunucu giriş noktası
 │   ├── routes.ts         # API rotaları
 │   ├── db.ts            # Veritabanı konfigürasyonu
+│   ├── storage.ts       # Veritabanı işlemleri
+│   ├── emailService.ts  # E-posta servisi
+│   ├── redis.ts         # Redis konfigürasyonu
 │   └── types.ts         # TypeScript tipleri
 ├── shared/               # Frontend ve backend arasında paylaşılan kod
 │   └── schema.ts        # Veritabanı şeması ve tipleri
-├── uploads/             # Dosya yükleme dizini
+├── migrations/           # Veritabanı migrasyonları
+├── public/              # Statik dosyalar
 └── drizzle.config.ts    # Drizzle konfigürasyonu
 ```
 
@@ -152,18 +174,22 @@ LibraryMaster/
 ### Users Tablosu
 - `id` - Primary key
 - `name` - Kullanıcının tam adı
-- `email` - E-posta adresi
-- `password` - Şifrelenmiş parola
+- `username` - Benzersiz kullanıcı adı
+- `email` - E-posta adresi (opsiyonel)
+- `password` - Şifrelenmiş parola (opsiyonel)
 - `isAdmin` - Admin rol bayrağı
 - `membershipDate` - Üyelik tarihi
 - `adminRating` - Admin tarafından atanan puan
 - `adminNotes` - Admin notları
+- `emailVerified` - E-posta doğrulama durumu
+- `emailVerificationToken` - E-posta doğrulama token'ı
+- `emailVerificationExpires` - Token geçerlilik süresi
 
 ### Books Tablosu
 - `id` - Primary key
 - `title` - Kitap başlığı
 - `author` - Kitap yazarı
-- `isbn` - Benzersiz ISBN
+- `isbn` - Benzersiz ISBN (opsiyonel)
 - `genre` - Kitap türü
 - `publishYear` - Yayın yılı
 - `shelfNumber` - Fiziksel konum
@@ -204,6 +230,12 @@ npm run check        # TypeScript tip kontrolü
 |----------|----------|---------|
 | `DATABASE_URL` | PostgreSQL bağlantı stringi | Evet |
 | `SESSION_SECRET` | Oturum şifreleme için gizli anahtar | Evet |
+| `JWT_SECRET` | JWT token şifreleme için gizli anahtar | Evet |
+| `REDIS_URL` | Redis bağlantı stringi | Evet |
+| `EMAIL_SERVICE` | E-posta servisi (gmail, outlook, vb.) | Evet |
+| `BACKEND_URL` | Backend URL'i (e-posta doğrulama linkleri için) | Evet |
+| `EMAIL_USER` | E-posta kullanıcı adı | Evet |
+| `EMAIL_PASS` | E-posta şifresi | Evet |
 
 ## 🔧 Konfigürasyon
 
@@ -211,10 +243,16 @@ npm run check        # TypeScript tip kontrolü
 Uygulama PostgreSQL ile Drizzle ORM kullanır. Veritabanı migrasyonları `drizzle-kit` ile otomatik olarak yönetilir.
 
 ### Kimlik Doğrulama
-- Oturum tabanlı kimlik doğrulama
+- JWT tabanlı kimlik doğrulama
+- E-posta doğrulama sistemi
 - Bcrypt ile parola şifreleme
 - Admin rol yönetimi
-- Güvenli oturum depolama
+- Redis ile doğrulama token yönetimi
+
+### E-posta Servisi
+- Nodemailer ile SMTP entegrasyonu
+- E-posta doğrulama gönderimi
+- Şifre sıfırlama e-postaları
 
 ### Uluslararasılaştırma
 - Türkçe ve İngilizce desteği
@@ -224,34 +262,44 @@ Uygulama PostgreSQL ile Drizzle ORM kullanır. Veritabanı migrasyonları `drizz
 ## 📱 Detaylı Özellikler
 
 ### Dashboard
-- Gerçek zamanlı istatistikler
+- Kapsamlı istatistikler
 - Son aktiviteler
 - Hızlı işlemler
 - Sistem genel bakışı
+- En çok ödünç alınan kitaplar
+- En aktif üyeler
 
 ### Kitap Yönetimi
 - Kitaplar için CRUD işlemleri
 - Gelişmiş arama ve filtreleme
 - Toplu işlemler
-- ISBN doğrulama
+- ISBN doğrulama (opsiyonel)
 
 ### Üye Yönetimi
-- Üye kaydı
+- Üye kaydı ve e-posta doğrulama
 - Profil yönetimi
 - Ödünç alma geçmişi
 - Admin notları ve puanları
+- Username ve email ile giriş
 
 ### Ödünç Alma Sistemi
 - Ödünç alma süreci
 - Son teslim tarihi yönetimi
 - Uzatma talepleri
 - İade işlemi
+- Durum takibi
 
 ### Raporlar ve Analitik
 - İstatistiksel genel bakış
 - Trend analizi
 - Üye aktivite raporları
 - Kitap popülerlik analizi
+- Gecikmiş kitap raporları
+
+### Aktivite Takibi
+- Sistem aktivite geçmişi
+- Kullanıcı aktivite takibi
+- Gerçek zamanlı bildirimler
 
 ## 🤝 Katkıda Bulunma
 
@@ -279,6 +327,7 @@ Proje Linki: [https://github.com/belkiz-ozbek/LibraryMaster](https://github.com/
 - [Radix UI](https://www.radix-ui.com/) - UI bileşenleri
 - [Drizzle ORM](https://orm.drizzle.team/) - Veritabanı ORM
 - [Neon](https://neon.tech/) - PostgreSQL hosting
+- [Wouter](https://github.com/molefrog/wouter) - Routing
 
 ---
 

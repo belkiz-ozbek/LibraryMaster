@@ -22,7 +22,7 @@ import type { User, Book, Borrowing } from "@shared/schema";
 import { useEffect, useRef, useState } from "react";
 import Confetti from 'react-dom-confetti';
 import Player from 'lottie-react';
-import { Link } from "react-router-dom";
+import { Link } from "wouter";
 import { capitalizeWords } from "@/lib/utils";
 import LoadingScreen from "@/components/ui/loading-screen";
 

@@ -19,7 +19,7 @@ import type { BorrowingWithDetails } from "@shared/schema";
 import { useTranslation } from "react-i18next";
 import { motion } from "framer-motion";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
-import { Link } from "react-router-dom";
+import { Link } from "wouter";
 import LoadingScreen from "@/components/ui/loading-screen";
 import { capitalizeWords } from "@/lib/utils";
 
