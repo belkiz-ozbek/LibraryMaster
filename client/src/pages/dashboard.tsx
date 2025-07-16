@@ -249,6 +249,35 @@ export default function Dashboard() {
     queryKey: ["/api/stats/genre-distribution"],
   });
 
+  // Tür çeviri fonksiyonu
+  const translateGenre = (genre: string) => {
+    if (!genre || genre.trim() === '') return "Tür Belirtilmemiş";
+    
+    // Virgülle ayrılmış türleri böl ve her birini çevir
+    const genres = genre.split(',').map(g => g.trim()).filter(g => g);
+    const translatedGenres = genres.map(g => {
+      // Türkçe karakterleri normalize et
+      const normalizedGenre = g
+        .toLowerCase()
+        .replace(/ç/g, 'c')
+        .replace(/ı/g, 'i')
+        .replace(/ş/g, 's')
+        .replace(/ü/g, 'u')
+        .replace(/ö/g, 'o')
+        .replace(/ğ/g, 'g')
+        .replace(/\s+/g, '');
+      
+      // Çeviri anahtarını oluştur
+      const translationKey = `genres.${normalizedGenre}`;
+      const translated = t(translationKey);
+      
+      // Eğer çeviri bulunamazsa orijinal değeri döndür
+      return translated !== translationKey ? translated : g;
+    });
+    
+    return translatedGenres.length > 0 ? translatedGenres.join(', ') : "Tür Belirtilmemiş";
+  };
+
   const overdueColumns = [
     {
       key: "user.name",
@@ -651,16 +680,7 @@ export default function Dashboard() {
                         marginTop: 16
                       }}
                       formatter={(value) => {
-                        const key = (value || '')
-                          .toLowerCase()
-                          .replace(/ /g, '')
-                          .replace(/ç/g, 'c')
-                          .replace(/ı/g, 'i')
-                          .replace(/ş/g, 's')
-                          .replace(/ü/g, 'u')
-                          .replace(/ö/g, 'o')
-                          .replace(/ğ/g, 'g');
-                        return t('genres.' + key);
+                        return translateGenre(value || '');
                       }}
                     />
                     <Tooltip 

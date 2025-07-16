@@ -379,7 +379,9 @@ export const tr = {
     weeklyActivity: "Haftalık Aktivite",
     weeklyActivityDesc: "Son 7 gündeki ödünç alma ve iade işlemleri",
     borrowed: "Ödünç Alınan",
-    returned: "İade Edilen"
+    returned: "İade Edilen",
+    collectionDistribution: "Koleksiyon Dağılımı",
+    collectionDistributionDesc: "Kitapların türlere göre dağılımı"
   },
   pagination: {
     previous: "Önceki",

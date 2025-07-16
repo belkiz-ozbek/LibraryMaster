@@ -70,10 +70,10 @@ function getFriendlyDeleteErrorMessage(error: string) {
 
 // Genre çeviri fonksiyonu
 const translateGenre = (genre: string, t: any) => {
-  if (!genre) return "";
+  if (!genre || genre.trim() === '') return "Tür Belirtilmemiş";
   
   // Virgülle ayrılmış türleri böl ve her birini çevir
-  const genres = genre.split(',').map(g => g.trim());
+  const genres = genre.split(',').map(g => g.trim()).filter(g => g);
   const translatedGenres = genres.map(g => {
     // Türkçe karakterleri normalize et
     const normalizedGenre = g
@@ -94,7 +94,7 @@ const translateGenre = (genre: string, t: any) => {
     return translated !== translationKey ? translated : g;
   });
   
-  return translatedGenres.join(', ');
+  return translatedGenres.length > 0 ? translatedGenres.join(', ') : "Tür Belirtilmemiş";
 };
 
 export default function Books() {
