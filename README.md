@@ -13,7 +13,7 @@ Modern React, TypeScript ve Express.js ile geliştirilmiş tam kapsamlı kütüp
 
 ### 📖 Kitap Yönetimi
 - Detaylı bilgilerle kitap ekleme, düzenleme ve silme
-- ISBN doğrulama ve mükerrer önleme (opsiyonel)
+- ISBN doğrulama ve tekrar önleme (opsiyonel)
 - Mevcut ve toplam kopya takibi
 - Başlık, yazar, tür veya ISBN ile arama ve filtreleme
 - Kitap kategorilendirme ve raf yönetimi
