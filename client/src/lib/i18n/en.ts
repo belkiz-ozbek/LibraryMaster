@@ -289,6 +289,7 @@ export const en = {
     createBorrowing: "Create New Borrowing",
     updateBorrowingInfo: "Update the borrowing information below.",
     createBorrowingDesc: "Create a new book borrowing record.",
+    addBorrowing: "Add Borrowing",
     activeBorrowings: "Active Borrowings",
     dueSoon: "Due Soon (3 days)",
     overdueItems: "Overdue Items",

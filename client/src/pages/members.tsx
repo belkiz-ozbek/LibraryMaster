@@ -205,7 +205,7 @@ export default function Members() {
       key: "isAdmin",
       title: t("members.role"),
       render: (value: boolean) => (
-        <Badge variant={value ? "default" : "secondary"}>
+        <Badge variant={value ? "default" : "secondary"} className="justify-center w-fit">
           {value ? t("members.administrator") : t("members.member")}
         </Badge>
       ),

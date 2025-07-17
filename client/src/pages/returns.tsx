@@ -307,7 +307,14 @@ export default function Returns() {
     {
       key: "user.name",
       title: t("borrowing.member"),
-      render: (value: string) => value,
+      render: (value: string, row: BorrowingWithDetails) => (
+        <Link
+          to={`/members/${row.user.id}`}
+          className="font-medium text-on-surface hover:underline hover:text-primary transition-colors"
+        >
+          {value}
+        </Link>
+      ),
     },
     {
       key: "book.title",
@@ -330,7 +337,10 @@ export default function Returns() {
       render: (value: string, row: BorrowingWithDetails) => {
         const wasOverdue = new Date(row.returnDate!) > new Date(row.dueDate);
         return (
-          <Badge variant={wasOverdue ? "destructive" : "secondary"}>
+          <Badge 
+            variant={wasOverdue ? "destructive" : "secondary"}
+            className="whitespace-nowrap min-w-fit px-3 py-1"
+          >
             {wasOverdue ? t("returns.returnedLate") : t("returns.returnedOnTime")}
           </Badge>
         );

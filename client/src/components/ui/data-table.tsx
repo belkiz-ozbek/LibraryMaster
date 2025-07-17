@@ -103,17 +103,17 @@ export function DataTable<T extends Record<string, any>>({
 
   return (
     <div className="space-y-4">
-      <div className="rounded-md border overflow-x-auto">
+      <div className="rounded-lg border shadow-sm overflow-x-auto">
         <Table>
           <TableHeader>
             <TableRow>
               {columns.map((column) => (
                 <TableHead
                   key={String(column.key)}
-                  className={`h-12 min-w-[120px] ${column.sortable ? "cursor-pointer hover:bg-muted/50" : ""}`}
+                  className={`h-14 px-6 min-w-[120px] ${column.sortable ? "cursor-pointer hover:bg-muted/50" : ""}`}
                   onClick={column.sortable ? () => handleSort(String(column.key)) : undefined}
                 >
-                  <div className="flex items-center space-x-1 font-medium">
+                  <div className="flex items-center space-x-1 font-semibold">
                     <span className="text-sm sm:text-base">{column.title}</span>
                     {column.sortable && sortColumn === column.key && (
                       <span className="text-xs">
@@ -128,15 +128,15 @@ export function DataTable<T extends Record<string, any>>({
           <TableBody>
             {paginatedData.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={columns.length} className="text-center py-8 text-text-muted">
+                <TableCell colSpan={columns.length} className="text-center py-12 text-text-muted">
                   {emptyMessage}
                 </TableCell>
               </TableRow>
             ) : (
               paginatedData.map((row, index) => (
-                <TableRow key={index} className="hover:bg-muted/50 data-[state=selected]:bg-muted">
+                <TableRow key={index} className="hover:bg-muted/50 data-[state=selected]:bg-muted h-16">
                   {columns.map((column) => (
-                    <TableCell key={String(column.key)} className="py-3 min-w-[120px]">
+                    <TableCell key={String(column.key)} className="py-4 px-6 min-w-[120px]">
                       {column.render 
                         ? column.render(getValue(row, String(column.key)), row, index)
                         : getValue(row, String(column.key))
@@ -241,17 +241,17 @@ export function ServerDataTable<T extends Record<string, any>>({
   if (!data || !data.pagination) {
     return (
       <div className="space-y-4">
-        <div className="rounded-md border">
+        <div className="rounded-lg border shadow-sm">
           <Table>
             <TableHeader>
               <TableRow>
                 {columns.map((column) => (
                   <TableHead
                     key={String(column.key)}
-                    className="h-12"
+                    className="h-14 px-6"
                   >
-                    <div className="flex items-center space-x-1 font-medium">
-                      <span>{column.title}</span>
+                    <div className="flex items-center space-x-1 font-semibold">
+                      <span className="text-sm sm:text-base">{column.title}</span>
                     </div>
                   </TableHead>
                 ))}
@@ -292,16 +292,16 @@ export function ServerDataTable<T extends Record<string, any>>({
 
   return (
     <div className="space-y-4">
-      <div className="rounded-md border overflow-x-auto">
+      <div className="rounded-lg border shadow-sm overflow-x-auto">
         <Table>
           <TableHeader>
             <TableRow>
               {columns.map((column) => (
                 <TableHead
                   key={String(column.key)}
-                  className="h-12 min-w-[120px]"
+                  className="h-14 px-6 min-w-[120px]"
                 >
-                  <div className="flex items-center space-x-1 font-medium">
+                  <div className="flex items-center space-x-1 font-semibold">
                     <span className="text-sm sm:text-base">{column.title}</span>
                   </div>
                 </TableHead>
@@ -311,15 +311,15 @@ export function ServerDataTable<T extends Record<string, any>>({
           <TableBody>
             {!tableData || tableData.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={columns.length} className="text-center py-8 text-text-muted">
+                <TableCell colSpan={columns.length} className="text-center py-12 text-text-muted">
                   {emptyMessage}
                 </TableCell>
               </TableRow>
             ) : (
               tableData.map((row, index) => (
-                <TableRow key={index} className="hover:bg-muted/50 data-[state=selected]:bg-muted">
+                <TableRow key={index} className="hover:bg-muted/50 data-[state=selected]:bg-muted h-16">
                   {columns.map((column) => (
-                    <TableCell key={String(column.key)} className="py-3 min-w-[120px]">
+                    <TableCell key={String(column.key)} className="py-4 px-6 min-w-[120px]">
                       {column.render 
                         ? column.render(getValue(row, String(column.key)), row, index)
                         : getValue(row, String(column.key))
