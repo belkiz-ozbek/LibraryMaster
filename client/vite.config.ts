@@ -12,7 +12,7 @@ export default defineConfig({
     },
   },
   optimizeDeps: {
-    include: ['wouter', '@tanstack/react-query', 'lucide-react', 'framer-motion', 'date-fns'],
+    include: ['wouter', '@tanstack/react-query', 'lucide-react', 'framer-motion', 'date-fns', 'react-dom-confetti'],
   },
   server: {
     proxy: {
