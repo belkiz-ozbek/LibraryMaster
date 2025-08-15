@@ -12,7 +12,7 @@ export default defineConfig({
     },
   },
   optimizeDeps: {
-    include: ['wouter'],
+    include: ['wouter', '@tanstack/react-query', 'lucide-react', 'framer-motion'],
   },
   server: {
     proxy: {
