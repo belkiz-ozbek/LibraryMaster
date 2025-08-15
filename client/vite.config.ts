@@ -22,6 +22,7 @@ export default defineConfig({
       'recharts', 
       '@radix-ui/react-slot', 
       '@radix-ui/react-label',
+      '@radix-ui/react-tooltip',
       'class-variance-authority',
       'clsx',
       'lottie-react'
