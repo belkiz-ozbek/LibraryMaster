@@ -50,7 +50,8 @@ export default defineConfig({
       'class-variance-authority',
       'clsx',
       'lottie-react',
-      'tailwind-merge'
+      'tailwind-merge',
+      'react-hook-form'
     ],
   },
   server: {
