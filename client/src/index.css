@@ -1,128 +1,6 @@
-@layer utilities {
-  .border-border {
-    border-color: theme('colors.border');
-  }
-  .text-primary {
-    color: hsl(var(--primary));
-  }
-  .border-input {
-    border-color: hsl(var(--input));
-  }
-  .focus\:ring-primary:focus {
-    --tw-ring-color: hsl(var(--primary));
-  }
-  .bg-muted\/50 {
-    background-color: hsl(var(--muted) / 0.5);
-  }
-  .bg-primary {
-    background-color: hsl(var(--primary));
-  }
-  .text-primary-foreground {
-    color: hsl(var(--primary-foreground));
-  }
-  .bg-secondary {
-    background-color: hsl(var(--secondary));
-  }
-  .text-secondary-foreground {
-    color: hsl(var(--secondary-foreground));
-  }
-  .bg-secondary\/90 {
-    background-color: hsl(var(--secondary) / 0.9);
-  }
-  .bg-accent {
-    background-color: hsl(var(--accent));
-  }
-  .text-accent-foreground {
-    color: hsl(var(--accent-foreground));
-  }
-  .bg-accent\/90 {
-    background-color: hsl(var(--accent) / 0.9);
-  }
-  .bg-destructive {
-    background-color: hsl(var(--destructive));
-  }
-  .text-destructive-foreground {
-    color: hsl(var(--destructive-foreground));
-  }
-  .bg-destructive\/90 {
-    background-color: hsl(var(--destructive) / 0.9);
-  }
-  .bg-muted {
-    background-color: hsl(var(--muted));
-  }
-  .text-muted-foreground {
-    color: hsl(var(--muted-foreground));
-  }
-  .bg-popover {
-    background-color: hsl(var(--popover));
-  }
-  .text-popover-foreground {
-    color: hsl(var(--popover-foreground));
-  }
-  .bg-card {
-    background-color: hsl(var(--card));
-  }
-  .text-card-foreground {
-    color: hsl(var(--card-foreground));
-  }
-  .ring-ring {
-    --tw-ring-color: hsl(var(--ring));
-  }
-  .bg-background {
-    background-color: hsl(var(--background));
-  }
-  .text-foreground {
-    color: hsl(var(--foreground));
-  }
-  .text-secondary {
-    color: hsl(var(--secondary));
-  }
-  .text-destructive {
-    color: hsl(var(--destructive));
-  }
-  .text-accent {
-    color: hsl(var(--accent));
-  }
-  .text-muted {
-    color: hsl(var(--muted));
-  }
-  .text-popover {
-    color: hsl(var(--popover));
-  }
-  .text-card {
-    color: hsl(var(--card));
-  }
-  .text-background {
-    color: hsl(var(--background));
-  }
-  .border-primary {
-    border-color: hsl(var(--primary));
-  }
-  .border-secondary {
-    border-color: hsl(var(--secondary));
-  }
-  .border-accent {
-    border-color: hsl(var(--accent));
-  }
-  .border-destructive {
-    border-color: hsl(var(--destructive));
-  }
-  .border-muted {
-    border-color: hsl(var(--muted));
-  }
-  .border-popover {
-    border-color: hsl(var(--popover));
-  }
-  .border-card {
-    border-color: hsl(var(--card));
-  }
-  .border-background {
-    border-color: hsl(var(--background));
-  }
-  .border-foreground {
-    border-color: hsl(var(--foreground));
-  }
-}
+
+
+@reference "tailwindcss";
 
 @tailwind base;
 @tailwind components;
@@ -188,7 +66,7 @@
 
 @layer base {
   * {
-    @apply border-border;
+    border-color: hsl(var(--border));
   }
 
   /* Basit global zoom scaling - transform yerine font-size */
@@ -285,11 +163,13 @@
 }
 
 .data-table th {
-  @apply text-left py-3 px-4 font-medium text-text-muted text-sm border-b border-border;
+  @apply text-left py-3 px-4 font-medium text-text-muted text-sm border-b;
+  border-color: hsl(var(--border));
 }
 
 .data-table td {
-  @apply py-3 px-4 border-b border-border;
+  @apply py-3 px-4 border-b;
+  border-color: hsl(var(--border));
 }
 
 .data-table tr:hover {

@@ -97,7 +97,7 @@ interface RecentActivity {
 const CustomTooltip = ({ active, payload, label }: any) => {
   if (active && payload && payload.length) {
     return (
-      <div className="bg-card p-3 rounded-lg border border-border shadow-lg backdrop-blur-sm">
+              <div className="bg-card p-3 rounded-lg border shadow-lg backdrop-blur-sm" style={{ borderColor: 'hsl(var(--border))' }}>
         <p className="font-medium text-card-foreground">{label}</p>
         {payload.map((entry: any, index: number) => (
           <p key={index} style={{ color: entry.color }}>

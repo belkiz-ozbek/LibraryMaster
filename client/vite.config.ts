@@ -11,6 +11,9 @@ export default defineConfig({
       '@shared': resolve(__dirname, '../shared'),
     },
   },
+  optimizeDeps: {
+    include: ['wouter'],
+  },
   server: {
     proxy: {
       '/api': process.env.VITE_API_URL || 'http://localhost:3000',
@@ -19,5 +22,8 @@ export default defineConfig({
   build: {
     outDir: '../dist/public',
     emptyOutDir: true,
+    rollupOptions: {
+      external: [],
+    },
   },
 }); 
