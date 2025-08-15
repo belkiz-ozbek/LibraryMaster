@@ -49,7 +49,8 @@ export default defineConfig({
       '@radix-ui/react-alert-dialog',
       'class-variance-authority',
       'clsx',
-      'lottie-react'
+      'lottie-react',
+      'tailwind-merge'
     ],
   },
   server: {
