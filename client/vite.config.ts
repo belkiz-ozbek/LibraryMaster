@@ -12,7 +12,20 @@ export default defineConfig({
     },
   },
   optimizeDeps: {
-    include: ['wouter', '@tanstack/react-query', 'lucide-react', 'framer-motion', 'date-fns', 'react-dom-confetti', 'recharts', '@radix-ui/react-slot', '@radix-ui/react-label'],
+    include: [
+      'wouter', 
+      '@tanstack/react-query', 
+      'lucide-react', 
+      'framer-motion', 
+      'date-fns', 
+      'react-dom-confetti', 
+      'recharts', 
+      '@radix-ui/react-slot', 
+      '@radix-ui/react-label',
+      'class-variance-authority',
+      'clsx',
+      'lottie-react'
+    ],
   },
   server: {
     proxy: {
