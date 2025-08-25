@@ -69,7 +69,7 @@ export default defineConfig({
     outDir: '../dist/public',
     emptyOutDir: true,
     rollupOptions: {
-      external: ['drizzle-orm', 'drizzle-orm/pg-core'],
+      external: ['drizzle-orm', 'drizzle-orm/pg-core', 'drizzle-zod', 'zod'],
     },
   },
 }); 
