@@ -51,7 +51,8 @@ export default defineConfig({
       'clsx',
       'lottie-react',
       'tailwind-merge',
-      'react-hook-form'
+      'react-hook-form',
+      'vaul'
     ],
   },
   server: {
