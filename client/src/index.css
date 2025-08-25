@@ -139,8 +139,9 @@
 }
 
 .nav-item:not(.active) {
-  @apply text-text-muted hover:bg-gray-50;
-  color: hsl(var(--on-surface));
+  /* Buradan @apply text-text-muted'i kaldırdım */
+  color: hsl(var(--text-muted));
+  @apply hover:bg-gray-50;
 }
 
 .nav-item:not(.active):hover {
@@ -169,7 +170,8 @@
 }
 
 .data-table th {
-  @apply text-left py-3 px-4 font-medium text-text-muted text-sm border-b;
+  color: hsl(var(--text-muted));
+  @apply text-left py-3 px-4 font-medium text-sm border-b;
   border-color: hsl(var(--border));
 }
 
@@ -209,7 +211,8 @@
 }
 
 .stats-label {
-  @apply text-sm font-medium text-text-muted;
+  color: hsl(var(--text-muted));
+  @apply text-sm font-medium;
 }
 
 .stats-change {
