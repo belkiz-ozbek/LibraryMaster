@@ -6,6 +6,11 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Minimal custom utilities needed by @apply rules (Tailwind v4) */
+@layer utilities {
+  .text-primary { color: hsl(var(--primary)); }
+}
+
 :root {
   --background: 0 0% 100%;
   --foreground: 240 5% 6%;
