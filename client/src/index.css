@@ -9,6 +9,7 @@
 /* Minimal custom utilities needed by @apply rules (Tailwind v4) */
 @layer utilities {
   .text-primary { color: hsl(var(--primary)); }
+  .text-text-muted { color: hsl(var(--text-muted)); }
 }
 
 :root {
@@ -133,7 +134,7 @@
 }
 
 .nav-item.active {
-  @apply text-primary;
+  color: hsl(var(--primary));
   background-color: hsl(var(--primary) / 0.1);
 }
 
