@@ -52,7 +52,11 @@ export default defineConfig({
       'lottie-react',
       'tailwind-merge',
       'react-hook-form',
-      'vaul'
+      'vaul',
+      'drizzle-orm',
+      'drizzle-orm/pg-core',
+      'drizzle-zod',
+      'zod'
     ],
   },
   server: {
