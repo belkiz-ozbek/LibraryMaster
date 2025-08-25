@@ -19,11 +19,16 @@ process.on('unhandledRejection', (reason, promise) => {
 });
 
 const app = express();
+// Trust Render/Proxy to allow secure cookies
+app.set('trust proxy', 1);
+
 app.use(cors({
   origin: [
     "https://librarymaster-production.up.railway.app",
-    "http://localhost:3000"
-  ],
+    "http://localhost:3000",
+    "https://librarymaster-1.onrender.com",
+    process.env.RENDER_EXTERNAL_URL || ""
+  ].filter(Boolean),
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization', 'Cookie'],
